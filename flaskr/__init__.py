@@ -1,5 +1,39 @@
 import os
 from flask import Flask
+import spacy
+from spacy.lang.en.stop_words import STOP_WORDS
+
+
+nlp = spacy.load('en_core_web_sm')
+
+# Tokenize
+
+
+def spacy_tokenize(string):
+    tokens = list()
+    doc = nlp(string)
+    for token in doc:
+        tokens.append(token)
+    return tokens
+
+# Normalize
+
+
+def normalize(tokens):
+    normalized_tokens = list()
+    for token in tokens:
+        normalized = token.text.lower().strip()
+        if ((token.is_alpha or token.is_digit)):
+            # removing stopwords
+            if token.is_stop == False:
+                normalized_tokens.append(normalized)
+    return normalized_tokens
+
+#Tokenize and normalize
+
+
+def tokenize_normalize(string):
+    return normalize(spacy_tokenize(string))
 
 
 def create_app(test_config=None):
@@ -22,6 +56,34 @@ def create_app(test_config=None):
         os.makedirs(app.instance_path)
     except OSError:
         pass
+
+    nlp = spacy.load('en_core_web_sm')
+
+    # Tokenize
+
+    def spacy_tokenize(string):
+        tokens = list()
+        doc = nlp(string)
+        for token in doc:
+            tokens.append(token)
+        return tokens
+
+    # Normalize
+
+    def normalize(tokens):
+        normalized_tokens = list()
+        for token in tokens:
+            normalized = token.text.lower().strip()
+            if ((token.is_alpha or token.is_digit)):
+                # removing stopwords
+                if token.is_stop == False:
+                    normalized_tokens.append(normalized)
+        return normalized_tokens
+
+    #Tokenize and normalize
+
+    def tokenize_normalize(string):
+        return normalize(spacy_tokenize(string))
 
     from . import db
     db.init_app(app)

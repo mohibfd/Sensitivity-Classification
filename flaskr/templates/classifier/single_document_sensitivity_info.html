@@ -6,4 +6,14 @@
   </h1>
 {% endblock %}
 
-{% block content %}{% endblock %}
+{% block content %}
+  F1 score:
+  {{prediction}}
+  Confusion Matrix:
+  {{ confusion_matrix_score }}
+  {% if exp %}
+    <div class="container">
+      {{ exp|safe }}
+    </div>
+  {% endif %}
+{% endblock %}
