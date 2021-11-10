@@ -17,4 +17,4 @@ flaskr/model/sensitive_data.pkl
 flaskr/model/test_features.sav
 flaskr/model/train_features.sav
 flaskr/model/validation_features.sav
-flask/model/one_hot_lr_model.sav
+flaskr/model/one_hot_lr_model.sav
