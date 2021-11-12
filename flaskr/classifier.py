@@ -28,9 +28,26 @@ train_labels = train_data['Sensitive']
 test_labels = test_data['Sensitive']
 
 
-@bp.route('/classifier-main-page')
-@login_required
+@bp.route('/')
 def classifier_main_page():
+    return render_template('classifier/index.html')
+
+
+@bp.route('/sensitive-info')
+@login_required
+def sensitive_info():
+    return render_template('classifier/sensitive_info.html')
+
+
+@bp.route('/non-sensitive-info')
+@login_required
+def non_sensitive_info():
+    return render_template('classifier/non_sensitive_info.html')
+
+
+@bp.route('/general-sensitivity-info')
+@login_required
+def general_sensitivity_info():
 
     model = LogisticExplainer()
     lr_predict = model.predict(test_data['Body'], probability=False)
@@ -38,25 +55,9 @@ def classifier_main_page():
     prediction = "%.3f" % (f1_score(
         lr_predict, test_labels, average="macro"))
 
-    # Note the order here is true, predicted
     confusion_matrix_score = confusion_matrix(test_labels, lr_predict)
 
-    return render_template('classifier/classifier_main_page.html', prediction=prediction, confusion_matrix_score=confusion_matrix_score)
-
-
-@bp.route('/sensitive-info')
-def sensitive_info():
-    return render_template('classifier/sensitive_info.html')
-
-
-@bp.route('/non-sensitive-info')
-def non_sensitive_info():
-    return render_template('classifier/non_sensitive_info.html')
-
-
-@bp.route('/general-sensitivity-info')
-def general_sensitivity_info():
-    return render_template('classifier/general_sensitivity_info.html')
+    return render_template('classifier/general_sensitivity_info.html', prediction=prediction, confusion_matrix_score=confusion_matrix_score)
 
 
 class LogisticExplainer:
@@ -120,7 +121,7 @@ def explainer(document_number) -> LimeTextExplainer:
     second_idx = first_idx + 1
 
     specific_data = data[first_idx:second_idx].iloc[0]
-    specific_data = specific_data[0:150]
+    specific_data = specific_data[0:300]
 
     # Make a prediction and explain it:
     exp = explainer.explain_instance(
