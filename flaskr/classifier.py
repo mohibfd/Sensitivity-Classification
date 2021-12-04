@@ -59,28 +59,22 @@ def general_sensitivity_info():
 def explainer(document_number) -> LimeTextExplainer:
     """Run LIME explainer on provided classifier"""
     index = 0
-    fold1_position = len(cross_val_stats["test_labels_list"][0])
-    fold2_position = len(
-        cross_val_stats["test_labels_list"][1]) + fold1_position
-    fold3_position = len(
-        cross_val_stats["test_labels_list"][2]) + fold2_position
-    fold4_position = len(
-        cross_val_stats["test_labels_list"][3]) + fold3_position
+    fold_positions = []
+    folds = 5
+    tracker = 0
+    for i in range(folds):
+        fold_length = len(cross_val_stats["test_labels_list"][i])
+        tracker += fold_length
+        fold_positions.append(tracker)
 
-    if document_number < fold1_position:
+    if document_number < fold_positions[0]:
         index = 0
-    elif document_number < fold2_position:
-        index = 1
-        document_number = document_number - fold1_position
-    elif document_number < fold3_position:
-        index = 2
-        document_number = document_number - fold2_position
-    elif document_number < fold4_position:
-        index = 3
-        document_number = document_number - fold3_position
     else:
-        index = 4
-        document_number = document_number - fold4_position
+        for i in range(5):
+            if document_number < fold_positions[i+1]:
+                index = i+1
+                document_number -= fold_positions[i]
+                break
 
     text_data = cross_val_stats["test_features_list"][index]
     one_hot_vectorizer = cross_val_stats["vectorizers"][index]
@@ -99,7 +93,6 @@ def explainer(document_number) -> LimeTextExplainer:
     specific_data = text_data[first_idx:second_idx].iloc[0]
     specific_data = specific_data[0:300]
 
-    # Make a prediction and explain it:
     exp = explainer.explain_instance(
         specific_data,
         classifier_fn=predictor,
@@ -119,6 +112,8 @@ def single_document_sensitivity_info():
 
     document_number = document_number[0]
 
+    max_documents = len(main_data['labels'])
+
     if request.method == 'POST':
 
         if request.form['submit_button'] == 'Previous Document':
@@ -127,7 +122,7 @@ def single_document_sensitivity_info():
             else:
                 document_number -= 1
         elif request.form['submit_button'] == 'Next Document':
-            if (document_number == 3800):
+            if (document_number == max_documents):
                 flash("There are no more documents")
             else:
                 document_number += 1
@@ -141,4 +136,4 @@ def single_document_sensitivity_info():
     exp = explainer(document_number)
     exp = exp.as_html()
 
-    return render_template('classifier/single_document_sensitivity_info.html', exp=exp, document_number=document_number+1)
+    return render_template('classifier/single_document_sensitivity_info.html', exp=exp, document_number=document_number+1, max_documents=max_documents)
