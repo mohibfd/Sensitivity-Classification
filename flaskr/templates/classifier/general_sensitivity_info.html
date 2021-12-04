@@ -10,7 +10,19 @@
   <div class="general_body">
     <div class="f1_score">
       F1 micro score:
-      {{ prediction }}
+      {{ predictions["f1_micro"] }}
+    </div>
+    <div class="f1_score">
+      F1 macro score:
+      {{ predictions["f1_macro"] }}
+    </div>
+    <div class="f1_score">
+      Accuracy:
+      {{ predictions["accuracy"] }}
+    </div>
+    <div class="f1_score">
+      Precision:
+      {{ predictions["precision"] }}
     </div>
 
     <div class="matrix_title">

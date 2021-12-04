@@ -21,6 +21,7 @@ MODEL_PATH = os.path.join(APP_ROOT, "model/")
 
 cross_val_stats = pd.read_pickle(MODEL_PATH + 'cross_val_stats.pkl')
 main_data = pd.read_pickle(MODEL_PATH + 'main_data.pkl')
+folds = len(cross_val_stats["classifiers"])
 
 
 @bp.route('/')
@@ -47,34 +48,42 @@ def general_sensitivity_info():
     y = main_data['labels']
     model = main_data['classifier']
 
-    scores = cross_val_score(model, X, y, cv=5, scoring="f1_micro")
-    prediction = "f1: %0.2f (+/- %0.2f)" % (np.mean(scores), np.std(scores))
+    f1_micro_scores = cross_val_score(
+        model, X, y, cv=folds, scoring="f1_micro")
+    f1_macro_scores = cross_val_score(
+        model, X, y, cv=folds, scoring="f1_macro")
+    accuracy_scores = cross_val_score(
+        model, X, y, cv=folds, scoring="accuracy")
+    precision_scores = cross_val_score(
+        model, X, y, cv=folds, scoring="precision")
 
-    y_pred = cross_val_predict(model, X, y, cv=5)
+    f1_micro_prediction = "%0.2f (+/- %0.2f)" % (
+        np.mean(f1_micro_scores), np.std(f1_micro_scores))
+    f1_macro_prediction = "%0.2f (+/- %0.2f)" % (
+        np.mean(f1_macro_scores), np.std(f1_macro_scores))
+    accuracy_prediction = " %0.2f (+/- %0.2f)" % (
+        np.mean(accuracy_scores), np.std(accuracy_scores))
+    precision_prediction = "%0.2f (+/- %0.2f)" % (
+        np.mean(precision_scores), np.std(precision_scores))
+
+    predictions = {"f1_micro": f1_micro_prediction, "f1_macro": f1_macro_prediction,
+                   "accuracy": accuracy_prediction, "precision": precision_prediction}
+
+    y_pred = cross_val_predict(model, X, y, cv=folds)
     confusion_matrix_score = confusion_matrix(y, y_pred)
 
-    return render_template('classifier/general_sensitivity_info.html', prediction=prediction, confusion_matrix_score=confusion_matrix_score)
+    return render_template('classifier/general_sensitivity_info.html', predictions=predictions, confusion_matrix_score=confusion_matrix_score)
 
 
 def explainer(document_number) -> LimeTextExplainer:
-    """Run LIME explainer on provided classifier"""
     index = 0
-    fold_positions = []
-    folds = 5
-    tracker = 0
-    for i in range(folds):
-        fold_length = len(cross_val_stats["test_labels_list"][i])
-        tracker += fold_length
-        fold_positions.append(tracker)
+    fold_length = len(cross_val_stats["test_labels_list"][0])
 
-    if document_number < fold_positions[0]:
-        index = 0
-    else:
-        for i in range(5):
-            if document_number < fold_positions[i+1]:
-                index = i+1
-                document_number -= fold_positions[i]
-                break
+    for i in range(folds):
+        if document_number < fold_length*(i+1):
+            index = i
+            document_number -= fold_length*i
+            break
 
     text_data = cross_val_stats["test_features_list"][index]
     one_hot_vectorizer = cross_val_stats["vectorizers"][index]
@@ -122,7 +131,7 @@ def single_document_sensitivity_info():
             else:
                 document_number -= 1
         elif request.form['submit_button'] == 'Next Document':
-            if (document_number == max_documents):
+            if (document_number == max_documents-1):
                 flash("There are no more documents")
             else:
                 document_number += 1
