@@ -1,6 +1,9 @@
 Use this command to start project:
 export FLASK_APP=flaskr && export FLASK_ENV=development && flask run
 
+test coverage: coverage run -m pytest
+html report: coverage html
+
 command to print in terminal:
 import sys
 print('Hello world!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>', file=sys.stderr)

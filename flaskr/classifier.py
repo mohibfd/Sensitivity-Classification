@@ -75,15 +75,15 @@ def general_sensitivity_info():
     return render_template('classifier/general_sensitivity_info.html', predictions=predictions, confusion_matrix_score=conf_mat)
 
 
-def explainer(document_number) -> LimeTextExplainer:
+def explainer(document_index) -> LimeTextExplainer:
     index = 0
     fold_length = len(cross_val_stats["test_labels_list"][0])
 
-    for i in range(folds):
-        if document_number < fold_length*(i+1):
-            index = i
-            document_number -= fold_length*i
-            break
+    # find which cross validation index to choose from
+    while document_index > fold_length * (index+1):
+        index += 1
+
+    document_index -= fold_length * index
 
     text_data = cross_val_stats["test_features_list"][index]
     one_hot_vectorizer = cross_val_stats["vectorizers"][index]
@@ -96,7 +96,7 @@ def explainer(document_number) -> LimeTextExplainer:
 
     explainer = LimeTextExplainer(class_names=['Non-Sensitive', 'Sensitive'])
 
-    first_idx = document_number
+    first_idx = document_index
     second_idx = first_idx + 1
 
     specific_data = text_data[first_idx:second_idx].iloc[0]
@@ -116,10 +116,8 @@ def single_document_sensitivity_info():
     db = get_db()
     document_number = db.execute(
         'SELECT document_number FROM user WHERE id = ?', (user_id,)
-    ).fetchone()
+    ).fetchone()[0]
     db.commit()
-
-    document_number = document_number[0]
 
     max_documents = len(main_data['labels'])
 
