@@ -5,12 +5,12 @@ from flask import g, session
 
 @pytest.mark.parametrize('path', (
     '/',
-    '/classifier-main-page',
     '/sensitive-info',
     '/non-sensitive-info',
     '/general-sensitivity-info',
     '/single-document-sensitivity-info',
 
 ))
-def test_paths(client, path):
+def test_paths(client, path, auth):
+    auth.login()
     assert client.get(path).status_code == 200

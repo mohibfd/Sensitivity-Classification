@@ -70,9 +70,9 @@ def general_sensitivity_info():
                    "accuracy": accuracy_prediction, "precision": precision_prediction}
 
     y_pred = cross_val_predict(model, X, y, cv=folds)
-    confusion_matrix_score = confusion_matrix(y, y_pred)
+    conf_mat = confusion_matrix(y, y_pred)
 
-    return render_template('classifier/general_sensitivity_info.html', predictions=predictions, confusion_matrix_score=confusion_matrix_score)
+    return render_template('classifier/general_sensitivity_info.html', predictions=predictions, confusion_matrix_score=conf_mat)
 
 
 def explainer(document_number) -> LimeTextExplainer:
@@ -100,7 +100,7 @@ def explainer(document_number) -> LimeTextExplainer:
     second_idx = first_idx + 1
 
     specific_data = text_data[first_idx:second_idx].iloc[0]
-    specific_data = specific_data[0:300]
+    specific_data = specific_data[0:1000]
 
     exp = explainer.explain_instance(
         specific_data,
