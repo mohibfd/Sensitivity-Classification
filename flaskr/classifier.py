@@ -9,10 +9,11 @@ from flaskr.db import get_db
 import os
 import pandas as pd
 from sklearn.metrics import confusion_matrix
-from lime.lime_text import LimeTextExplainer
 from sklearn.model_selection import cross_val_predict
 from sklearn.model_selection import cross_val_score
+from lime.lime_text import LimeTextExplainer
 import numpy as np
+import shap as shap
 
 bp = Blueprint('classifier', __name__)
 
@@ -75,7 +76,7 @@ def general_sensitivity_info():
     return render_template('classifier/general_sensitivity_info.html', predictions=predictions, confusion_matrix_score=conf_mat)
 
 
-def explainer(document_index) -> LimeTextExplainer:
+def explainers(document_index) -> LimeTextExplainer:
     index = 0
     fold_length = len(cross_val_stats["test_labels_list"][0])
 
@@ -85,28 +86,45 @@ def explainer(document_index) -> LimeTextExplainer:
 
     document_index -= fold_length * index
 
-    text_data = cross_val_stats["test_features_list"][index]
-    one_hot_vectorizer = cross_val_stats["vectorizers"][index]
+    test_data = cross_val_stats["test_features_list"][index]
+    vectorizer = cross_val_stats["vectorizers"][index]
     model = cross_val_stats["classifiers"][index]
 
-    def predictor(texts):
-        feature = one_hot_vectorizer.transform(texts)
-        pred = model.predict_proba(feature)
-        return pred
+    def lime_explain():
+        def predictor(texts):
+            feature = vectorizer.transform(texts)
+            pred = model.predict_proba(feature)
+            return pred
 
-    explainer = LimeTextExplainer(class_names=['Non-Sensitive', 'Sensitive'])
+        lime_explainer = LimeTextExplainer(
+            class_names=['Non-Sensitive', 'Sensitive'])
 
-    first_idx = document_index
-    second_idx = first_idx + 1
+        lime_data = test_data.iloc[document_index][0:500]
 
-    specific_data = text_data[first_idx:second_idx].iloc[0]
-    specific_data = specific_data[0:1000]
+        lime_values = lime_explainer.explain_instance(
+            lime_data,
+            classifier_fn=predictor,
+        )
+        return lime_values.as_html()
 
-    exp = explainer.explain_instance(
-        specific_data,
-        classifier_fn=predictor,
-    )
-    return exp
+    def shap_explain():
+        train_data = cross_val_stats["train_features_list"][index]
+        train_features = vectorizer.transform(train_data).toarray()
+        test_features = vectorizer.transform(test_data).toarray()
+
+        shap_explainer = shap.Explainer(
+            model, train_features, feature_names=vectorizer.get_feature_names_out())
+        shap_values = shap_explainer(test_features)
+
+        force_plot = shap.plots.force(
+            shap_values[document_index], matplotlib=False)
+        shap_html = f"<head>{shap.getjs()}</head><body>{force_plot.html()}</body>"
+        return shap_html
+
+    lime_html = lime_explain()
+    shap_plot = shap_explain()
+
+    return lime_html, shap_plot
 
 
 @bp.route('/single-document-sensitivity-info', methods=('GET', 'POST'))
@@ -122,12 +140,12 @@ def single_document_sensitivity_info():
     max_documents = len(main_data['labels'])
 
     if request.method == 'POST':
-
         if request.form['submit_button'] == 'Previous Document':
             if (document_number == 0):
                 flash("There are no previous documents")
             else:
                 document_number -= 1
+
         elif request.form['submit_button'] == 'Next Document':
             if (document_number == max_documents-1):
                 flash("There are no more documents")
@@ -140,7 +158,7 @@ def single_document_sensitivity_info():
         )
         db.commit()
 
-    exp = explainer(document_number)
-    exp = exp.as_html()
+    lime_html, shap_plot = explainers(document_number)
 
-    return render_template('classifier/single_document_sensitivity_info.html', exp=exp, document_number=document_number+1, max_documents=max_documents)
+    return render_template('classifier/single_document_sensitivity_info.html', lime_html=lime_html, document_number=document_number+1,
+                           max_documents=max_documents, shap_plot=shap_plot)
