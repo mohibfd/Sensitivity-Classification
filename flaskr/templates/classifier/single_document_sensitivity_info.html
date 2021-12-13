@@ -7,18 +7,26 @@
 {% endblock %}
 
 {% block content %}
-  <li>
-    <a href="{{ url_for('classifier.classifier_main_page') }}">Go Back</a>
-  </li>
-  document number =
-  {{document_number}}/{{max_documents}}
+  <a href="{{ url_for('classifier.classifier_main_page') }}">Go Back</a>
+  <div class="center">
+    document number =
+    {{document_number}}/{{max_documents}}
+  </div>
+  {% if isSensitive %}
+    <div class="center">
+      The document's true label is:
+      {{ isSensitive }}
+    </div>
+  {% endif %}
+  <hr>
   {% if lime_html %}
-    <div class="container">
+    <div>
       {{ lime_html|safe }}
     </div>
   {% endif %}
+  <hr>
   {% if shap_plot%}
-    <div class="container">
+    <div>
       {{ shap_plot|safe }}
     </div>
   {% endif %}

@@ -115,7 +115,6 @@ input[type="submit"] {
 }
 .matrix_title{
     padding: 0.75em 4.5em;
-
 }
 .matrix_header{
     margin: 0 4.5em;
@@ -134,3 +133,7 @@ input[type="submit"] {
     display:inline-block;
     width: 3.5em
 }
+.center {
+    padding: 10px;
+    text-align: center;
+  }

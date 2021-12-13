@@ -76,7 +76,7 @@ def general_sensitivity_info():
     return render_template('classifier/general_sensitivity_info.html', predictions=predictions, confusion_matrix_score=conf_mat)
 
 
-def explainers(document_index) -> LimeTextExplainer:
+def explainers(document_index: int) -> LimeTextExplainer:
     index = 0
     fold_length = len(cross_val_stats["test_labels_list"][0])
 
@@ -99,7 +99,8 @@ def explainers(document_index) -> LimeTextExplainer:
         lime_explainer = LimeTextExplainer(
             class_names=['Non-Sensitive', 'Sensitive'])
 
-        lime_data = test_data.iloc[document_index][0:500]
+        # lime_data = test_data.iloc[document_index][0:100]
+        lime_data = test_data.iloc[document_index]
 
         lime_values = lime_explainer.explain_instance(
             lime_data,
@@ -124,7 +125,11 @@ def explainers(document_index) -> LimeTextExplainer:
     lime_html = lime_explain()
     shap_plot = shap_explain()
 
-    return lime_html, shap_plot
+    test_labels = cross_val_stats["test_labels_list"][index]
+    isSensitive = (
+        "Sensitive" if test_labels.iloc[document_index] else "Non-Sensitive")
+
+    return lime_html, shap_plot, isSensitive
 
 
 @bp.route('/single-document-sensitivity-info', methods=('GET', 'POST'))
@@ -158,7 +163,7 @@ def single_document_sensitivity_info():
         )
         db.commit()
 
-    lime_html, shap_plot = explainers(document_number)
+    lime_html, shap_plot, isSensitive = explainers(document_number)
 
     return render_template('classifier/single_document_sensitivity_info.html', lime_html=lime_html, document_number=document_number+1,
-                           max_documents=max_documents, shap_plot=shap_plot)
+                           max_documents=max_documents, shap_plot=shap_plot, isSensitive=isSensitive)
