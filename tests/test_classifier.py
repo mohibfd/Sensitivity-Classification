@@ -22,25 +22,29 @@ def test_paths_logged_in(client, path, auth):
 
 documents_visibility_list = [
     (0, b'There are no previous documents', 'Previous Document'),
-    (543, b'Document number =\n    543', 'Previous Document'),
-    (543, b'Document number =\n    544', ''),
-    (543, b'Document number =\n    545', 'Next Document'),
 ]
 
 all_docs_visib = documents_visibility_list.copy()
 all_docs_visib.append(
-    (3800, b'There are no more documents', 'Next Document')
-)
+    (543, b'Document number =\n    543', 'Previous Document'))
+all_docs_visib.append((543, b'Document number =\n    544', ''))
+all_docs_visib.append((543, b'Document number =\n    545', 'Next Document'))
+all_docs_visib.append((3800, b'There are no more documents', 'Next Document'))
 
 sens_docs_visib = documents_visibility_list.copy()
-sens_docs_visib.append(
-    (501, b'There are no more documents', 'Next Document')
-)
+sens_docs_visib.append((71, b'Document number =\n    71', 'Previous Document'))
+sens_docs_visib.append((71, b'Document number =\n    72', ''))
+sens_docs_visib.append((71, b'Document number =\n    73', 'Next Document'))
+sens_docs_visib.append((501, b'There are no more documents', 'Next Document'))
 
 non_sens_docs_visib = documents_visibility_list.copy()
 non_sens_docs_visib.append(
-    (3298, b'There are no more documents', 'Next Document')
-)
+    (471, b'Document number =\n    471', 'Previous Document'))
+non_sens_docs_visib.append((471, b'Document number =\n    472', ''))
+non_sens_docs_visib.append(
+    (471, b'Document number =\n    473', 'Next Document'))
+non_sens_docs_visib.append(
+    (3298, b'There are no more documents', 'Next Document'))
 
 
 @pytest.mark.parametrize(('document_num', 'message', 'button_action'), all_docs_visib)
