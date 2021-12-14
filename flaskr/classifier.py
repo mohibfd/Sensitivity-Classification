@@ -88,112 +88,38 @@ def change_doc(document_number: int, max_documents: int, database="") -> int:
 
 
 def get_specific_sens(sens: int) -> pd:
-    test_data = cross_val_stats["test_features_list"]
-    test_labels = cross_val_stats["test_labels_list"]
+    test_data = cross_val_stats["test_features_list"].copy()
+    test_labels = cross_val_stats["test_labels_list"].copy()
 
+    extra_indexs = [0 for _ in range(folds)]
+    indexs_counter = 0
+
+    average_length = int(main_data["labels"].value_counts()[sens]/folds)
     for i in range(len(test_data)):
         data = {'Body': test_data[i], 'Sensitive': test_labels[i]}
         test_df = pd.DataFrame(data)
 
         sensitive_df = test_df.loc[test_df['Sensitive'] == sens]
 
+        if len(sensitive_df) > average_length:
+            indexs_counter += 1
+            extra_indexs[i] = indexs_counter
+
         test_data[i] = sensitive_df['Body']
         test_labels[i] = sensitive_df['Sensitive']
 
-    return test_data, test_labels
+    return test_data, test_labels, extra_indexs
 
 
-@bp.route('/')
-def classifier_main_page():
-    return render_template('classifier/index.html')
-
-
-@bp.route('/sensitive-info', methods=('GET', 'POST'))
-@login_required
-def sensitive_info():
-
-    sensitivity = 1
-
-    test_data, test_labels = get_specific_sens(sensitivity)
-
-    document_number = get_doc_num(sensitivity)
-
-    max_documents = main_data["labels"].value_counts()[sensitivity]
-
-    if request.method == 'POST':
-        change_doc(document_number, max_documents, sensitivity)
-
-    lime_html, shap_plot, isSensitive = explainers(
-        document_number, test_data, test_labels)
-
-    return render_template('classifier/sensitive_info.html', document_number=document_number+1,
-                           max_documents=max_documents, isSensitive=isSensitive, lime_html=lime_html, shap_plot=shap_plot)
-
-
-@bp.route('/non-sensitive-info', methods=('GET', 'POST'))
-@login_required
-def non_sensitive_info():
-    sensitivity = 0
-
-    test_data, test_labels = get_specific_sens(sensitivity)
-
-    document_number = get_doc_num(sensitivity)
-
-    max_documents = main_data["labels"].value_counts()[sensitivity]
-
-    if request.method == 'POST':
-        change_doc(document_number, max_documents, sensitivity)
-
-    lime_html, shap_plot, isSensitive = explainers(
-        document_number, test_data, test_labels)
-
-    return render_template('classifier/non_sensitive_info.html', document_number=document_number+1,
-                           max_documents=max_documents, isSensitive=isSensitive, lime_html=lime_html, shap_plot=shap_plot)
-
-
-@bp.route('/general-sensitivity-info')
-@login_required
-def general_sensitivity_info():
-    X = main_data['features']
-    y = main_data['labels']
-    model = main_data['classifier']
-
-    f1_micro_scores = cross_val_score(
-        model, X, y, cv=folds, scoring="f1_micro")
-    f1_macro_scores = cross_val_score(
-        model, X, y, cv=folds, scoring="f1_macro")
-    accuracy_scores = cross_val_score(
-        model, X, y, cv=folds, scoring="accuracy")
-    precision_scores = cross_val_score(
-        model, X, y, cv=folds, scoring="precision")
-
-    f1_micro_prediction = "%0.2f (+/- %0.2f)" % (
-        np.mean(f1_micro_scores), np.std(f1_micro_scores))
-    f1_macro_prediction = "%0.2f (+/- %0.2f)" % (
-        np.mean(f1_macro_scores), np.std(f1_macro_scores))
-    accuracy_prediction = " %0.2f (+/- %0.2f)" % (
-        np.mean(accuracy_scores), np.std(accuracy_scores))
-    precision_prediction = "%0.2f (+/- %0.2f)" % (
-        np.mean(precision_scores), np.std(precision_scores))
-
-    predictions = {"f1_micro": f1_micro_prediction, "f1_macro": f1_macro_prediction,
-                   "accuracy": accuracy_prediction, "precision": precision_prediction}
-
-    y_pred = cross_val_predict(model, X, y, cv=folds)
-    conf_mat = confusion_matrix(y, y_pred)
-
-    return render_template('classifier/general_sensitivity_info.html', predictions=predictions, confusion_matrix_score=conf_mat)
-
-
-def explainers(document_index: int, test_data: pd, test_labels: pd) -> LimeTextExplainer:
+def explainers(document_index: int, test_data: pd, test_labels: pd, extra_indexs: list) -> LimeTextExplainer:
     index = 0
     fold_length = len(test_data[0])
 
     # find which cross validation index to choose from
-    while document_index > fold_length * (index+1):
+    while document_index > fold_length * (index+1) + extra_indexs[index] - 1:
         index += 1
 
-    document_index -= fold_length * index
+    document_index -= fold_length * index + extra_indexs[index]
 
     test_data = test_data[index]
     vectorizer = cross_val_stats["vectorizers"][index]
@@ -240,12 +166,98 @@ def explainers(document_index: int, test_data: pd, test_labels: pd) -> LimeTextE
     return lime_html, shap_plot, isSensitive
 
 
+@bp.route('/')
+def classifier_main_page():
+    return render_template('classifier/index.html')
+
+
+@bp.route('/sensitive-info', methods=('GET', 'POST'))
+@login_required
+def sensitive_info():
+    sensitivity = 1
+
+    test_data, test_labels, extra_indexs = get_specific_sens(sensitivity)
+
+    document_number = get_doc_num(sensitivity)
+    # document_number = 490
+
+    max_documents = main_data["labels"].value_counts()[sensitivity]
+
+    if request.method == 'POST':
+        document_number = change_doc(
+            document_number, max_documents, sensitivity)
+
+    lime_html, shap_plot, isSensitive = explainers(
+        document_number, test_data, test_labels, extra_indexs)
+
+    return render_template('classifier/sensitive_info.html', document_number=document_number+1,
+                           max_documents=max_documents, isSensitive=isSensitive, lime_html=lime_html, shap_plot=shap_plot)
+
+
+@bp.route('/non-sensitive-info', methods=('GET', 'POST'))
+@login_required
+def non_sensitive_info():
+    sensitivity = 0
+
+    test_data, test_labels, extra_indexs = get_specific_sens(sensitivity)
+
+    document_number = get_doc_num(sensitivity)
+
+    max_documents = main_data["labels"].value_counts()[sensitivity]
+
+    if request.method == 'POST':
+        document_number = change_doc(
+            document_number, max_documents, sensitivity)
+
+    lime_html, shap_plot, isSensitive = explainers(
+        document_number, test_data, test_labels, extra_indexs)
+
+    return render_template('classifier/non_sensitive_info.html', document_number=document_number+1,
+                           max_documents=max_documents, isSensitive=isSensitive, lime_html=lime_html, shap_plot=shap_plot)
+
+
+@bp.route('/general-sensitivity-info')
+@login_required
+def general_sensitivity_info():
+    X = main_data['features']
+    y = main_data['labels']
+    model = main_data['classifier']
+
+    f1_micro_scores = cross_val_score(
+        model, X, y, cv=folds, scoring="f1_micro")
+    f1_macro_scores = cross_val_score(
+        model, X, y, cv=folds, scoring="f1_macro")
+    accuracy_scores = cross_val_score(
+        model, X, y, cv=folds, scoring="accuracy")
+    precision_scores = cross_val_score(
+        model, X, y, cv=folds, scoring="precision")
+
+    f1_micro_prediction = "%0.2f (+/- %0.2f)" % (
+        np.mean(f1_micro_scores), np.std(f1_micro_scores))
+    f1_macro_prediction = "%0.2f (+/- %0.2f)" % (
+        np.mean(f1_macro_scores), np.std(f1_macro_scores))
+    accuracy_prediction = " %0.2f (+/- %0.2f)" % (
+        np.mean(accuracy_scores), np.std(accuracy_scores))
+    precision_prediction = "%0.2f (+/- %0.2f)" % (
+        np.mean(precision_scores), np.std(precision_scores))
+
+    predictions = {"f1_micro": f1_micro_prediction, "f1_macro": f1_macro_prediction,
+                   "accuracy": accuracy_prediction, "precision": precision_prediction}
+
+    y_pred = cross_val_predict(model, X, y, cv=folds)
+    conf_mat = confusion_matrix(y, y_pred)
+
+    return render_template('classifier/general_sensitivity_info.html', predictions=predictions, confusion_matrix_score=conf_mat)
+
+
 @bp.route('/single-document-sensitivity-info', methods=('GET', 'POST'))
 @login_required
 def single_document_sensitivity_info():
     document_number = get_doc_num()
 
     max_documents = len(main_data['labels'])
+
+    extra_indexs = [0 for _ in range(folds)]
 
     if request.method == 'POST':
         document_number = change_doc(document_number, max_documents)
@@ -254,7 +266,7 @@ def single_document_sensitivity_info():
     test_labels = cross_val_stats["test_labels_list"]
 
     lime_html, shap_plot, isSensitive = explainers(
-        document_number, test_data, test_labels)
+        document_number, test_data, test_labels, extra_indexs)
 
     return render_template('classifier/single_document_sensitivity_info.html', document_number=document_number+1,
                            max_documents=max_documents, isSensitive=isSensitive, lime_html=lime_html, shap_plot=shap_plot)

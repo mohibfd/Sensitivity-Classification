@@ -6,8 +6,9 @@ html report: coverage html
 
 command to print in terminal:
 import sys
-print('Hello world!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>', file=sys.stderr)
-print(specific_data, file=sys.stderr)
+print('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>', file=sys.stderr)
+print(document_index, file=sys.stderr)
+print('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>', file=sys.stderr)
 
 commands for pickle:
 pickle.dump(one_hot_vectorizer, open(directory_path+filename, 'wb'))
