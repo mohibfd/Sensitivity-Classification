@@ -136,4 +136,9 @@ input[type="submit"] {
 .center {
     padding: 10px;
     text-align: center;
-  }
+}
+.document_move {
+    display: inline-flex;
+    align-items: space-around;
+    justify-content: space-around;
+}

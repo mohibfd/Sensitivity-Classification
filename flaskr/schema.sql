@@ -5,7 +5,10 @@ CREATE TABLE user (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   username TEXT UNIQUE NOT NULL,
   password TEXT NOT NULL,
-  document_number INTEGER NOT NULL
+  document_number INTEGER NOT NULL,
+  sens_document_number INTEGER NOT NULL,
+  non_sens_document_number INTEGER NOT NULL
+
 );
 
 -- CREATE TABLE post (
