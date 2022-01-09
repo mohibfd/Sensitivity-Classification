@@ -58,10 +58,14 @@
       </div>
     </div>
     {% if eli5_general%}
-      <div>
-        {{ eli5_general|safe }}
-      </div>
+      {{ eli5_general|safe }}
     {% endif %}
-    <img src="{{url_for('static', filename='images/shap.png')}}" alt="Shap image"/>
+  </div>
+  <div>
+    <img src="{{url_for('static', filename='images/shap1.png')}}" width='45%' height='45%' alt="Shap image"/>
+    <img src="{{url_for('static', filename='images/shap2.png')}}" width='45%' height='45%' alt="Shap image"/>
+    <img src="{{url_for('static', filename='images/shap3.png')}}" width='45%' height='45%' alt="Shap image"/>
+    <img src="{{url_for('static', filename='images/shap4.png')}}" width='45%' height='45%' alt="Shap image"/>
+    <img src="{{url_for('static', filename='images/shap5.png')}}" width='45%' height='45%' alt="Shap image"/>
   </div>
 {% endblock %}
