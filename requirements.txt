@@ -4,3 +4,5 @@ sklearn==1.0.1
 lime==0.2.0.1
 spacy==3.2.0
 shap==0.40.0
+eli5==0.11.0
+IPython==7.31.0

@@ -19,6 +19,12 @@
     </div>
   {% endif %}
   <hr>
+  <form method="post">
+    <div class="document_move">
+      <input type="submit" name="submit_button" value="Previous Document">
+      <input type="submit" name="submit_button" value="Next Document">
+    </div>
+  </form>
   {% if lime_html %}
     <div>
       {{ lime_html|safe }}
@@ -30,10 +36,9 @@
       {{ shap_plot|safe }}
     </div>
   {% endif %}
-  <form method="post">
-    <div class="document_move">
-      <input type="submit" name="submit_button" value="Previous Document">
-      <input type="submit" name="submit_button" value="Next Document">
+  {% if eli5_html%}
+    <div>
+      {{ eli5_html|safe }}
     </div>
-  </form>
+  {% endif %}
 {% endblock %}

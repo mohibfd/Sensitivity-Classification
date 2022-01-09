@@ -14,6 +14,7 @@ from sklearn.model_selection import cross_val_score
 from lime.lime_text import LimeTextExplainer
 import numpy as np
 import shap as shap
+import eli5 as eli5
 
 bp = Blueprint('classifier', __name__)
 
@@ -124,6 +125,7 @@ def explainers(document_index: int, test_data: pd, test_labels: pd, extra_indexs
     test_data = test_data[index]
     vectorizer = cross_val_stats["vectorizers"][index]
     model = cross_val_stats["classifiers"][index]
+    target_names = ['Non-Sensitive', 'Sensitive']
 
     def lime_explain():
         def predictor(texts):
@@ -132,7 +134,7 @@ def explainers(document_index: int, test_data: pd, test_labels: pd, extra_indexs
             return pred
 
         lime_explainer = LimeTextExplainer(
-            class_names=['Non-Sensitive', 'Sensitive'])
+            class_names=target_names)
 
         lime_data = test_data.iloc[document_index][0:200]
 
@@ -148,7 +150,7 @@ def explainers(document_index: int, test_data: pd, test_labels: pd, extra_indexs
         test_features = vectorizer.transform(test_data).toarray()
 
         shap_explainer = shap.Explainer(
-            model, train_features, feature_names=vectorizer.get_feature_names_out())
+            model, train_features, feature_names=vectorizer.get_feature_names())
         shap_values = shap_explainer(test_features)
 
         force_plot = shap.plots.force(
@@ -156,14 +158,20 @@ def explainers(document_index: int, test_data: pd, test_labels: pd, extra_indexs
         shap_html = f"<head>{shap.getjs()}</head><body>{force_plot.html()}</body>"
         return shap_html
 
+    def eli5_explain():
+        eli5_html = eli5.show_prediction(
+            model, test_data.iloc[0], vec=vectorizer, target_names=target_names)
+        return eli5_html
+
     lime_html = lime_explain()
     shap_plot = shap_explain()
+    eli5_html = eli5_explain()
 
     test_labels = test_labels[index]
     isSensitive = (
         "Sensitive" if test_labels.iloc[document_index] else "Non-Sensitive")
 
-    return lime_html, shap_plot, isSensitive
+    return lime_html, shap_plot, eli5_html, isSensitive
 
 
 @bp.route('/')
@@ -265,8 +273,9 @@ def single_document_sensitivity_info():
     test_data = cross_val_stats["test_features_list"]
     test_labels = cross_val_stats["test_labels_list"]
 
-    lime_html, shap_plot, isSensitive = explainers(
+    lime_html, shap_plot, eli5_html, isSensitive = explainers(
         document_number, test_data, test_labels, extra_indexs)
 
     return render_template('classifier/single_document_sensitivity_info.html', document_number=document_number+1,
-                           max_documents=max_documents, isSensitive=isSensitive, lime_html=lime_html, shap_plot=shap_plot)
+                           max_documents=max_documents, isSensitive=isSensitive, lime_html=lime_html, shap_plot=shap_plot,
+                           eli5_html=eli5_html)
