@@ -57,5 +57,10 @@
         </div>
       </div>
     </div>
+    {% if eli5_general%}
+      <div>
+        {{ eli5_general|safe }}
+      </div>
+    {% endif %}
   </div>
 {% endblock %}

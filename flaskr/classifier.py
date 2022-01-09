@@ -24,6 +24,7 @@ MODEL_PATH = os.path.join(APP_ROOT, "model/")
 cross_val_stats = pd.read_pickle(MODEL_PATH + 'cross_val_stats.pkl')
 main_data = pd.read_pickle(MODEL_PATH + 'main_data.pkl')
 folds = len(cross_val_stats["classifiers"])
+target_names = ['Non-Sensitive', 'Sensitive']
 
 
 def get_doc_num(database="") -> int:
@@ -125,7 +126,6 @@ def explainers(document_index: int, test_data: pd, test_labels: pd, extra_indexs
     test_data = test_data[index]
     vectorizer = cross_val_stats["vectorizers"][index]
     model = cross_val_stats["classifiers"][index]
-    target_names = ['Non-Sensitive', 'Sensitive']
 
     def lime_explain():
         def predictor(texts):
@@ -257,7 +257,13 @@ def general_sensitivity_info():
     y_pred = cross_val_predict(model, X, y, cv=folds)
     conf_mat = confusion_matrix(y, y_pred)
 
-    return render_template('classifier/general_sensitivity_info.html', predictions=predictions, confusion_matrix_score=conf_mat)
+    vec = main_data['vectorizer']
+    model.fit(X, y)
+    eli5_general = eli5.show_weights(model, vec=vec, top=10,
+                                     target_names=target_names)
+
+    return render_template('classifier/general_sensitivity_info.html', predictions=predictions, confusion_matrix_score=conf_mat,
+                           eli5_general=eli5_general)
 
 
 @bp.route('/single-document-sensitivity-info', methods=('GET', 'POST'))
