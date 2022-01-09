@@ -30,6 +30,11 @@
       {{ shap_plot|safe }}
     </div>
   {% endif %}
+  {% if eli5_html%}
+    <div>
+      {{ eli5_html|safe }}
+    </div>
+  {% endif %}
   <form method="post">
     <div class="document_move">
       <input type="submit" name="submit_button" value="Previous Document">

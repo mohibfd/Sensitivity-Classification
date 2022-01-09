@@ -160,7 +160,7 @@ def explainers(document_index: int, test_data: pd, test_labels: pd, extra_indexs
 
     def eli5_explain():
         eli5_html = eli5.show_prediction(
-            model, test_data.iloc[0], vec=vectorizer, target_names=target_names)
+            model, test_data.iloc[document_index], vec=vectorizer, target_names=target_names)
         return eli5_html
 
     lime_html = lime_explain()
@@ -195,11 +195,12 @@ def sensitive_info():
         document_number = change_doc(
             document_number, max_documents, sensitivity)
 
-    lime_html, shap_plot, isSensitive = explainers(
+    lime_html, shap_plot, eli5_html, isSensitive = explainers(
         document_number, test_data, test_labels, extra_indexs)
 
     return render_template('classifier/sensitive_info.html', document_number=document_number+1,
-                           max_documents=max_documents, isSensitive=isSensitive, lime_html=lime_html, shap_plot=shap_plot)
+                           max_documents=max_documents, isSensitive=isSensitive, lime_html=lime_html, shap_plot=shap_plot,
+                           eli5_html=eli5_html)
 
 
 @bp.route('/non-sensitive-info', methods=('GET', 'POST'))
@@ -217,11 +218,12 @@ def non_sensitive_info():
         document_number = change_doc(
             document_number, max_documents, sensitivity)
 
-    lime_html, shap_plot, isSensitive = explainers(
+    lime_html, shap_plot, eli5_html, isSensitive = explainers(
         document_number, test_data, test_labels, extra_indexs)
 
     return render_template('classifier/non_sensitive_info.html', document_number=document_number+1,
-                           max_documents=max_documents, isSensitive=isSensitive, lime_html=lime_html, shap_plot=shap_plot)
+                           max_documents=max_documents, isSensitive=isSensitive, lime_html=lime_html, shap_plot=shap_plot,
+                           eli5_html=eli5_html)
 
 
 @bp.route('/general-sensitivity-info')
