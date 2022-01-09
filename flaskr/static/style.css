@@ -127,7 +127,11 @@ input[type="submit"] {
     display:inline-block;
 }
 .f1_score{
+    display: inline-flex;
+    width: 100%;
     padding: 1em 0em;
+    justify-content: space-around;
+
 }
 .matrix_values{
     display:inline-block;
