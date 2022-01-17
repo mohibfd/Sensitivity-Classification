@@ -25,6 +25,7 @@ cross_val_stats = pd.read_pickle(MODEL_PATH + 'cross_val_stats.pkl')
 main_data = pd.read_pickle(MODEL_PATH + 'main_data.pkl')
 folds = len(cross_val_stats["classifiers"])
 target_names = ['Non-Sensitive', 'Sensitive']
+options = ["LIME", "SHAP", "ELI5"]
 
 
 def get_doc_num(database="") -> int:
@@ -206,6 +207,22 @@ def explainers(document_index: int, test_data: pd, test_labels: pd, extra_indexs
     return vis_html, isSensitive
 
 
+def reset_options(visual: str) -> None:
+    # ensure that chosen options shows to user
+    options.remove(visual)
+    options.append(visual)
+
+
+def get_visual_html(sensitivity: int, document_number: int, visual: str) -> LimeTextExplainer:
+
+    test_data, test_labels, extra_indexs = get_specific_sens(sensitivity)
+
+    visual_html, isSensitive = explainers(
+        document_number, test_data, test_labels, extra_indexs, visual)
+
+    return visual_html
+
+
 @bp.route('/')
 def classifier_main_page():
     return render_template('classifier/index.html')
@@ -216,23 +233,27 @@ def classifier_main_page():
 def sensitive_info():
     sensitivity = 1
 
-    test_data, test_labels, extra_indexs = get_specific_sens(sensitivity)
-
     document_number = get_doc_num(sensitivity)
-    # document_number = 490
 
     max_documents = main_data["labels"].value_counts()[sensitivity]
 
-    if request.method == 'POST':
-        document_number = change_doc(
-            document_number, max_documents, sensitivity)
+    visual = get_visualisation()
 
-    lime_html, shap_plot, eli5_html, isSensitive = explainers(
-        document_number, test_data, test_labels, extra_indexs)
+    if request.method == 'POST':
+        chosen_vis = request.form.get('options')
+
+        if chosen_vis == None:
+            document_number = change_doc(
+                document_number, max_documents, sensitivity)
+        else:
+            visual = change_visual(chosen_vis)
+
+    reset_options(visual)
+
+    visual_html = get_visual_html(sensitivity, document_number, visual)
 
     return render_template('classifier/sensitive_info.html', document_number=document_number+1,
-                           max_documents=max_documents, isSensitive=isSensitive, lime_html=lime_html, shap_plot=shap_plot,
-                           eli5_html=eli5_html)
+                           max_documents=max_documents, isSensitive=True, options=options, visual_html=visual_html, selected=visual)
 
 
 @bp.route('/non-sensitive-info', methods=('GET', 'POST'))
@@ -240,22 +261,59 @@ def sensitive_info():
 def non_sensitive_info():
     sensitivity = 0
 
-    test_data, test_labels, extra_indexs = get_specific_sens(sensitivity)
-
     document_number = get_doc_num(sensitivity)
 
     max_documents = main_data["labels"].value_counts()[sensitivity]
 
-    if request.method == 'POST':
-        document_number = change_doc(
-            document_number, max_documents, sensitivity)
+    visual = get_visualisation()
 
-    lime_html, shap_plot, eli5_html, isSensitive = explainers(
-        document_number, test_data, test_labels, extra_indexs)
+    if request.method == 'POST':
+        chosen_vis = request.form.get('options')
+
+        if chosen_vis == None:
+            document_number = change_doc(
+                document_number, max_documents, sensitivity)
+        else:
+            visual = change_visual(chosen_vis)
+
+    reset_options(visual)
+
+    visual_html = get_visual_html(sensitivity, document_number, visual)
 
     return render_template('classifier/non_sensitive_info.html', document_number=document_number+1,
-                           max_documents=max_documents, isSensitive=isSensitive, lime_html=lime_html, shap_plot=shap_plot,
-                           eli5_html=eli5_html)
+                           max_documents=max_documents, isSensitive=False, options=options, visual_html=visual_html, selected=visual)
+
+
+@bp.route('/single-document-sensitivity-info', methods=('GET', 'POST'))
+@login_required
+def single_document_sensitivity_info():
+
+    document_number = get_doc_num()
+
+    max_documents = len(main_data['labels'])
+
+    extra_indexs = [0 for _ in range(folds)]
+
+    visual = get_visualisation()
+
+    if request.method == 'POST':
+        chosen_vis = request.form.get('options')
+
+        if chosen_vis == None:
+            document_number = change_doc(document_number, max_documents)
+        else:
+            visual = change_visual(chosen_vis)
+
+    reset_options(visual)
+
+    test_data = cross_val_stats["test_features_list"]
+    test_labels = cross_val_stats["test_labels_list"]
+
+    visual_html, isSensitive = explainers(
+        document_number, test_data, test_labels, extra_indexs, visual)
+
+    return render_template('classifier/single_document_sensitivity_info.html', document_number=document_number+1,
+                           max_documents=max_documents, isSensitive=isSensitive, options=options, visual_html=visual_html, selected=visual)
 
 
 @bp.route('/general-sensitivity-info')
@@ -296,41 +354,3 @@ def general_sensitivity_info():
 
     return render_template('classifier/general_sensitivity_info.html', predictions=predictions, confusion_matrix_score=conf_mat,
                            eli5_general=eli5_general)
-
-
-@bp.route('/single-document-sensitivity-info', methods=('GET', 'POST'))
-@login_required
-def single_document_sensitivity_info():
-    document_number = get_doc_num()
-
-    max_documents = len(main_data['labels'])
-
-    extra_indexs = [0 for _ in range(folds)]
-
-    visual = get_visualisation()
-
-    options = ["LIME", "SHAP", "ELI5"]
-
-    if request.method == 'POST':
-
-        chosen_vis = request.form.get('options')
-
-        if chosen_vis == None:
-            document_number = change_doc(document_number, max_documents)
-        else:
-            visual = change_visual(chosen_vis)
-
-    test_data = cross_val_stats["test_features_list"]
-    test_labels = cross_val_stats["test_labels_list"]
-
-    visual_html, isSensitive = explainers(
-        document_number, test_data, test_labels, extra_indexs, visual)
-
-    isSensitive = None
-
-    # ensure that chosen options shows to user
-    options.remove(visual)
-    options.append(visual)
-
-    return render_template('classifier/single_document_sensitivity_info.html', document_number=document_number+1,
-                           max_documents=max_documents, isSensitive=isSensitive, options=options, visual_html=visual_html, selected=visual)
