@@ -26,14 +26,27 @@
     </div>
   </form>
 
-  <form method="post">
-    <select name="options">
-      {% for colour in options %}
-        <option value="{{ colour }}" name="options" selected="SELECTED">{{ colour }}</option>
-      {% endfor %}
-      <input type="submit" name="options_button" value="submit">
-    </select>
-  </form>
+  <div class="double_dropdown">
+
+    <form method="post">
+      <div class="dropdown">
+        <select name="vis_options">
+          {% for option in vis_options %}
+            <option value="{{ option }}" name="vis_options" selected="SELECTED">{{ option }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="dropdown">
+        <select name="clf_options">
+          {% for clf in class_options %}
+            <option value="{{ clf }}" name="clf_options" selected="SELECTED">{{ clf }}</option>
+          {% endfor %}
+        </select>
+        <input type="submit" name="options_button" value="submit">
+      </div>
+    </form>
+  </div>
 
   {% if visual_html %}
     <div>

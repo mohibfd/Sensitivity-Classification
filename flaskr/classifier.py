@@ -21,11 +21,12 @@ bp = Blueprint('classifier', __name__)
 APP_ROOT = os.path.dirname(os.path.abspath(__file__))
 MODEL_PATH = os.path.join(APP_ROOT, "model/")
 
-cross_val_stats = pd.read_pickle(MODEL_PATH + 'cross_val_stats.pkl')
+LR_cross_val_stats = pd.read_pickle(MODEL_PATH + 'cross_val_stats.pkl')
 main_data = pd.read_pickle(MODEL_PATH + 'main_data.pkl')
-folds = len(cross_val_stats["classifiers"])
+folds = len(LR_cross_val_stats["classifiers"])
 target_names = ['Non-Sensitive', 'Sensitive']
-options = ["LIME", "SHAP", "ELI5"]
+vis_options = ["LIME", "SHAP", "ELI5"]
+clf_options = ["LR", "RF", "SVM"]
 
 
 def get_doc_num(database="") -> int:
@@ -61,6 +62,17 @@ def get_visualisation() -> str:
     return visual
 
 
+def get_clf() -> str:
+    user_id = g.user['id']
+    db = get_db()
+
+    clf = db.execute(
+        'SELECT clf_method FROM user WHERE id = ?', (user_id,)
+    ).fetchone()[0]
+
+    return clf
+
+
 def change_visual(visual: str) -> str:
     user_id = g.user['id']
     db = get_db()
@@ -74,6 +86,21 @@ def change_visual(visual: str) -> str:
     db.commit()
 
     return visual
+
+
+def change_clf(clf: str) -> str:
+    user_id = g.user['id']
+    db = get_db()
+
+    db.execute(
+        'UPDATE user SET clf_method = ?'
+        ' WHERE id = ?',
+        (clf, user_id)
+    )
+
+    db.commit()
+
+    return clf
 
 
 def change_doc(document_number: int, max_documents: int, database="") -> int:
@@ -116,7 +143,7 @@ def change_doc(document_number: int, max_documents: int, database="") -> int:
     return document_number
 
 
-def get_specific_sens(sens: int) -> pd:
+def get_specific_sens(sens: int, cross_val_stats: dict) -> pd:
     test_data = cross_val_stats["test_features_list"].copy()
     test_labels = cross_val_stats["test_labels_list"].copy()
 
@@ -140,7 +167,16 @@ def get_specific_sens(sens: int) -> pd:
     return test_data, test_labels, extra_indexs
 
 
-def explainers(document_index: int, test_data: pd, test_labels: pd, extra_indexs: list, visual: str) -> LimeTextExplainer:
+def get_clf_stats(clf: str) -> dict:
+    if clf == 'LR':
+        return LR_cross_val_stats
+    elif clf == 'RF':
+        return LR_cross_val_stats
+    elif clf == 'SVM':
+        return LR_cross_val_stats
+
+
+def explainers(document_index: int, test_data: pd, test_labels: pd, extra_indexs: list, visual: str, cross_val_stats: dict) -> LimeTextExplainer:
     index = 0
     fold_length = len(test_data[0])
 
@@ -207,18 +243,24 @@ def explainers(document_index: int, test_data: pd, test_labels: pd, extra_indexs
     return vis_html, isSensitive
 
 
-def reset_options(visual: str) -> None:
+def reset_options(visual: str, clf: str) -> None:
     # ensure that chosen options shows to user
-    options.remove(visual)
-    options.append(visual)
+    vis_options.remove(visual)
+    vis_options.append(visual)
+
+    clf_options.remove(clf)
+    clf_options.append(clf)
 
 
-def get_visual_html(sensitivity: int, document_number: int, visual: str) -> LimeTextExplainer:
+def get_visual_html(sensitivity: int, document_number: int, visual: str, clf: str) -> LimeTextExplainer:
 
-    test_data, test_labels, extra_indexs = get_specific_sens(sensitivity)
+    cross_val_stats = get_clf_stats(clf)
+
+    test_data, test_labels, extra_indexs = get_specific_sens(
+        sensitivity, cross_val_stats)
 
     visual_html, isSensitive = explainers(
-        document_number, test_data, test_labels, extra_indexs, visual)
+        document_number, test_data, test_labels, extra_indexs, visual, cross_val_stats)
 
     return visual_html
 
@@ -239,21 +281,25 @@ def sensitive_info():
 
     visual = get_visualisation()
 
+    clf = get_clf()
+
     if request.method == 'POST':
-        chosen_vis = request.form.get('options')
+        chosen_vis = request.form.get('vis_options')
 
         if chosen_vis == None:
             document_number = change_doc(
                 document_number, max_documents, sensitivity)
         else:
             visual = change_visual(chosen_vis)
+            chosen_clf = request.form.get('clf_options')
+            clf = change_clf(chosen_clf)
 
-    reset_options(visual)
+    reset_options(visual, clf)
 
-    visual_html = get_visual_html(sensitivity, document_number, visual)
+    visual_html = get_visual_html(sensitivity, document_number, visual, clf)
 
     return render_template('classifier/sensitive_info.html', document_number=document_number+1,
-                           max_documents=max_documents, isSensitive=True, options=options, visual_html=visual_html, selected=visual)
+                           max_documents=max_documents, isSensitive=True, vis_options=vis_options, visual_html=visual_html, class_options=clf_options)
 
 
 @bp.route('/non-sensitive-info', methods=('GET', 'POST'))
@@ -267,21 +313,25 @@ def non_sensitive_info():
 
     visual = get_visualisation()
 
+    clf = get_clf()
+
     if request.method == 'POST':
-        chosen_vis = request.form.get('options')
+        chosen_vis = request.form.get('vis_options')
 
         if chosen_vis == None:
             document_number = change_doc(
                 document_number, max_documents, sensitivity)
         else:
             visual = change_visual(chosen_vis)
+            chosen_clf = request.form.get('clf_options')
+            clf = change_clf(chosen_clf)
 
-    reset_options(visual)
+    reset_options(visual, clf)
 
-    visual_html = get_visual_html(sensitivity, document_number, visual)
+    visual_html = get_visual_html(sensitivity, document_number, visual, clf)
 
     return render_template('classifier/non_sensitive_info.html', document_number=document_number+1,
-                           max_documents=max_documents, isSensitive=False, options=options, visual_html=visual_html, selected=visual)
+                           max_documents=max_documents, isSensitive=False, vis_options=vis_options, visual_html=visual_html, class_options=clf_options)
 
 
 @bp.route('/single-document-sensitivity-info', methods=('GET', 'POST'))
@@ -296,24 +346,30 @@ def single_document_sensitivity_info():
 
     visual = get_visualisation()
 
+    clf = get_clf()
+
     if request.method == 'POST':
-        chosen_vis = request.form.get('options')
+        chosen_vis = request.form.get('vis_options')
 
         if chosen_vis == None:
             document_number = change_doc(document_number, max_documents)
         else:
             visual = change_visual(chosen_vis)
+            chosen_clf = request.form.get('clf_options')
+            clf = change_clf(chosen_clf)
 
-    reset_options(visual)
+    reset_options(visual, clf)
+
+    cross_val_stats = get_clf_stats(clf)
 
     test_data = cross_val_stats["test_features_list"]
     test_labels = cross_val_stats["test_labels_list"]
 
     visual_html, isSensitive = explainers(
-        document_number, test_data, test_labels, extra_indexs, visual)
+        document_number, test_data, test_labels, extra_indexs, visual, cross_val_stats)
 
     return render_template('classifier/single_document_sensitivity_info.html', document_number=document_number+1,
-                           max_documents=max_documents, isSensitive=isSensitive, options=options, visual_html=visual_html, selected=visual)
+                           max_documents=max_documents, isSensitive=isSensitive, vis_options=vis_options, visual_html=visual_html, class_options=clf_options)
 
 
 @bp.route('/general-sensitivity-info')

@@ -8,7 +8,8 @@ CREATE TABLE user (
   document_number INTEGER NOT NULL,
   sens_document_number INTEGER NOT NULL,
   non_sens_document_number INTEGER NOT NULL,
-  visualisation_method VARCHAR NOT NUlL
+  visualisation_method VARCHAR NOT NUlL,
+  clf_method VARCHAR NOT NUlL
 );
 
 -- CREATE TABLE post (
