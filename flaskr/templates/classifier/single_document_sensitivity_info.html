@@ -25,20 +25,19 @@
       <input type="submit" name="submit_button" value="Next Document">
     </div>
   </form>
-  {% if lime_html %}
+
+  <form method="post">
+    <select name="options">
+      {% for colour in options %}
+        <option value="{{ colour }}" name="options" selected="SELECTED">{{ colour }}</option>
+      {% endfor %}
+      <input type="submit" name="options_button" value="submit">
+    </select>
+  </form>
+
+  {% if visual_html %}
     <div>
-      {{ lime_html|safe }}
-    </div>
-  {% endif %}
-  <hr>
-  {% if shap_plot%}
-    <div>
-      {{ shap_plot|safe }}
-    </div>
-  {% endif %}
-  {% if eli5_html%}
-    <div>
-      {{ eli5_html|safe }}
+      {{ visual_html|safe }}
     </div>
   {% endif %}
 {% endblock %}

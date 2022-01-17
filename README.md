@@ -22,3 +22,7 @@ temp = pickle.load(open(directory_path+filename, 'rb'))
 # Hide input
 
 %%model
+
+# Change database
+
+flask init-db

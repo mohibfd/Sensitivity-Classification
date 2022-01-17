@@ -7,8 +7,8 @@ CREATE TABLE user (
   password TEXT NOT NULL,
   document_number INTEGER NOT NULL,
   sens_document_number INTEGER NOT NULL,
-  non_sens_document_number INTEGER NOT NULL
-
+  non_sens_document_number INTEGER NOT NULL,
+  visualisation_method VARCHAR NOT NUlL
 );
 
 -- CREATE TABLE post (

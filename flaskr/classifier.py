@@ -1,4 +1,3 @@
-from __future__ import print_function  # In python 2.7
 from flask import (
     Blueprint, flash, g, render_template, request
 )
@@ -48,6 +47,32 @@ def get_doc_num(database="") -> int:
         ).fetchone()[0]
 
     return document_number
+
+
+def get_visualisation() -> str:
+    user_id = g.user['id']
+    db = get_db()
+
+    visual = db.execute(
+        'SELECT visualisation_method FROM user WHERE id = ?', (user_id,)
+    ).fetchone()[0]
+
+    return visual
+
+
+def change_visual(visual: str) -> str:
+    user_id = g.user['id']
+    db = get_db()
+
+    db.execute(
+        'UPDATE user SET visualisation_method = ?'
+        ' WHERE id = ?',
+        (visual, user_id)
+    )
+
+    db.commit()
+
+    return visual
 
 
 def change_doc(document_number: int, max_documents: int, database="") -> int:
@@ -114,7 +139,7 @@ def get_specific_sens(sens: int) -> pd:
     return test_data, test_labels, extra_indexs
 
 
-def explainers(document_index: int, test_data: pd, test_labels: pd, extra_indexs: list) -> LimeTextExplainer:
+def explainers(document_index: int, test_data: pd, test_labels: pd, extra_indexs: list, visual: str) -> LimeTextExplainer:
     index = 0
     fold_length = len(test_data[0])
 
@@ -164,15 +189,21 @@ def explainers(document_index: int, test_data: pd, test_labels: pd, extra_indexs
             model, test_data.iloc[document_index], vec=vectorizer, target_names=target_names)
         return eli5_html
 
-    lime_html = lime_explain()
-    shap_plot = shap_explain()
-    eli5_html = eli5_explain()
+    vis_html = None
+    if visual == 'ELI5':
+        vis_html = eli5_explain()
+
+    elif visual == 'LIME':
+        vis_html = lime_explain()
+
+    elif visual == 'SHAP':
+        vis_html = shap_explain()
 
     test_labels = test_labels[index]
     isSensitive = (
         "Sensitive" if test_labels.iloc[document_index] else "Non-Sensitive")
 
-    return lime_html, shap_plot, eli5_html, isSensitive
+    return vis_html, isSensitive
 
 
 @bp.route('/')
@@ -276,15 +307,30 @@ def single_document_sensitivity_info():
 
     extra_indexs = [0 for _ in range(folds)]
 
+    visual = get_visualisation()
+
+    options = ["LIME", "SHAP", "ELI5"]
+
     if request.method == 'POST':
-        document_number = change_doc(document_number, max_documents)
+
+        chosen_vis = request.form.get('options')
+
+        if chosen_vis == None:
+            document_number = change_doc(document_number, max_documents)
+        else:
+            visual = change_visual(chosen_vis)
 
     test_data = cross_val_stats["test_features_list"]
     test_labels = cross_val_stats["test_labels_list"]
 
-    lime_html, shap_plot, eli5_html, isSensitive = explainers(
-        document_number, test_data, test_labels, extra_indexs)
+    visual_html, isSensitive = explainers(
+        document_number, test_data, test_labels, extra_indexs, visual)
+
+    isSensitive = None
+
+    # ensure that chosen options shows to user
+    options.remove(visual)
+    options.append(visual)
 
     return render_template('classifier/single_document_sensitivity_info.html', document_number=document_number+1,
-                           max_documents=max_documents, isSensitive=isSensitive, lime_html=lime_html, shap_plot=shap_plot,
-                           eli5_html=eli5_html)
+                           max_documents=max_documents, isSensitive=isSensitive, options=options, visual_html=visual_html, selected=visual)
