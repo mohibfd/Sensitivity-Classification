@@ -1,18 +1,32 @@
 html {
    font-family: sans-serif;
-   background: #eee;
+   background: black;
    padding: 1rem;
 }
 body {
+   padding: 2%;
    max-width: 960px;
    margin: 0 auto;
-   background: white;
+   background: black;
+   color: white;
+   text-align: justify;
+   text-justify: inter-word;
 }
 h1 {
    font-family: serif;
    color: #377ba8;
    margin: 1rem 0;
+   text-align: center;
 }
+h2 {
+   font-family: serif;
+   color: #377ba8;
+   margin: 0 0 0 0;
+   padding-top: 20px;
+   /* border-bottom: 0px; */
+   /* margin-top: 3; */
+}
+
 a {
    color: #377ba8;
 }
@@ -21,10 +35,12 @@ hr {
    border-top: 1px solid lightgray;
 }
 nav {
-   background: lightgray;
-   display: flex;
-   align-items: center;
-   padding: 0 0.5rem;
+   background: rgb(10, 10, 10);
+   /* display: flex; */
+   /* align-items: center; */
+   /* padding: 0 0.5rem; */
+   max-width: 800px;
+   margin: auto;
 }
 nav h1 {
    flex: auto;
@@ -50,7 +66,7 @@ header .action {
    padding: 0 1rem 1rem;
 }
 .content > header {
-   border-bottom: 1px solid lightgray;
+   /* border-bottom: 1px solid lightgray; */
    display: flex;
    align-items: flex-end;
 }
@@ -61,7 +77,7 @@ header .action {
 .flash {
    margin: 1em 0;
    padding: 1em;
-   background: #cae6f6;
+   background: #687f8a;
    border: 1px solid #377ba8;
 }
 .post > header {
@@ -110,39 +126,127 @@ input[type="submit"] {
    align-self: start;
    min-width: 10em;
 }
-.general_body{
-    font-size: 1.5em;
+.general_body {
+   font-size: 1.5em;
 }
-.matrix_title{
-    padding: 0.75em 4.5em;
+.matrix_title {
+   padding: 0.75em 4.5em;
 }
-.matrix_header{
-    margin: 0 4.5em;
+.matrix_header {
+   margin: 0 4.5em;
 }
-.matrix_row_label{
-    display:inline-block;
-    width: 4.5em
+.matrix_row_label {
+   display: inline-block;
+   width: 4.5em;
 }
-.matrix_row{
-    display:inline-block;
+.matrix_row {
+   display: inline-block;
 }
-.f1_score{
-    display: inline-flex;
-    width: 100%;
-    padding: 1em 0em;
-    justify-content: space-around;
-
+.f1_score {
+   display: inline-flex;
+   width: 100%;
+   padding: 1em 0em;
+   justify-content: space-around;
 }
-.matrix_values{
-    display:inline-block;
-    width: 3.5em
+.matrix_values {
+   display: inline-block;
+   width: 3.5em;
 }
 .center {
-    padding: 10px;
-    text-align: center;
+   padding: 10px;
+   text-align: center;
 }
 .document_move {
-    display: inline-flex;
-    align-items: space-around;
-    justify-content: space-around;
+   display: inline-flex;
+   align-items: space-around;
+   justify-content: space-around;
+}
+
+.link {
+   display: flex;
+   /* background-color: white; */
+   text-align: center;
+   justify-content: space-around;
+   font-size: 3rem;
+}
+.link a {
+   text-decoration: none;
+   font-weight: lighter;
+}
+.link a:hover {
+   background-color: rgba(140, 145, 150, 0.3);
+}
+
+.before_register {
+   text-align: center;
+   margin: 100px 0px 50px 0px;
+}
+
+.register_container {
+   /* background-color: yellow; */
+   /* height: 100px; */
+   padding-top: 100px;
+}
+
+.register_form {
+   max-width: 500px;
+   margin: auto;
+   background-color: rgb(23, 25, 32);
+   padding: 25px 50px 0px 50px;
+}
+
+.toggle_register {
+   align-self: center;
+}
+
+input[value="Register"] {
+   background-color: rgb(63, 145, 117);
+   color: white;
+   width: 100%;
+   /* width: 300px; */
+   height: 50px;
+   font-size: 1.5em;
+   border: 0;
+}
+input[value="Sign Up"] {
+   background-color: rgb(63, 145, 117);
+   color: white;
+   width: 50%;
+   height: 45px;
+   font-size: 1.3em;
+   border: 0;
+}
+input[value="Log In"] {
+   background-color: rgb(77, 80, 79);
+   color: white;
+   width: 50%;
+   height: 45px;
+   font-size: 1.3em;
+   border: 0;
+}
+
+input[value="Log In"]:hover {
+   background-color: rgb(42, 100, 81);
+}
+
+.toggle_register {
+   display: flex;
+   width: 100%;
+   justify-content: center;
+}
+input[value="Register"]:hover {
+   background-color: rgb(42, 100, 81);
+}
+
+.register_button {
+   align-self: center;
+   padding: 10px;
+}
+
+input[required="required"] {
+   border: 2px solid rgb(77, 80, 79);
+   background-color: rgb(23, 25, 32);
+   font-size: 1.3em;
+   padding-left: 10px;
+   color: white;
 }
