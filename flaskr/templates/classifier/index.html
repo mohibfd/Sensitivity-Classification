@@ -8,21 +8,21 @@
 
   {% if g.user %}
     <div class="top">
-      <div class="top_left">
-        <a href="{{ url_for('classifier.sensitive_info') }}">Features that identify a document as sensitive</a>
-      </div>
-      <div class="top_right">
-        <a href="{{ url_for('classifier.non_sensitive_info') }}">Features that identify a document as non sensitive</a>
-      </div>
+      <a class="top_left block_link" href="{{ url_for('classifier.sensitive_info') }}">
+        Sensitive Documents Explanations
+      </a>
+      <a class="top_right block_link" href="{{ url_for('classifier.non_sensitive_info') }}">
+        Non-Sensitive Documents Explanations
+      </a>
     </div>
   </div>
   <div class="bottom">
-    <div class="bottom_left">
-      <a href="{{ url_for('classifier.single_document_sensitivity_info') }}">Features for identifying both sensitive and non sensitive documents</a>
-    </div>
-    <div class="bottom_right">
-      <a href="{{ url_for('classifier.general_sensitivity_info') }}">General stats on the collection level</a>
-    </div>
+    <a class="bottom_left block_link" href="{{ url_for('classifier.single_document_sensitivity_info') }}">
+      Sensitive and Non-Sensitive Documents Explanations
+    </a>
+    <a class="bottom_right block_link" href="{{ url_for('classifier.general_sensitivity_info') }}">
+      Classifier Information
+    </a>
   </div>
 
 {% else %}

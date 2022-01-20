@@ -7,7 +7,7 @@ body {
 
 h1 {
    font-family: serif;
-   font-size: 2em;
+   font-size: 1.9em;
    color: #377ba8;
    position: absolute;
    height: 2.5vh;
@@ -32,14 +32,10 @@ hr {
    border-top: 1px solid lightgray;
 }
 nav {
-   /* background: rgb(10, 10, 10); */
-   /* max-width: 800px; */
-   /* padding: 10px 0; */
    margin: auto;
    display: flex;
    flex-direction: row;
    justify-content: center;
-   /* align-items: center; */
 }
 nav h1 {
    flex: auto;
@@ -63,32 +59,9 @@ header .action {
    padding: 0.5rem;
 }
 
-.content {
-   height: 100vh;
-   /* 
-   background: url("images/background.jpeg") no-repeat center center fixed;
-   -webkit-background-size: cover;
-   -moz-background-size: cover;
-   -o-background-size: cover;
-   background-size: cover; */
-   /* background-image: ; */
-
-   /* padding: 0; */
-   /* margin: 0; */
-   /* padding: 4%;
-   max-width: 960px;
-   margin: 0 auto;
-   background: black;
-   color: white;
-   text-align: justify;
-   text-justify: inter-word; */
-}
 .main_page_content {
    padding: 1% 4% 2% 4%;
-   /* max-width: 960px; */
    margin: 0 auto;
-   /* background: black; */
-   /* color: white; */
    text-align: justify;
    text-justify: inter-word;
 }
@@ -305,8 +278,16 @@ input[required="required"] {
 
 .top,
 .bottom {
-   height: 50vh;
+   height: 49vh;
    display: flex;
+   justify-content: space-between;
+}
+.top {
+   margin-bottom: 2vh;
+}
+
+.bottom {
+   margin-top: 2vh;
 }
 
 .top_left,
@@ -317,12 +298,12 @@ input[required="required"] {
    flex: 1;
    height: 100%;
    text-align: center;
-   /* background-color: #cc2f2e; */
    justify-content: center;
    align-items: center;
 }
 
 .top_left {
+   margin-right: 1vh;
    background-image: linear-gradient(
       to right,
       #ff8177 0%,
@@ -335,21 +316,23 @@ input[required="required"] {
 }
 
 .top_right {
+   margin-left: 1vh;
    background-image: linear-gradient(120deg, #96e6a1 0%, #d4fc79 100%);
 }
 
 .bottom_left {
+   margin-right: 1vh;
    background-image: linear-gradient(
       to right,
-      #ff8177 0%,
-      #ff8c7f 30%,
+      #cf556c 0%,
+      #ff867a 30%,
       #96e6a1 70%,
       #d4fc79 100%
    );
 }
 
 .bottom_right {
-   /* background-image: linear-gradient(120deg, #eff0b3 0%, #f5f252 100%); */
+   margin-left: 1vh;
    background-image: radial-gradient(#ff8177, #d4fc79);
 }
 
@@ -359,4 +342,10 @@ input[required="required"] {
    -moz-background-size: cover;
    -o-background-size: cover;
    background-size: cover;
+}
+
+.block_link {
+   font-size: 2rem;
+   text-decoration: none;
+   font-weight: lighter;
 }
