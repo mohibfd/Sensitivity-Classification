@@ -1,11 +1,20 @@
 <!DOCTYPE html>
+<!-- <div class="temp"> -->
 <title>
   {% block title %}{% endblock %}
 </title>
 <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}"/>
 <nav>
   <h1>Sensitivity Classifier</h1>
-  <!-- <ul> {% if g.user %} <li> <span>{{ g.user['username'] }}</span></li> <li> <a href="{{ url_for('auth.logout') }}">Log Out</a> {% else %} </li> <li> <a href="{{ url_for('auth.register') }}">Register</a> </li> <li> <a href="{{ url_for('auth.login') }}">Log In</a> {% endif %} </li> </ul> -->
+  <ul>
+    {% if g.user %}
+      <li>
+        <span>{{ g.user['username'] }}</span></li>
+      <li>
+        <a href="{{ url_for('auth.logout') }}">Log Out</a>
+      {% endif %}
+    </li>
+  </ul>
 </nav>
 <section class="content">
   <header>
@@ -16,3 +25,5 @@
   {% endfor %}
   {% block content%}{% endblock %}
 </section>
+
+<!-- </div> -->
