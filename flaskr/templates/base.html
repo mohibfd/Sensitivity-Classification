@@ -11,6 +11,8 @@
       <li>
         <span>{{ g.user['username'] }}</span></li>
       <li>
+        <i class="fas fa-sign-out-alt"></i>
+
         <a href="{{ url_for('auth.logout') }}">Log Out</a>
       {% endif %}
     </li>
