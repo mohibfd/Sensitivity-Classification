@@ -32,7 +32,7 @@ hr {
 }
 nav {
    /* background: rgb(10, 10, 10); */
-   max-width: 800px;
+   /* max-width: 800px; */
    margin: auto;
    display: flex;
    flex-direction: row;
@@ -209,7 +209,13 @@ input[type="submit"] {
 }
 
 .register_container {
-   padding-top: 100px;
+   background: url("images/background.jpeg") no-repeat center center fixed;
+   -webkit-background-size: cover;
+   -moz-background-size: cover;
+   -o-background-size: cover;
+   background-size: cover;
+   height: 100vh;
+   display: flex;
 }
 
 .register_form {
@@ -242,7 +248,7 @@ input[value="Sign Up"] {
 input[id="off"] {
    background-color: rgb(77, 80, 79);
    color: white;
-   width: 50%;
+   width: 200px;
    height: 45px;
    font-size: 1.3em;
    border: 0;
@@ -252,7 +258,7 @@ input[id="off"] {
 input[id="on"] {
    background-color: rgb(63, 145, 117);
    color: white;
-   width: 50%;
+   width: 200px;
    height: 45px;
    font-size: 1.3em;
    border: 0;
@@ -286,49 +292,35 @@ input[required="required"] {
 
 .fake_button {
    display: flex;
-   flex: 1;
+   width: 200px;
    background-color: rgb(63, 145, 117);
    justify-content: center;
    align-items: center;
    font-size: 1.3em;
 }
 
-.top {
-   /* display: inline; */
-   /* display: flex; */
+.top,
+.bottom {
    height: 50vh;
-   /* width: 100%; */
-   /* justify-content: center;
-   align-items: center;
-   align-content: center; */
-   /* flex-direction: row; */
-   /* height: 100%; */
-   /* min-height: 100%; */
-   /* background-color: #a437a8; */
-   /* flex: 1; */
-   /* height: 50%; */
-   /* width: 50%; */
-   /* justify-content: space-evenly; */
+   display: flex;
 }
 
-.top_left {
-   display: inline-flex;
-
-   /* margin: auto; */
-   width: 49.7%;
+.top_left,
+.top_right,
+.bottom_left,
+.bottom_right {
+   display: flex;
+   flex: 1;
    height: 100%;
-   /* width: 50%; */
    text-align: center;
    background-color: #cc2f2e;
+   justify-content: center;
+   align-items: center;
 }
 
-.top_right {
-   display: inline-flex;
-   height: 100%;
-   width: 49.7%;
+.top_right,
+.bottom_left {
    background-color: #816969;
-
-   /* text-align: center; */
 }
 
 .bottom {
@@ -344,4 +336,12 @@ input[required="required"] {
    -o-background-size: cover;
    background-size: cover;
    /* background-image: url("images/background.jpeg"); */
+}
+
+.nav_img {
+   background: url("images/background.jpeg") no-repeat center center fixed;
+   -webkit-background-size: cover;
+   -moz-background-size: cover;
+   -o-background-size: cover;
+   background-size: cover;
 }
