@@ -17,3 +17,7 @@ build/
 
 flaskr/model/cross_val_stats.pkl
 flaskr/model/main_data.pkl
+flaskr/model/RF_cross_val_stats.pkl
+flaskr/model/RF_main_data.pkl
+flaskr/model/SVM_cross_val_stats.pkl
+flaskr/model/SVM_main_data.pkl
