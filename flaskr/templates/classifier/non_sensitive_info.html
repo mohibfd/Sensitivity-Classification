@@ -1,55 +1,68 @@
 {% extends 'base.html' %}
 
 {% block header %}
-  <h1>
-    {% block title %}Non Sensitive Information{% endblock %}
-  </h1>
+  <h2>
+    {% block title %}Non-Sensitive Documents{% endblock %}
+  </h2>
 {% endblock %}
 
 {% block content %}
-  <a href="{{ url_for('classifier.classifier_main_page') }}">Go Back</a>
-  <div class="center">
-    Document number =
-    {{document_number}}/{{max_documents}}
-  </div>
-  {% if isSensitive %}
+  <div class="page_padding">
+    <a href="{{ url_for('classifier.classifier_main_page') }}">Go Back</a>
     <div class="center">
-      The document's true label is:
-      {{ isSensitive }}
+      Document number =
+      {{document_number}}/{{max_documents}}
     </div>
-  {% endif %}
-  <hr>
-  <form method="post">
-    <div class="document_move">
-      <input type="submit" name="submit_button" value="Previous Document">
-      <input type="submit" name="submit_button" value="Next Document">
-    </div>
-  </form>
-  <hr>
-  <div class="double_dropdown">
-    <form method="post">
-      <div class="dropdown">
-        <select name="vis_options">
-          {% for option in vis_options %}
-            <option value="{{ option }}" name="vis_options" selected="SELECTED">{{ option }}</option>
-          {% endfor %}
-        </select>
+    {% if isSensitive %}
+      <div class="center">
+        The document's true label is:
+        {{ isSensitive }}
       </div>
-
-      <div class="dropdown">
-        <select name="clf_options">
-          {% for clf in class_options %}
-            <option value="{{ clf }}" name="clf_options" selected="SELECTED">{{ clf }}</option>
-          {% endfor %}
-        </select>
-        <input type="submit" name="options_button" value="submit">
+    {% endif %}
+    <hr>
+    <form method="post">
+      <div class="document_move">
+        <input type="submit" name="submit_button" value="Previous Document">
+        <input type="submit" name="submit_button" value="Next Document">
       </div>
     </form>
-  </div>
-  <hr>
-  {% if visual_html %}
-    <div>
-      {{ visual_html|safe }}
+
+    <hr>
+
+    <div class="double_dropdown">
+      <form method="post">
+        <div>
+          <select name="vis_options">
+            {% for option in vis_options %}
+              <option value="{{ option }}" name="vis_options" selected="SELECTED">{{ option }}</option>
+            {% endfor %}
+          </select>
+          <select name="clf_options">
+            {% for clf in class_options %}
+              <option value="{{ clf }}" name="clf_options" selected="SELECTED">{{ clf }}</option>
+            {% endfor %}
+          </select>
+          <input type="submit" name="options_button" value="submit">
+        </div>
+      </form>
     </div>
-  {% endif %}
+
+    <hr>
+
+    <div class="visuals_container">
+      <div class="shap">
+        {% if shap_html %}
+          {{ shap_html|safe }}
+        {% endif %}
+      </div>
+
+      {% if lime_probas_html %}
+        {{ lime_probas_html|safe }}
+      {% endif %}
+    </div>
+
+    {% if visual_html %}
+      {{ visual_html|safe }}
+    {% endif %}
+  </div>
 {% endblock %}

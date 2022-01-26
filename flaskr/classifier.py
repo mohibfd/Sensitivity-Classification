@@ -25,7 +25,7 @@ LR_cross_val_stats = pd.read_pickle(MODEL_PATH + 'cross_val_stats.pkl')
 main_data = pd.read_pickle(MODEL_PATH + 'main_data.pkl')
 folds = len(LR_cross_val_stats["classifiers"])
 target_names = ['Non-Sensitive', 'Sensitive']
-vis_options = ["LIME", "SHAP", "ELI5"]
+vis_options = ["LIME", "ELI5"]
 clf_options = ["LR", "RF", "SVM"]
 
 
@@ -190,7 +190,7 @@ def explainers(document_index: int, test_data: pd, test_labels: pd, extra_indexs
     vectorizer = cross_val_stats["vectorizers"][index]
     model = cross_val_stats["classifiers"][index]
 
-    def lime_explain():
+    def lime_explain(text=True):
         def predictor(texts):
             feature = vectorizer.transform(texts)
             pred = model.predict_proba(feature)
@@ -199,22 +199,20 @@ def explainers(document_index: int, test_data: pd, test_labels: pd, extra_indexs
         lime_explainer = LimeTextExplainer(
             class_names=target_names)
 
-        lime_data = test_data.iloc[document_index][0:200]
+        lime_data = test_data.iloc[document_index][0:500]
 
         lime_values = lime_explainer.explain_instance(
             lime_data,
             classifier_fn=predictor,
         )
-        return lime_values.as_html()
+
+        if text:
+            return lime_values.as_html(predict_proba=False, specific_predict_proba=False)
+        else:
+            return lime_values.as_html(text=False)
 
     def shap_explain():
-        train_data = cross_val_stats["train_features_list"][index]
-        train_features = vectorizer.transform(train_data).toarray()
-        test_features = vectorizer.transform(test_data).toarray()
-
-        shap_explainer = shap.Explainer(
-            model, train_features, feature_names=vectorizer.get_feature_names())
-        shap_values = shap_explainer(test_features)
+        shap_values = cross_val_stats["shap_values"][index]
 
         force_plot = shap.plots.force(
             shap_values[document_index], matplotlib=False)
@@ -226,21 +224,21 @@ def explainers(document_index: int, test_data: pd, test_labels: pd, extra_indexs
             model, test_data.iloc[document_index], vec=vectorizer, target_names=target_names)
         return eli5_html
 
+    shap_html = shap_explain()
+
     vis_html = None
+    lime_html = lime_explain(text=False)
     if visual == 'ELI5':
         vis_html = eli5_explain()
 
     elif visual == 'LIME':
         vis_html = lime_explain()
 
-    elif visual == 'SHAP':
-        vis_html = shap_explain()
-
     test_labels = test_labels[index]
     isSensitive = (
         "Sensitive" if test_labels.iloc[document_index] else "Non-Sensitive")
 
-    return vis_html, isSensitive
+    return shap_html, lime_html, vis_html, isSensitive
 
 
 def reset_options(visual: str, clf: str) -> None:
@@ -259,10 +257,10 @@ def get_visual_html(sensitivity: int, document_number: int, visual: str, clf: st
     test_data, test_labels, extra_indexs = get_specific_sens(
         sensitivity, cross_val_stats)
 
-    visual_html, isSensitive = explainers(
+    shap_html, lime_probas_html, visual_html, isSensitive = explainers(
         document_number, test_data, test_labels, extra_indexs, visual, cross_val_stats)
 
-    return visual_html
+    return shap_html, lime_probas_html, visual_html
 
 
 @bp.route('/')
@@ -296,10 +294,12 @@ def sensitive_info():
 
     reset_options(visual, clf)
 
-    visual_html = get_visual_html(sensitivity, document_number, visual, clf)
+    shap_html, lime_probas_html, visual_html = get_visual_html(
+        sensitivity, document_number, visual, clf)
 
-    return render_template('classifier/sensitive_info.html', document_number=document_number+1,
-                           max_documents=max_documents, isSensitive=True, vis_options=vis_options, visual_html=visual_html, class_options=clf_options)
+    return render_template('classifier/sensitive_info.html', document_number=document_number+1, max_documents=max_documents,
+                           vis_options=vis_options, visual_html=visual_html, class_options=clf_options,
+                           shap_html=shap_html, lime_probas_html=lime_probas_html)
 
 
 @bp.route('/non-sensitive-info', methods=('GET', 'POST'))
@@ -328,10 +328,12 @@ def non_sensitive_info():
 
     reset_options(visual, clf)
 
-    visual_html = get_visual_html(sensitivity, document_number, visual, clf)
+    shap_html, lime_probas_html, visual_html = get_visual_html(
+        sensitivity, document_number, visual, clf)
 
-    return render_template('classifier/non_sensitive_info.html', document_number=document_number+1,
-                           max_documents=max_documents, isSensitive=False, vis_options=vis_options, visual_html=visual_html, class_options=clf_options)
+    return render_template('classifier/non_sensitive_info.html', document_number=document_number+1, max_documents=max_documents,
+                           vis_options=vis_options, visual_html=visual_html, class_options=clf_options, shap_html=shap_html,
+                           lime_probas_html=lime_probas_html)
 
 
 @bp.route('/single-document-sensitivity-info', methods=('GET', 'POST'))
@@ -365,11 +367,13 @@ def single_document_sensitivity_info():
     test_data = cross_val_stats["test_features_list"]
     test_labels = cross_val_stats["test_labels_list"]
 
-    visual_html, isSensitive = explainers(
+    shap_html, lime_probas_html, visual_html, isSensitive = explainers(
         document_number, test_data, test_labels, extra_indexs, visual, cross_val_stats)
 
     return render_template('classifier/single_document_sensitivity_info.html', document_number=document_number+1,
-                           max_documents=max_documents, isSensitive=isSensitive, vis_options=vis_options, visual_html=visual_html, class_options=clf_options)
+                           max_documents=max_documents, isSensitive=isSensitive, vis_options=vis_options,
+                           visual_html=visual_html, class_options=clf_options, lime_probas_html=lime_probas_html,
+                           shap_html=shap_html)
 
 
 @bp.route('/general-sensitivity-info')
