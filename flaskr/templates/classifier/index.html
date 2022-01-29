@@ -4,6 +4,10 @@
   <!-- <h2> {% block title %}Classifier Information{% endblock %} </h2> -->
 {% endblock %}
 
+{% block breadcrumb %}
+  <li class="breadcrumb-item active" aria-current="page">Home</li>
+{% endblock %}
+
 {% block content %}
 
   {% if g.user %}
@@ -33,47 +37,18 @@
       <div class="title">
         WHY
       </div>
-      Government departments, such as the Ministry of Defence, produce a large amount of written communications that are essential for the international operations of government.
-      <!-- <hr> -->
-      Freedom of Information Laws legislate that these documents should be released to the public.
-      <!-- <hr> -->
-      However, many of these documents contain sensitive information.
-      <!-- <hr> -->
-      Therefore, each document needs to be reviewed to identify and withhold any sensitivities.
-      <!-- <hr> -->
-      This website is a sensitivity review application that integrates automatic sensitivity classification.
+      Government departments, such as the Ministry of Defence, produce a large amount of written communications that are essential for the international operations of government. Freedom of Information Laws legislate that these documents should be released to the public. However, many of these documents contain sensitive information. Therefore, each document needs to be reviewed to identify and withhold any sensitivities. This website is a sensitivity review application that integrates automatic sensitivity classification.
 
       <div class="spacing"></div>
 
       <div class="title">
         HOW
       </div>
-      This system displays documents along with the classifier's predictions as to whether the documents contain any sensitive information.
-      <!-- <hr> -->
-      Importantly, the system provides useful information to explain why it has predicted that a document is (not) sensitive, such as colour coded highlighting of important term features within a document.
-      <!-- <hr> -->
-      The system produces useful reports to visualise the similarities and differences between what the classifier belives to be the most important features of sensitivity and features that are present in the collection being reviewed.
+      This system displays documents along with the classifier's predictions as to whether the documents contain any sensitive information. Importantly, the system provides useful information to explain why it has predicted that a document is (not) sensitive, such as colour coded highlighting of important term features within a document. The system produces useful reports to visualise the similarities and differences between what the classifier belives to be the most important features of sensitivity and features that are present in the collection being reviewed.
       <div class="large_spacing"></div>
       To see the classifier and the explanations made by it, please register or login.
     </div>
 
-    <div class="card" style="width: 18rem;">
-      <img src="{{url_for('static', filename='images/shap1.png')}}" class="card-img-top" alt="...">
-      <div class="card-body">
-        <h5 class="card-title">Card title</h5>
-        <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
-        <a href="#" class="btn btn-primary">Go somewhere</a>
-      </div>
-    </div>
-
-    <div class="link">
-
-      <a href="{{ url_for('auth.register') }}">
-        <button type="button" class="btn btn-primary btn-lg">Register</button>
-      </a>
-
-      <a class="button_border" href="{{ url_for('auth.login') }}">Log In</a>
-    </div>
   </div>
 
 {% endif %}

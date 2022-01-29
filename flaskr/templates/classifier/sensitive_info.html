@@ -6,6 +6,13 @@
   </h2>
 {% endblock %}
 
+{% block breadcrumb %}
+  <li class="breadcrumb-item">
+    <a href="{{ url_for('classifier.classifier_main_page') }}">Home</a>
+  </li>
+  <li class="breadcrumb-item active" aria-current="page">Sensitive Info</li>
+{% endblock %}
+
 {% block content %}
 
   <div class="page_padding">
