@@ -12,10 +12,17 @@ h2 {
 }
 
 h1 {
-   font-size: 1.9em;
-   position: absolute;
-   height: 2.5vh;
-   /* padding-top: 10px; */
+   /* font-size: 1.9em; */
+   /* position: absolute; */
+   /* height: 2.5vh; */
+   /* align-self: center; */
+   /* background-color: red; */
+   /* justify-content: center; */
+   /* align-items: center; */
+   text-align: center;
+   width: 100%;
+   padding-left: 200px;
+   /* z-index: -1; */
 }
 h2 {
    padding-left: 4%;
@@ -25,7 +32,6 @@ h2 {
    /* max-width: 960px; */
    /* height: 2.5vh; */
 }
-
 a {
    /* color: #377ba8; */
    color: black;
@@ -39,6 +45,7 @@ nav {
    display: flex;
    flex-direction: row;
    justify-content: center;
+   height: 50px;
 }
 nav h1 {
    flex: auto;
@@ -175,12 +182,12 @@ input[type="submit"] {
 .back_image,
 .register_container {
    min-height: 100vh;
-   /* background-image: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); */
-   background: url("images/background.jpeg") no-repeat center center fixed;
+   background-image: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+   /* background: url("images/background.jpeg") no-repeat center center fixed;
    -webkit-background-size: cover;
    -moz-background-size: cover;
    -o-background-size: cover;
-   background-size: cover;
+   background-size: cover; */
 }
 
 .register_container {
@@ -390,4 +397,18 @@ input[required="required"] {
    justify-content: center;
    /* flex-direction: row; */
    /* background-color: #377ba8; */
+}
+
+.btn-mid {
+   width: 90px;
+   height: 40px;
+   margin: 0 5px 0 5px;
+   /* background-color: red; */
+}
+.username {
+   height: 40px;
+   width: 80px;
+   display: flex;
+   align-items: flex-end;
+   /* background-color: red; */
 }

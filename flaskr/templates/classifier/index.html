@@ -26,9 +26,6 @@
   </div>
 
 {% else %}
-  <!-- <div style="background-image: url({{url_for('static', filename= 'images/background.jpeg')}})"> -->
-  <!-- <div style="background-image: url('images/background.jpeg')"> -->
-
   <div class="back_image">
     <!-- <img src="{{url_for('static', filename='images/background.jpeg')}}" width='70%' height='70%' alt="Shap image"/> -->
     <div class="main_page_content">
@@ -60,8 +57,21 @@
       To see the classifier and the explanations made by it, please register or login.
     </div>
 
+    <div class="card" style="width: 18rem;">
+      <img src="{{url_for('static', filename='images/shap1.png')}}" class="card-img-top" alt="...">
+      <div class="card-body">
+        <h5 class="card-title">Card title</h5>
+        <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+        <a href="#" class="btn btn-primary">Go somewhere</a>
+      </div>
+    </div>
+
     <div class="link">
-      <a class="button_border" href="{{ url_for('auth.register') }}">Register</a>
+
+      <a href="{{ url_for('auth.register') }}">
+        <button type="button" class="btn btn-primary btn-lg">Register</button>
+      </a>
+
       <a class="button_border" href="{{ url_for('auth.login') }}">Log In</a>
     </div>
   </div>
