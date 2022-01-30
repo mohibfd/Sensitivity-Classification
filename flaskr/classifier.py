@@ -199,7 +199,7 @@ def explainers(document_index: int, test_data: pd, test_labels: pd, extra_indexs
         lime_explainer = LimeTextExplainer(
             class_names=target_names)
 
-        lime_data = test_data.iloc[document_index][0:500]
+        lime_data = test_data.iloc[document_index][0:1000]
 
         lime_values = lime_explainer.explain_instance(
             lime_data,
@@ -315,16 +315,16 @@ def non_sensitive_info():
 
     clf = get_clf()
 
-    if request.method == 'POST':
-        chosen_vis = request.form.get('vis_options')
+    # if request.method == 'POST':
+    #     chosen_vis = request.form.get('vis_options')
 
-        if chosen_vis == None:
-            document_number = change_doc(
-                document_number, max_documents, sensitivity)
-        else:
-            visual = change_visual(chosen_vis)
-            chosen_clf = request.form.get('clf_options')
-            clf = change_clf(chosen_clf)
+    #     if chosen_vis == None:
+    #         document_number = change_doc(
+    #             document_number, max_documents, sensitivity)
+    #     else:
+    #         visual = change_visual(chosen_vis)
+    #         chosen_clf = request.form.get('clf_options')
+    #         clf = change_clf(chosen_clf)
 
     reset_options(visual, clf)
 

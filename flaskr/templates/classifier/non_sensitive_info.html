@@ -15,7 +15,6 @@
 
 {% block content %}
   <div class="page_padding">
-    <a href="{{ url_for('classifier.classifier_main_page') }}">Go Back</a>
     <div class="center">
       Document number =
       {{document_number}}/{{max_documents}}
@@ -27,10 +26,16 @@
       </div>
     {% endif %}
     <hr>
+
     <form method="post">
       <div class="document_move">
-        <input type="submit" name="submit_button" value="Previous Document">
-        <input type="submit" name="submit_button" value="Next Document">
+        <input type="submit" name="submit_button" value="Previous Document" onclick="loading();">
+        <div class="cursor_wait">
+          <div id="loading" class="spinner-border" role="status">
+            <span class="visually-hidden">Loading...</span>
+          </div>
+        </div>
+        <input type="submit" name="submit_button" value="Next Document" onclick="loading();">
       </div>
     </form>
 
@@ -49,7 +54,7 @@
               <option value="{{ clf }}" name="clf_options" selected="SELECTED">{{ clf }}</option>
             {% endfor %}
           </select>
-          <input type="submit" name="options_button" value="submit">
+          <input type="submit" name="options_button" value="submit" onclick="loading();">
         </div>
       </form>
     </div>
