@@ -315,16 +315,16 @@ def non_sensitive_info():
 
     clf = get_clf()
 
-    # if request.method == 'POST':
-    #     chosen_vis = request.form.get('vis_options')
+    if request.method == 'POST':
+        chosen_vis = request.form.get('vis_options')
 
-    #     if chosen_vis == None:
-    #         document_number = change_doc(
-    #             document_number, max_documents, sensitivity)
-    #     else:
-    #         visual = change_visual(chosen_vis)
-    #         chosen_clf = request.form.get('clf_options')
-    #         clf = change_clf(chosen_clf)
+        if chosen_vis == None:
+            document_number = change_doc(
+                document_number, max_documents, sensitivity)
+        else:
+            visual = change_visual(chosen_vis)
+            chosen_clf = request.form.get('clf_options')
+            clf = change_clf(chosen_clf)
 
     reset_options(visual, clf)
 

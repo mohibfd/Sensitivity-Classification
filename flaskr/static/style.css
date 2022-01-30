@@ -347,9 +347,9 @@ input[required="required"] {
 }
 .username {
    height: 40px;
-   width: 80px;
+   width: 100px;
    display: flex;
-   align-items: flex-end;
+   align-items: center;
 }
 .breadcrumb {
    height: 5vh;
@@ -364,7 +364,34 @@ div#content {
 div#loading {
    display: none;
    position: absolute;
+   z-index: 1000;
 }
 div#cursor {
    cursor: default;
+}
+.card-img-top {
+   /* width: auto; */
+   /* height: auto; */
+   max-width: 100%;
+   max-height: 100%;
+}
+.img_container {
+   height: 300px;
+}
+.limited_width {
+   width: 98%;
+   margin: auto;
+}
+.end {
+   right: 10px;
+}
+nav .one_row {
+   display: flex;
+   width: 190px;
+   margin-right: 10px;
+}
+.no_margin {
+   margin: 0;
+   padding: 0;
+   height: 20px;
 }

@@ -11,46 +11,104 @@
 {% block content %}
 
   {% if g.user %}
-    <div class="top">
-      <a class="top_left block_link" href="{{ url_for('classifier.sensitive_info') }}">
-        Sensitive Documents Explanations
-      </a>
-      <a class="top_right block_link" href="{{ url_for('classifier.non_sensitive_info') }}">
-        Non-Sensitive Documents Explanations
-      </a>
-    </div>
-  </div>
-  <div class="bottom">
-    <a class="bottom_left block_link" href="{{ url_for('classifier.single_document_sensitivity_info') }}">
-      Sensitive and Non-Sensitive Documents Explanations
-    </a>
-    <a class="bottom_right block_link" href="{{ url_for('classifier.general_sensitivity_info') }}">
-      Classifier Information
-    </a>
-  </div>
 
-{% else %}
-  <div class="back_image">
-    <!-- <img src="{{url_for('static', filename='images/background.jpeg')}}" width='70%' height='70%' alt="Shap image"/> -->
-    <div class="main_page_content">
-      <!-- <h2> Classifier Information </h2> -->
-      <div class="title">
-        WHY
+    <div class="end">
+      <div id="loading" class="spinner-border end" role="status">
+        <span class="visually-hidden">Loading...</span>
       </div>
-      Government departments, such as the Ministry of Defence, produce a large amount of written communications that are essential for the international operations of government. Freedom of Information Laws legislate that these documents should be released to the public. However, many of these documents contain sensitive information. Therefore, each document needs to be reviewed to identify and withhold any sensitivities. This website is a sensitivity review application that integrates automatic sensitivity classification.
-
-      <div class="spacing"></div>
-
-      <div class="title">
-        HOW
-      </div>
-      This system displays documents along with the classifier's predictions as to whether the documents contain any sensitive information. Importantly, the system provides useful information to explain why it has predicted that a document is (not) sensitive, such as colour coded highlighting of important term features within a document. The system produces useful reports to visualise the similarities and differences between what the classifier belives to be the most important features of sensitivity and features that are present in the collection being reviewed.
-      <div class="large_spacing"></div>
-      To see the classifier and the explanations made by it, please register or login.
     </div>
 
-  </div>
+    <div class="row row-cols-1 row-cols-md-2 g-4 limited_width">
+      <div class="col">
+        <div class="card text-center">
+          <div class="img_container">
+            <img src="{{url_for('static', filename='images/confidential.webp')}}" class="card-img-top" alt="confidental">
+          </div>
+          <div class="card-body">
+            <h5 class="card-title">Sensitive Documents Explanations</h5>
+            <p class="card-text">Visualise which features influence the classifier's decision making for all sensitive documents.</p>
+            <form action="{{ url_for('classifier.sensitive_info') }}">
+              <div class="center no_margin">
+                <input type="submit" value="View" class="btn btn-primary btn-mid" onclick="loading();"/>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+      <div class="col">
+        <div class="card text-center">
+          <div class="img_container">
+            <img src="{{url_for('static', filename='images/green_lock.jpeg')}}" class="card-img-top" alt="safe">
+          </div>
+          <div class="card-body">
+            <h5 class="card-title">Non-Sensitive Documents Explanations</h5>
+            <p class="card-text">Visualise which features influence the classifier's decision making for all non-sensitive documents.</p>
+            <form action="{{ url_for('classifier.non_sensitive_info') }}">
+              <div class="center no_margin">
+                <input type="submit" value="View" class="btn btn-primary btn-mid" onclick="loading();"/>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
 
-{% endif %}
+      <div class="col">
+        <div class="card text-center">
+          <div class="img_container">
+            <img src="{{url_for('static', filename='images/green_red_lock.svg')}}" class="card-img-top" alt="(non) safe">
+          </div>
+          <div class="card-body">
+            <h5 class="card-title">Sensitive and Non-Sensitive Documents Explanations</h5>
+            <p class="card-text">Visualise which features influence the classifier's decision making for all sensitive and non-sensitive documents.</p>
+            <form action="{{ url_for('classifier.single_document_sensitivity_info') }}">
+              <div class="center no_margin">
+                <input type="submit" value="View" class="btn btn-primary btn-mid" onclick="loading();"/>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+      <div class="col">
+        <div class="card text-center">
+          <div class="img_container">
+            <img src="{{url_for('static', filename='images/lock.png')}}" class="card-img-top" alt="classifier info">
+          </div>
+          <div class="card-body">
+            <h5 class="card-title">Classifier Information</h5>
+            <p class="card-text">Statistical information about how well the model predicts and what features it deems important on the corpus level.</p>
+            <form action="{{ url_for('classifier.general_sensitivity_info') }}">
+              <div class="center no_margin">
+                <input type="submit" value="View" class="btn btn-primary btn-mid" onclick="loading();"/>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- <div class="top"> <a class="top_left block_link" href="{{ url_for('classifier.sensitive_info') }}"> Sensitive Documents Explanations </a> <a class="top_right block_link" href="{{ url_for('classifier.non_sensitive_info') }}"> Non-Sensitive Documents Explanations </a> </div> <div class="bottom"> <a class="bottom_left block_link" href="{{ url_for('classifier.single_document_sensitivity_info') }}"> Sensitive and Non-Sensitive Documents Explanations </a> <a class="bottom_right block_link" href="{{ url_for('classifier.general_sensitivity_info') }}"> Classifier Information </a> </div> -->
+
+  {% else %}
+    <div class="back_image">
+      <!-- <img src="{{url_for('static', filename='images/background.jpeg')}}" width='70%' height='70%' alt="Shap image"/> -->
+      <div class="main_page_content">
+        <!-- <h2> Classifier Information </h2> -->
+        <div class="title">
+          WHY
+        </div>
+        Government departments, such as the Ministry of Defence, produce a large amount of written communications that are essential for the international operations of government. Freedom of Information Laws legislate that these documents should be released to the public. However, many of these documents contain sensitive information. Therefore, each document needs to be reviewed to identify and withhold any sensitivities. This website is a sensitivity review application that integrates automatic sensitivity classification.
+
+        <div class="spacing"></div>
+
+        <div class="title">
+          HOW
+        </div>
+        This system displays documents along with the classifier's predictions as to whether the documents contain any sensitive information. Importantly, the system provides useful information to explain why it has predicted that a document is (not) sensitive, such as colour coded highlighting of important term features within a document. The system produces useful reports to visualise the similarities and differences between what the classifier belives to be the most important features of sensitivity and features that are present in the collection being reviewed.
+        <div class="large_spacing"></div>
+        To see the classifier and the explanations made by it, please register or login.
+      </div>
+
+    </div>
+
+  {% endif %}
 
 {% endblock %}

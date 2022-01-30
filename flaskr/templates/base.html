@@ -37,22 +37,21 @@
     <h1>Sensitivity Classifier</h1>
 
     <ul>
-      {% if g.user %}
-        <div class="username">
-          {{ g.user['username'] }}
+      <li class="one_row">
+        {% if g.user %}
+          <div class="username">
+            {{ g.user['username'] }}
 
-        </div>
-        <li>
-          <i class="fas fa-sign-out-alt"></i>
-          <a href="{{ url_for('auth.logout') }}">
-            <button type="button" class="btn btn-primary btn-mid">Log Out</button>
-          </a>
+          </div>
+          <i class="fas fa-sign-out-alt">
+            <a href="{{  url_for('auth.logout') }}" class="btn btn-primary btn-mid">Log Out</a>
+          </i>
         {% else %}
-          <a href="{{ url_for('auth.login') }}">
-            <button type="button" class="btn btn-primary btn-mid">Login</button>
+          <a href="{{ url_for('auth.login') }}" class="btn btn-primary btn-mid">
+            Login
           </a>
-          <a href="{{ url_for('auth.register') }}">
-            <button type="button" class="btn btn-primary btn-mid">Register</button>
+          <a href="{{ url_for('auth.register') }}" class="btn btn-primary btn-mid">
+            Register
           </a>
         {% endif %}
       </li>
