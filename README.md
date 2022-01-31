@@ -32,4 +32,4 @@ flask init-db
 
 # PS
 
-lime file needs to be modified to work
+lime file needs to be modified to work.
