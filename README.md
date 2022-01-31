@@ -4,8 +4,11 @@ export FLASK_APP=flaskr && export FLASK_ENV=development && flask run
 
 # test commands
 
+## ensure you are in sens_class_webs dir
+
 test coverage: coverage run -m pytest
 html report: coverage html
+view: open htmlcov/index.html
 
 # Command to print in terminal:
 
