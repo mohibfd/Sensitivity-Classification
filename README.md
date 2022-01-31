@@ -30,6 +30,6 @@ temp = pickle.load(open(directory_path+filename, 'rb'))
 
 flask init-db
 
-# PS
+# Note
 
 lime file needs to be modified to work.
