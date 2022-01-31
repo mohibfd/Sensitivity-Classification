@@ -20,31 +20,33 @@ def test_paths_logged_in(client, path, auth):
     assert client.get(path).status_code == 200
 
 
+prev_action = 'Previous'
+next_action = 'Next'
 documents_visibility_list = [
-    (0, b'There are no previous documents', 'Previous Document'),
+    (0, b'There are no previous documents', prev_action),
 ]
 
 all_docs_visib = documents_visibility_list.copy()
 all_docs_visib.append(
-    (543, b'Document number =\n    543', 'Previous Document'))
-all_docs_visib.append((543, b'Document number =\n    544', ''))
-all_docs_visib.append((543, b'Document number =\n    545', 'Next Document'))
-all_docs_visib.append((3800, b'There are no more documents', 'Next Document'))
+    (543, b'543', prev_action))
+all_docs_visib.append((543, b'544', '543'))
+all_docs_visib.append((543, b'545', next_action))
+all_docs_visib.append((3800, b'There are no more documents', next_action))
 
 sens_docs_visib = documents_visibility_list.copy()
-sens_docs_visib.append((71, b'Document number =\n    71', 'Previous Document'))
-sens_docs_visib.append((71, b'Document number =\n    72', ''))
-sens_docs_visib.append((71, b'Document number =\n    73', 'Next Document'))
-sens_docs_visib.append((501, b'There are no more documents', 'Next Document'))
+sens_docs_visib.append((71, b'71', prev_action))
+sens_docs_visib.append((71, b'72', '71'))
+sens_docs_visib.append((71, b'73', next_action))
+sens_docs_visib.append((501, b'There are no more documents', next_action))
 
 non_sens_docs_visib = documents_visibility_list.copy()
 non_sens_docs_visib.append(
-    (471, b'Document number =\n    471', 'Previous Document'))
-non_sens_docs_visib.append((471, b'Document number =\n    472', ''))
+    (471, b'471', prev_action))
+non_sens_docs_visib.append((471, b'472', '471'))
 non_sens_docs_visib.append(
-    (471, b'Document number =\n    473', 'Next Document'))
+    (471, b'473', next_action))
 non_sens_docs_visib.append(
-    (3298, b'There are no more documents', 'Next Document'))
+    (3298, b'There are no more documents', next_action))
 
 
 @pytest.mark.parametrize(('document_num', 'message', 'button_action'), all_docs_visib)
