@@ -29,6 +29,15 @@ def test_register_validate_input(client, username, password, message):
     assert message in response.data
 
 
+def test_go_register(client):
+
+    response = client.post(
+        '/auth/register',
+        data={'go_login': 'Log In'}
+    )
+    assert response.status_code == 302
+
+
 def test_login(client, auth):
     assert client.get('/auth/login').status_code == 200
     response = auth.login()
@@ -55,3 +64,13 @@ def test_logout(client, auth):
     with client:
         auth.logout()
         assert 'user_id' not in session
+
+
+def test_go_login(client):
+
+    response = client.post(
+        '/auth/login',
+        data={'go_sign_up': 'Sign Up'}
+    )
+
+    assert response.status_code == 302
