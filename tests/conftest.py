@@ -57,10 +57,10 @@ def auth(client):
     return AuthActions(client)
 
 
-# class TestingConfig(Config):
-#     TESTING = True
-#     SECRET_KEY = "GGggjjjfk887856$%kk"
-#     # Disable CSRF protection in the testing configuration
-#     WTF_CSRF_ENABLED = False
-#     SQLALCHEMY_DATABASE_URI = "sqlite:///" + \
-#         os.path.join(os.path.dirname(os.path.abspath(__file__)), "test.sqlite")
+class TestingConfig(object):
+    TESTING = True
+    SECRET_KEY = "GGggjjjfk887856$%kk"
+    # Disable CSRF protection in the testing configuration
+    WTF_CSRF_ENABLED = False
+    SQLALCHEMY_DATABASE_URI = "sqlite:///" + \
+        os.path.join(os.path.dirname(os.path.abspath(__file__)), "test.sqlite")
