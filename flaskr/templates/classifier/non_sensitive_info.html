@@ -1,9 +1,7 @@
 {% extends 'base.html' %}
 
 {% block header %}
-  <h2>
-    {% block title %}Non-Sensitive Documents{% endblock %}
-  </h2>
+  <!-- <h2> {% block title %}Non-Sensitive Documents{% endblock %} </h2> -->
 {% endblock %}
 
 {% block breadcrumb %}
@@ -14,32 +12,11 @@
 {% endblock %}
 
 {% block content %}
+
   <div class="page_padding">
-    <div class="center">
-      Document number =
-      {{document_number}}/{{max_documents}}
+    <div id="loading" class="spinner-border end" role="status">
+      <span class="visually-hidden">Loading...</span>
     </div>
-    {% if isSensitive %}
-      <div class="center">
-        The document's true label is:
-        {{ isSensitive }}
-      </div>
-    {% endif %}
-    <hr>
-
-    <form method="post">
-      <div class="document_move">
-        <input type="submit" name="submit_button" value="Previous Document" onclick="loading();">
-        <div class="cursor_wait">
-          <div id="loading" class="spinner-border" role="status">
-            <span class="visually-hidden">Loading...</span>
-          </div>
-        </div>
-        <input type="submit" name="submit_button" value="Next Document" onclick="loading();">
-      </div>
-    </form>
-
-    <hr>
 
     <div class="double_dropdown">
       <form method="post">
@@ -76,5 +53,64 @@
     {% if visual_html %}
       {{ visual_html|safe }}
     {% endif %}
+
   </div>
+
+  <form method="post">
+    <nav aria-label="Page navigation example" class="doc_num_nav">
+      <ul class="pagination justify-content-center">
+        {% if document_number == 1 %}
+          <li class="page-item disabled">
+            <input class="page-link" type="submit" name="submit_button" value="Previous" onclick="loading();">
+          </li>
+        {% else %}
+          <li class="page-item">
+            <input class="page-link" type="submit" name="submit_button" value="Previous" onclick="loading();">
+          </li>
+        {% endif %}
+        {% if document_number > 3 %}
+          <li class="page-item">
+            <input class="page-link small_btn" type="submit" name="submit_button" value="{{document_number-3}}" onclick="loading();">
+          </li>
+        {% endif %}
+        {% if document_number > 2 %}
+          <li class="page-item">
+            <input class="page-link small_btn" type="submit" name="submit_button" value="{{document_number-2}}" onclick="loading();">
+          </li>
+        {% endif %}
+        {% if document_number > 1 %}
+          <li class="page-item">
+            <input class="page-link small_btn" type="submit" name="submit_button" value="{{document_number-1}}" onclick="loading();">
+          </li>
+        {% endif %}
+        <li class="page-item active">
+          <input disabled="disabled" class="page-link small_btn" type="submit" name="submit_button" value="{{document_number}}" onclick="loading();">
+        </li>
+        {% if document_number < max_documents%}
+          <li class="page-item">
+            <input class="page-link small_btn" type="submit" name="submit_button" value="{{document_number+1}}" onclick="loading();">
+          </li>
+        {% endif %}
+        {% if document_number + 1 < max_documents %}
+          <li class="page-item">
+            <input class="page-link small_btn" type="submit" name="submit_button" value="{{document_number+2}}" onclick="loading();">
+          </li>
+        {% endif %}
+        {% if document_number + 2 < max_documents %}
+          <li class="page-item">
+            <input class="page-link small_btn" type="submit" name="submit_button" value="{{document_number+3}}" onclick="loading();">
+          </li>
+        {% endif %}
+        {% if document_number == max_documents %}
+          <li class="page-item disabled">
+            <input class="page-link" type="submit" name="submit_button" value="Next" onclick="loading();">
+          </li>
+        {% else %}
+          <li class="page-item">
+            <input class="page-link" type="submit" name="submit_button" value="Next" onclick="loading();">
+          </li>
+        {% endif %}
+      </ul>
+    </nav>
+  </form>
 {% endblock %}

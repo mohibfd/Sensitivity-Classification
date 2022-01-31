@@ -103,10 +103,10 @@ header .action {
 input.danger {
    color: #cc2f2e;
 }
-input[type="submit"] {
+/* input[type="submit"] {
    align-self: start;
    min-width: 10em;
-}
+} */
 .general_body {
    font-size: 1.5em;
 }
@@ -394,4 +394,12 @@ nav .one_row {
    margin: 0;
    padding: 0;
    height: 20px;
+}
+.doc_num_nav {
+   width: 100%;
+   align-items: center;
+   padding-bottom: 33px;
+   background-color: white;
+   position: absolute;
+   bottom: 30px;
 }
