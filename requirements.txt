@@ -32,8 +32,7 @@ en-core-web-sm @ https://github.com/explosion/spacy-models/releases/download/en_
 entrypoints==0.3
 et-xmlfile==1.0.1
 Flask==2.0.2
-# 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
--e git+https://${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}@github.com/mohibfd/Sensitivity-Classification-Website.git@b679f3b0fde509a905aea68103fdf28ecc382d58#egg=flaskr
+-e git+https://github.com/mohibfd/Sensitivity-Classification-Website.git@b679f3b0fde509a905aea68103fdf28ecc382d58#egg=flaskr
 flatbuffers==2.0
 gast==0.4.0
 google-auth==2.3.3
