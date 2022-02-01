@@ -73,7 +73,7 @@ def get_clf() -> str:
     return clf
 
 
-def change_visual(visual: str) -> str:
+def change_visual(visual: str):
     user_id = g.user['id']
     db = get_db()
 
@@ -85,10 +85,8 @@ def change_visual(visual: str) -> str:
 
     db.commit()
 
-    return visual
 
-
-def change_clf(clf: str) -> str:
+def change_clf(clf: str):
     user_id = g.user['id']
     db = get_db()
 
@@ -99,8 +97,6 @@ def change_clf(clf: str) -> str:
     )
 
     db.commit()
-
-    return clf
 
 
 def change_doc(document_number: int, max_documents: int, database="") -> int:
@@ -291,9 +287,10 @@ def sensitive_info():
             document_number = change_doc(
                 document_number, max_documents, sensitivity)
         else:
-            visual = change_visual(chosen_vis)
-            chosen_clf = request.form.get('clf_options')
-            clf = change_clf(chosen_clf)
+            visual = chosen_vis
+            change_visual(visual)
+            clf = request.form.get('clf_options')
+            change_clf(clf)
 
     reset_options(visual, clf)
 
@@ -301,7 +298,7 @@ def sensitive_info():
         sensitivity, document_number, visual, clf)
 
     return render_template('classifier/sensitive_info.html', document_number=document_number+1, max_documents=max_documents,
-                           vis_options=vis_options, visual_html=visual_html, class_options=clf_options,
+                           vis_options=vis_options, visual_html=visual_html, clf_options=clf_options,
                            shap_html=shap_html, lime_probas_html=lime_probas_html)
 
 
@@ -325,9 +322,10 @@ def non_sensitive_info():
             document_number = change_doc(
                 document_number, max_documents, sensitivity)
         else:
-            visual = change_visual(chosen_vis)
-            chosen_clf = request.form.get('clf_options')
-            clf = change_clf(chosen_clf)
+            visual = chosen_vis
+            change_visual(visual)
+            clf = request.form.get('clf_options')
+            change_clf(clf)
 
     reset_options(visual, clf)
 
@@ -335,7 +333,7 @@ def non_sensitive_info():
         sensitivity, document_number, visual, clf)
 
     return render_template('classifier/non_sensitive_info.html', document_number=document_number+1, max_documents=max_documents,
-                           vis_options=vis_options, visual_html=visual_html, class_options=clf_options, shap_html=shap_html,
+                           vis_options=vis_options, visual_html=visual_html, clf_options=clf_options, shap_html=shap_html,
                            lime_probas_html=lime_probas_html)
 
 
@@ -359,9 +357,10 @@ def single_document_sensitivity_info():
         if chosen_vis == None:
             document_number = change_doc(document_number, max_documents)
         else:
-            visual = change_visual(chosen_vis)
-            chosen_clf = request.form.get('clf_options')
-            clf = change_clf(chosen_clf)
+            visual = chosen_vis
+            change_visual(visual)
+            clf = request.form.get('clf_options')
+            change_clf(clf)
 
     reset_options(visual, clf)
 
@@ -375,7 +374,7 @@ def single_document_sensitivity_info():
 
     return render_template('classifier/single_document_sensitivity_info.html', document_number=document_number+1,
                            max_documents=max_documents, isSensitive=isSensitive, vis_options=vis_options,
-                           visual_html=visual_html, class_options=clf_options, lime_probas_html=lime_probas_html,
+                           visual_html=visual_html, clf_options=clf_options, lime_probas_html=lime_probas_html,
                            shap_html=shap_html)
 
 
