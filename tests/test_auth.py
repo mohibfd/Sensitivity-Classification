@@ -67,7 +67,6 @@ def test_logout(client, auth):
 
 
 def test_go_login(client):
-
     response = client.post(
         '/auth/login',
         data={'go_sign_up': 'Sign Up'}
