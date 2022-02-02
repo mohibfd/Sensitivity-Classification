@@ -228,6 +228,7 @@ input[id="off"]:hover {
 .register_button {
    align-self: center;
    padding: 10px;
+   width: 200px;
 }
 input[required="required"] {
    border: 2px solid rgb(77, 80, 79);
@@ -397,9 +398,14 @@ nav .one_row {
 }
 .doc_num_nav {
    width: 100%;
-   align-items: center;
-   padding-bottom: 33px;
    background-color: white;
-   position: absolute;
-   bottom: 30px;
+   position: fixed;
+   bottom: 0px;
+}
+.white_button {
+   background-color: white;
+   color: black;
+}
+input[id="dropdown"] {
+   margin: 0;
 }

@@ -20,21 +20,40 @@
 
     <div class="double_dropdown">
       <form method="post">
-        <div>
-          <select name="vis_options">
-            {% for option in vis_options %}
-              <option value="{{ option }}" name="vis_options" selected="SELECTED">{{ option }}</option>
-            {% endfor %}
-          </select>
-          <select name="clf_options">
-            {% for clf in clf_options %}
-              <option value="{{ clf }}" name="clf_options" selected="SELECTED">{{ clf }}</option>
-            {% endfor %}
-          </select>
-          <input type="submit" name="options_button" value="submit" onclick="loading();">
+        <div class="dropdown">
+          <button class="btn btn-secondary dropdown-toggle white_button" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+            {{curr_vis}}
+            Visual
+          </button>
+          <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+            <li>
+              <input class="dropdown-item" id="dropdown" type="submit" name="vis_option" value="LIME" onclick="loading();">
+            </li>
+            <li>
+              <input class="dropdown-item" id="dropdown" type="submit" name="vis_option" value="ELI5" onclick="loading();">
+            </li>
+          </ul>
+
+          <button class="btn btn-secondary dropdown-toggle white_button" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+            {{curr_clf}}
+            Classifier
+          </button>
+          <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+            <li>
+              <input class="dropdown-item" id="dropdown" type="submit" name="clf_option" value="LR" onclick="loading();">
+            </li>
+            <li>
+              <input class="dropdown-item" id="dropdown" type="submit" name="clf_option" value="CLF" onclick="loading();">
+            </li>
+            <li>
+              <input class="dropdown-item" id="dropdown" type="submit" name="clf_option" value="SVM" onclick="loading();">
+            </li>
+          </ul>
         </div>
       </form>
     </div>
+
+    <!-- <div class="double_dropdown"> <form method="post"> <div> <select name="vis_options"> {% for option in vis_options %} <option value="{{ option }}" name="vis_options" selected="SELECTED">{{ option }}</option> {% endfor %} </select> <select name="clf_options"> {% for clf in clf_options %} <option value="{{ clf }}" name="clf_options" selected="SELECTED">{{ clf }}</option> {% endfor %} </select> <input type="submit" name="options_button" value="submit" onclick="loading();"> </div> </form> </div> -->
 
     <hr>
 

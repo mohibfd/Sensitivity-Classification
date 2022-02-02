@@ -316,24 +316,27 @@ def non_sensitive_info():
     clf = get_clf()
 
     if request.method == 'POST':
-        chosen_vis = request.form.get('vis_options')
+        chosen_vis = request.form.get('vis_option')
 
-        if chosen_vis == None:
+        chosen_clf = request.form.get('clf_option')
+
+        if chosen_vis == None and chosen_clf == None:
             document_number = change_doc(
                 document_number, max_documents, sensitivity)
-        else:
+        elif chosen_clf == None:
             visual = chosen_vis
             change_visual(visual)
-            clf = request.form.get('clf_options')
+        else:
+            clf = chosen_clf
             change_clf(clf)
 
-    reset_options(visual, clf)
+    # reset_options(visual, clf)
 
     shap_html, lime_probas_html, visual_html = get_visual_html(
         sensitivity, document_number, visual, clf)
 
     return render_template('classifier/non_sensitive_info.html', document_number=document_number+1, max_documents=max_documents,
-                           vis_options=vis_options, visual_html=visual_html, clf_options=clf_options, shap_html=shap_html,
+                           curr_vis=visual, visual_html=visual_html, curr_clf=clf, shap_html=shap_html,
                            lime_probas_html=lime_probas_html)
 
 
