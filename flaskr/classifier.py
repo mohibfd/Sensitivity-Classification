@@ -240,15 +240,6 @@ def explainers(document_index: int, test_data: pd, test_labels: pd, extra_indexs
     return shap_html, lime_html, vis_html, isSensitive
 
 
-def reset_options(visual: str, clf: str) -> None:
-    # ensure that chosen options shows to user
-    vis_options.remove(visual)
-    vis_options.append(visual)
-
-    clf_options.remove(clf)
-    clf_options.append(clf)
-
-
 def get_visual_html(sensitivity: int, document_number: int, visual: str, clf: str) -> LimeTextExplainer:
 
     cross_val_stats = get_clf_stats(clf)
@@ -281,25 +272,26 @@ def sensitive_info():
     clf = get_clf()
 
     if request.method == 'POST':
-        chosen_vis = request.form.get('vis_options')
+        chosen_vis = request.form.get('vis_option')
 
-        if chosen_vis == None:
+        chosen_clf = request.form.get('clf_option')
+
+        if chosen_vis == None and chosen_clf == None:
             document_number = change_doc(
                 document_number, max_documents, sensitivity)
-        else:
+        elif chosen_clf == None:
             visual = chosen_vis
             change_visual(visual)
-            clf = request.form.get('clf_options')
+        else:
+            clf = chosen_clf
             change_clf(clf)
-
-    reset_options(visual, clf)
 
     shap_html, lime_probas_html, visual_html = get_visual_html(
         sensitivity, document_number, visual, clf)
 
     return render_template('classifier/sensitive_info.html', document_number=document_number+1, max_documents=max_documents,
-                           vis_options=vis_options, visual_html=visual_html, clf_options=clf_options,
-                           shap_html=shap_html, lime_probas_html=lime_probas_html)
+                           curr_vis=visual, visual_html=visual_html, curr_clf=clf, shap_html=shap_html,
+                           lime_probas_html=lime_probas_html)
 
 
 @bp.route('/non-sensitive-info', methods=('GET', 'POST'))
@@ -330,8 +322,6 @@ def non_sensitive_info():
             clf = chosen_clf
             change_clf(clf)
 
-    # reset_options(visual, clf)
-
     shap_html, lime_probas_html, visual_html = get_visual_html(
         sensitivity, document_number, visual, clf)
 
@@ -355,17 +345,19 @@ def single_document_sensitivity_info():
     clf = get_clf()
 
     if request.method == 'POST':
-        chosen_vis = request.form.get('vis_options')
+        chosen_vis = request.form.get('vis_option')
 
-        if chosen_vis == None:
-            document_number = change_doc(document_number, max_documents)
-        else:
+        chosen_clf = request.form.get('clf_option')
+
+        if chosen_vis == None and chosen_clf == None:
+            document_number = change_doc(
+                document_number, max_documents)
+        elif chosen_clf == None:
             visual = chosen_vis
             change_visual(visual)
-            clf = request.form.get('clf_options')
+        else:
+            clf = chosen_clf
             change_clf(clf)
-
-    reset_options(visual, clf)
 
     cross_val_stats = get_clf_stats(clf)
 
@@ -377,8 +369,8 @@ def single_document_sensitivity_info():
 
     return render_template('classifier/single_document_sensitivity_info.html', document_number=document_number+1,
                            max_documents=max_documents, isSensitive=isSensitive, vis_options=vis_options,
-                           visual_html=visual_html, clf_options=clf_options, lime_probas_html=lime_probas_html,
-                           shap_html=shap_html)
+                           curr_vis=visual, curr_clf=clf, lime_probas_html=lime_probas_html,
+                           shap_html=shap_html, visual_html=visual_html)
 
 
 @bp.route('/general-sensitivity-info')

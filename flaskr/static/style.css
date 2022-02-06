@@ -377,11 +377,10 @@ div#cursor {
    max-height: 100%;
 }
 .img_container {
-   height: 300px;
+   height: 270px;
 }
 .limited_width {
-   width: 98%;
-   margin: auto;
+   width: 90%;
 }
 .end {
    right: 10px;
@@ -397,10 +396,14 @@ nav .one_row {
    height: 20px;
 }
 .doc_num_nav {
+   display: flex;
+   align-items: center;
    width: 100%;
    background-color: white;
    position: fixed;
    bottom: 0px;
+   margin-bottom: 40px;
+   padding-top: 18px;
 }
 .white_button {
    background-color: white;
@@ -408,4 +411,18 @@ nav .one_row {
 }
 input[id="dropdown"] {
    margin: 0;
+}
+.card_container {
+   display: flex;
+   flex: 1;
+   height: 95vh;
+   align-items: center;
+   justify-content: space-around;
+   background-color: rgb(89, 136, 161);
+}
+.card-title {
+   font-size: 1.6em;
+}
+.card-text {
+   font-size: 1.2em;
 }
