@@ -103,7 +103,7 @@ def change_doc(document_number: int, max_documents: int, database="") -> int:
     user_id = g.user['id']
     db = get_db()
 
-    if request.form['submit_button'] == 'Previous':
+    if request.form['submit_button'] == "Prev":
         if (document_number == 0):
             flash("There are no previous documents")
         else:

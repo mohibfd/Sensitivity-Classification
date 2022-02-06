@@ -20,7 +20,7 @@ def test_paths_logged_in(client, path, auth):
     assert client.get(path).status_code == 200
 
 
-prev_action = 'Previous'
+prev_action = "Prev"
 next_action = 'Next'
 documents_visibility_list = [
     (0, b'There are no previous documents', prev_action),
