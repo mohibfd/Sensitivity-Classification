@@ -112,7 +112,9 @@ svm = 'SVM'
 xgb = 'XGB'
 
 visuals = [eli5, lime]
-classifiers = [lr, svm, xgb]
+# classifiers = [lr, svm, xgb]
+classifiers = [lr, xgb]
+
 clf_types = ['non-sensitive-info', 'sensitive-info',
              'single-document-sensitivity-info']
 
@@ -133,8 +135,7 @@ def test_dropdown_options(client, auth, clf_type,  visual, classifier, message):
 
     response = client.post(
         '/' + clf_type,
-        data={'clf_options': classifier, 'vis_options': visual,
-              'options_button': 'Submit'}
+        data={'clf_option': classifier, 'vis_option': visual}
     )
 
     assert message in response.data
