@@ -329,9 +329,9 @@ input[required="required"] {
 .spacing {
    padding-bottom: 40px;
 }
-.title {
-   /* text-decoration: underline; */
-}
+/* .title {
+   text-decoration: underline;
+} */
 .half_text {
    width: 50%;
    margin: 2%;
