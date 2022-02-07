@@ -408,6 +408,5 @@ def general_sensitivity_info():
     model.fit(X, y)
     eli5_general = eli5.show_weights(model, vec=vec, top=10,
                                      target_names=target_names)
-
     return render_template('classifier/general_sensitivity_info.html', predictions=predictions, confusion_matrix_score=conf_mat,
                            eli5_general=eli5_general)
