@@ -1,5 +1,5 @@
 from flask import (
-    Blueprint, flash, g, render_template, request
+    Blueprint, flash, g, render_template, request, Flask
 )
 
 from flaskr.auth import login_required
@@ -7,9 +7,6 @@ from flaskr.db import get_db
 
 import os
 import pandas as pd
-from sklearn.metrics import confusion_matrix
-from sklearn.model_selection import cross_val_predict
-from sklearn.model_selection import cross_val_score
 from lime.lime_text import LimeTextExplainer
 import numpy as np
 import shap as shap
@@ -21,12 +18,23 @@ bp = Blueprint('classifier', __name__)
 APP_ROOT = os.path.dirname(os.path.abspath(__file__))
 MODEL_PATH = os.path.join(APP_ROOT, "model/")
 
+IMAGES_FOLDER = os.path.join('static', 'images')
+
+app = Flask(__name__)
+app.config['IMAGES_FOLDER'] = IMAGES_FOLDER
+
+
 LR_cross_val_stats = pd.read_pickle(MODEL_PATH + 'cross_val_stats.pkl')
-main_data = pd.read_pickle(MODEL_PATH + 'main_data.pkl')
+XGB_cross_val_stats = pd.read_pickle(MODEL_PATH + 'XGB_cross_val_stats.pkl')
+SVM_cross_val_stats = pd.read_pickle(MODEL_PATH + 'SVM_cross_val_stats.pkl')
+
+LR_main_data = pd.read_pickle(MODEL_PATH + 'main_data.pkl')
+XGB_main_data = pd.read_pickle(MODEL_PATH + 'XGB_main_data.pkl')
+
 folds = len(LR_cross_val_stats["classifiers"])
 target_names = ['Non-Sensitive', 'Sensitive']
 vis_options = ["LIME", "ELI5"]
-clf_options = ["LR", "RF", "SVM"]
+clf_options = ["LR", "XGB", "SVM"]
 
 
 def get_doc_num(database="") -> int:
@@ -149,7 +157,7 @@ def get_specific_sens(sens: int, cross_val_stats: dict) -> pd:
     extra_indexs = [0 for _ in range(folds)]
     indexs_counter = 0
 
-    average_length = int(main_data["labels"].value_counts()[sens]/folds)
+    average_length = int(LR_main_data["labels"].value_counts()[sens]/folds)
     for i in range(len(test_data)):
         data = {'Body': test_data[i], 'Sensitive': test_labels[i]}
         test_df = pd.DataFrame(data)
@@ -169,10 +177,12 @@ def get_specific_sens(sens: int, cross_val_stats: dict) -> pd:
 def get_clf_stats(clf: str) -> dict:
     if clf == 'LR':
         return LR_cross_val_stats
-    elif clf == 'RF':
-        return LR_cross_val_stats
+    elif clf == 'XGB':
+        return XGB_cross_val_stats
     elif clf == 'SVM':
         return LR_cross_val_stats
+    else:
+        return XGB_cross_val_stats
 
 
 def explainers(document_index: int, test_data: pd, test_labels: pd, extra_indexs: list, visual: str, cross_val_stats: dict) -> LimeTextExplainer:
@@ -199,6 +209,7 @@ def explainers(document_index: int, test_data: pd, test_labels: pd, extra_indexs
             class_names=target_names)
 
         lime_data = test_data.iloc[document_index][0:1000]
+        # lime_data = test_data.iloc[document_index]
 
         lime_values = lime_explainer.explain_instance(
             lime_data,
@@ -213,14 +224,24 @@ def explainers(document_index: int, test_data: pd, test_labels: pd, extra_indexs
     def shap_explain():
         shap_values = cross_val_stats["shap_values"][index]
 
-        force_plot = shap.plots.force(
-            shap_values[document_index], matplotlib=False)
+        force_plot = None
+        if get_clf() == 'LR':
+            force_plot = shap.plots.force(
+                shap_values[document_index], matplotlib=False)
+        else:
+            explainer = shap.TreeExplainer(model)
+            vec = cross_val_stats["vectorizers"][index]
+
+            force_plot = shap.plots.force(
+                explainer.expected_value, shap_values[document_index], feature_names=vec.get_feature_names(), matplotlib=False)
+            # explainer.expected_value, shap_values[ind], feature_names=vec.get_feature_names_out()
+
         shap_html = f"<head>{shap.getjs()}</head><body>{force_plot.html()}</body>"
         return shap_html
 
     def eli5_explain():
         eli5_html = eli5.show_prediction(
-            model, test_data.iloc[document_index], vec=vectorizer, target_names=target_names)
+            model, test_data.iloc[document_index], vec=vectorizer, target_names=target_names, top=10)
         return eli5_html
 
     shap_html = shap_explain()
@@ -265,7 +286,7 @@ def sensitive_info():
 
     document_number = get_doc_num(sensitivity)
 
-    max_documents = main_data["labels"].value_counts()[sensitivity]
+    max_documents = LR_main_data["labels"].value_counts()[sensitivity]
 
     visual = get_visualisation()
 
@@ -301,7 +322,7 @@ def non_sensitive_info():
 
     document_number = get_doc_num(sensitivity)
 
-    max_documents = main_data["labels"].value_counts()[sensitivity]
+    max_documents = LR_main_data["labels"].value_counts()[sensitivity]
 
     visual = get_visualisation()
 
@@ -336,7 +357,7 @@ def single_document_sensitivity_info():
 
     document_number = get_doc_num()
 
-    max_documents = len(main_data['labels'])
+    max_documents = len(LR_main_data['labels'])
 
     extra_indexs = [0 for _ in range(folds)]
 
@@ -373,41 +394,45 @@ def single_document_sensitivity_info():
                            shap_html=shap_html, visual_html=visual_html)
 
 
-@bp.route('/general-sensitivity-info')
+@bp.route('/general-sensitivity-info', methods=('GET', 'POST'))
 @login_required
 def general_sensitivity_info():
-    X = main_data['features']
-    y = main_data['labels']
-    model = main_data['classifier']
 
-    f1_micro_scores = cross_val_score(
-        model, X, y, cv=folds, scoring="f1_micro")
-    f1_macro_scores = cross_val_score(
-        model, X, y, cv=folds, scoring="f1_macro")
-    accuracy_scores = cross_val_score(
-        model, X, y, cv=folds, scoring="accuracy")
-    precision_scores = cross_val_score(
-        model, X, y, cv=folds, scoring="precision")
+    def get_shap_images():
+        for i in range(1, 6):
+            url = f"{clf}/shap{i}.png"
+            shap_images.append(os.path.join(
+                app.config['IMAGES_FOLDER'], url))
 
-    f1_micro_prediction = "%0.2f (+/- %0.2f)" % (
-        np.mean(f1_micro_scores), np.std(f1_micro_scores))
-    f1_macro_prediction = "%0.2f (+/- %0.2f)" % (
-        np.mean(f1_macro_scores), np.std(f1_macro_scores))
-    accuracy_prediction = " %0.2f (+/- %0.2f)" % (
-        np.mean(accuracy_scores), np.std(accuracy_scores))
-    precision_prediction = "%0.2f (+/- %0.2f)" % (
-        np.mean(precision_scores), np.std(precision_scores))
+    clf = ""
+    if request.method == 'POST':
+        clf = request.form.get('clf_option')
+        change_clf(clf)
+    else:
+        clf = get_clf()
 
-    predictions = {"f1_micro": f1_micro_prediction, "f1_macro": f1_macro_prediction,
-                   "accuracy": accuracy_prediction, "precision": precision_prediction}
+    main_data = {}
+    shap_images = []
+    conf_mat_png = os.path.join(
+        app.config['IMAGES_FOLDER'], clf+'/conf_mat.png')
 
-    y_pred = cross_val_predict(model, X, y, cv=folds)
-    conf_mat = confusion_matrix(y, y_pred)
+    if clf == 'LR':
+        main_data = LR_main_data
+        # conf_mat_png = os.path.join(
+        #     app.config['IMAGES_FOLDER'], 'LR/conf_mat.png')
 
-    vec = main_data['vectorizer']
-    model.fit(X, y)
-    eli5_general = eli5.show_weights(model, vec=vec, top=10,
-                                     target_names=target_names)
+        get_shap_images()
 
-    return render_template('classifier/general_sensitivity_info.html', predictions=predictions, confusion_matrix_score=conf_mat,
-                           eli5_general=eli5_general)
+    else:
+        main_data = XGB_main_data
+        # conf_mat_png = os.path.join(
+        #     app.config['IMAGES_FOLDER'], 'XGB_conf_mat.png')
+
+        get_shap_images()
+
+    predictions = main_data["predictions"]
+
+    eli5_general = main_data["eli5_general"]
+
+    return render_template('classifier/general_sensitivity_info.html', predictions=predictions, eli5_general=eli5_general,
+                           conf_mat_png=conf_mat_png, curr_clf=clf, shap_images=shap_images)

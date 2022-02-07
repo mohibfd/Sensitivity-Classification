@@ -6,11 +6,34 @@
   </h1>
 {% endblock %}
 
+{% block breadcrumb %}
+  <li class="breadcrumb-item">
+    <a href="{{ url_for('classifier.classifier_main_page') }}">Home</a>
+  </li>
+  <li class="breadcrumb-item active" aria-current="page">General Info</li>
+{% endblock %}
+
 {% block content %}
 
-  {% if disp%}
-    {{ disp|safe }}
-  {% endif %}
+  <form method="post">
+    <div class="dropdown center">
+      <button class="btn btn-secondary dropdown-toggle white_button" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+        {{curr_clf}}
+        Classifier
+      </button>
+      <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+        <li>
+          <input class="dropdown-item" id="dropdown" type="submit" name="clf_option" value="LR" onclick="loading();">
+        </li>
+        <li>
+          <input class="dropdown-item" id="dropdown" type="submit" name="clf_option" value="XGB" onclick="loading();">
+        </li>
+        <li>
+          <input class="dropdown-item" id="dropdown" type="submit" name="clf_option" value="SVM" onclick="loading();">
+        </li>
+      </ul>
+    </div>
+  </form>
 
   <div class="general_body">
     <div class="f1_score">
@@ -34,20 +57,23 @@
       </div>
     </div>
 
-    <!-- <div class="matrix_title"> Confusion Matrix </div> <div class="matrix_header"> Positive Negative </div> <div> <div class="matrix_row_label"> Positive </div> <div class="matrix_row"> <div class="matrix_values"> TP:{{ confusion_matrix_score[0,0] }} </div> <div class="matrix_values"> FP:{{ confusion_matrix_score[0,1] }} </div> </div> </div> <div> <div class="matrix_row_label"> Negative </div> <div class="matrix_row"> <div class="matrix_values"> FN:{{ confusion_matrix_score[1,0] }} </div> <div class="matrix_values"> TN:{{ confusion_matrix_score[1,1] }} </div> </div> </div> -->
     <div class="center">
-      <img src="{{url_for('static', filename='images/conf_mat.png')}}" width='70%' height='70%' alt="Shap image"/>
+      <img src="{{conf_mat_png}}" width='70%' height='70%' alt="Confusion Matrix"/>
     </div>
     <div class="center">
-      <img src="{{url_for('static', filename='images/shap1.png')}}" width='45%' height='45%' alt="Shap image"/>
-      <img src="{{url_for('static', filename='images/shap2.png')}}" width='45%' height='45%' alt="Shap image"/>
-      <img src="{{url_for('static', filename='images/shap3.png')}}" width='45%' height='45%' alt="Shap image"/>
-      <img src="{{url_for('static', filename='images/shap4.png')}}" width='45%' height='45%' alt="Shap image"/>
-      <img src="{{url_for('static', filename='images/shap5.png')}}" width='45%' height='45%' alt="Shap image"/>
+      {% for i in shap_images %}
+        <img src="{{i}}" width='45%' height='45%' alt="Shap image"/>
+
+      {% endfor %}
+
+      <!-- <img src="{{url_for('static', filename='images/shap/LR/shap1.png')}}" width='45%' height='45%' alt="Shap image"/> <img src="{{url_for('static', filename='images/shap/LR/shap2.png')}}" width='45%' height='45%' alt="Shap image"/> <img src="{{url_for('static', filename='images/shap/LR/shap3.png')}}" width='45%' height='45%' alt="Shap image"/> <img src="{{url_for('static', filename='images/shap/LR/shap4.png')}}" width='45%' height='45%' alt="Shap image"/> <img src="{{url_for('static', filename='images/shap/LR/shap5.png')}}" width='45%' height='45%' alt="Shap image"/> -->
     </div>
     {% if eli5_general%}
-      <div>
-        {{ eli5_general|safe }}
+      <div class="inline">
+        <div class="push"></div>
+        <div class="column">
+          {{ eli5_general|safe }}
+        </div>
       </div>
     {% endif %}
   </div>
