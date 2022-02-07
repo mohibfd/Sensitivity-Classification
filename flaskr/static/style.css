@@ -313,10 +313,15 @@ input[required="required"] {
 .main_page_content hr {
    padding: 5px;
 }
-.main_page_content {
+.main_page_content,
+.ending {
    padding: 4% 4% 2% 4%;
    text-align: center;
-   font-size: 1.5em;
+   font-size: 1.3em;
+}
+.main_page_content {
+   justify-content: space-between;
+   display: flex;
 }
 .page_padding {
    padding: 0% 4% 0% 4%;
@@ -325,7 +330,11 @@ input[required="required"] {
    padding-bottom: 40px;
 }
 .title {
-   text-decoration: underline;
+   /* text-decoration: underline; */
+}
+.half_text {
+   width: 50%;
+   margin: 2%;
 }
 .large_spacing {
    padding-bottom: 80px;
