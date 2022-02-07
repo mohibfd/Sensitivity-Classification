@@ -418,16 +418,10 @@ def general_sensitivity_info():
 
     if clf == 'LR':
         main_data = LR_main_data
-        # conf_mat_png = os.path.join(
-        #     app.config['IMAGES_FOLDER'], 'LR/conf_mat.png')
-
         get_shap_images()
 
     else:
         main_data = XGB_main_data
-        # conf_mat_png = os.path.join(
-        #     app.config['IMAGES_FOLDER'], 'XGB_conf_mat.png')
-
         get_shap_images()
 
     predictions = main_data["predictions"]
