@@ -109,10 +109,10 @@ eli5 = 'ELI5'
 lime = 'LIME'
 lr = 'LR'
 svm = 'SVM'
-rf = 'RF'
+xgb = 'XGB'
 
 visuals = [eli5, lime]
-classifiers = [lr, svm, rf]
+classifiers = [lr, svm, xgb]
 clf_types = ['non-sensitive-info', 'sensitive-info',
              'single-document-sensitivity-info']
 
