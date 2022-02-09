@@ -14,7 +14,9 @@ h1 {
    width: 100%;
 }
 h2 {
-   padding-left: 4%;
+   text-align: center;
+   width: 100%;
+   padding-top: 2%;
 }
 a {
    color: black;
@@ -397,7 +399,7 @@ div#cursor {
 nav .one_row {
    display: flex;
    width: 190px;
-   margin-right: 10px;
+   margin-left: 30px;
 }
 .no_margin {
    margin: 0;
