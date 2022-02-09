@@ -196,11 +196,12 @@ def explainers(document_index: int, test_data: pd, test_labels: pd, extra_indexs
     document_index -= fold_length * index + extra_indexs[index]
 
     test_data = test_data[index]
+    specific_test = test_data.iloc[document_index]
     vectorizer = cross_val_stats["vectorizers"][index]
     model = cross_val_stats["classifiers"][index]
 
     def lime_explain(text=True):
-        def predictor(texts):
+        def proba_predictor(texts):
             feature = vectorizer.transform(texts)
             pred = model.predict_proba(feature)
             return pred
@@ -208,12 +209,12 @@ def explainers(document_index: int, test_data: pd, test_labels: pd, extra_indexs
         lime_explainer = LimeTextExplainer(
             class_names=target_names)
 
-        lime_data = test_data.iloc[document_index][0:1000]
-        # lime_data = test_data.iloc[document_index]
+        lime_data = specific_test[0:1000]
+        # lime_data = specific_test
 
         lime_values = lime_explainer.explain_instance(
             lime_data,
-            classifier_fn=predictor,
+            classifier_fn=proba_predictor,
         )
 
         if text:
@@ -241,7 +242,7 @@ def explainers(document_index: int, test_data: pd, test_labels: pd, extra_indexs
 
     def eli5_explain():
         eli5_html = eli5.show_prediction(
-            model, test_data.iloc[document_index], vec=vectorizer, target_names=target_names, top=10)
+            model, specific_test, vec=vectorizer, target_names=target_names, top=10)
         return eli5_html
 
     shap_html = shap_explain()
@@ -258,7 +259,23 @@ def explainers(document_index: int, test_data: pd, test_labels: pd, extra_indexs
     isSensitive = (
         "Sensitive" if test_labels.iloc[document_index] else "Non-Sensitive")
 
-    return shap_html, lime_html, vis_html, isSensitive
+    def predictor(texts):
+        predictions = []
+        feature = vectorizer.transform(texts)
+        models = {LR_cross_val_stats["classifiers"][index]: 'LR',
+                  XGB_cross_val_stats["classifiers"][index]: 'XGB'}
+
+        for model, name in models.items():
+            pred = model.predict(feature)
+            if pred == True:
+                predictions.append({name: 'Sensitive'})
+            else:
+                predictions.append({name: 'Non-Sensitive'})
+
+        return predictions
+
+    prediction = predictor([specific_test])
+    return shap_html, lime_html, vis_html, isSensitive, prediction
 
 
 def get_visual_html(sensitivity: int, document_number: int, visual: str, clf: str) -> LimeTextExplainer:
@@ -268,10 +285,10 @@ def get_visual_html(sensitivity: int, document_number: int, visual: str, clf: st
     test_data, test_labels, extra_indexs = get_specific_sens(
         sensitivity, cross_val_stats)
 
-    shap_html, lime_probas_html, visual_html, isSensitive = explainers(
+    shap_html, lime_probas_html, visual_html, _, prediction = explainers(
         document_number, test_data, test_labels, extra_indexs, visual, cross_val_stats)
 
-    return shap_html, lime_probas_html, visual_html
+    return shap_html, lime_probas_html, visual_html, prediction
 
 
 @bp.route('/')
@@ -307,12 +324,12 @@ def sensitive_info():
             clf = chosen_clf
             change_clf(clf)
 
-    shap_html, lime_probas_html, visual_html = get_visual_html(
+    shap_html, lime_probas_html, visual_html, prediction = get_visual_html(
         sensitivity, document_number, visual, clf)
 
     return render_template('classifier/sensitive_info.html', document_number=document_number+1, max_documents=max_documents,
                            curr_vis=visual, visual_html=visual_html, curr_clf=clf, shap_html=shap_html,
-                           lime_probas_html=lime_probas_html)
+                           lime_probas_html=lime_probas_html, prediction=prediction)
 
 
 @bp.route('/non-sensitive-info', methods=('GET', 'POST'))
