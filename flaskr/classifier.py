@@ -1,17 +1,30 @@
+import tensorflow as tf
+from nltk.stem import WordNetLemmatizer
+import string
+from nltk.tokenize import TweetTokenizer
+import re
+from nltk.corpus import stopwords
+from nltk.stem import PorterStemmer
+import sys
+# import unpack
+import numpy as np
+# import eli5 as eli5
+import shap as shap
+from lime.lime_text import LimeTextExplainer
+import pandas as pd
+import os
+from tensorflow.keras.preprocessing import sequence
+from flaskr.db import get_db
+from flaskr.auth import login_required
 from flask import (
     Blueprint, flash, g, render_template, request, Flask
 )
+import nltk
+nltk.download('stopwords')
+nltk.download('wordnet')
 
-from flaskr.auth import login_required
-from flaskr.db import get_db
 
-import os
-import pandas as pd
-from lime.lime_text import LimeTextExplainer
-import numpy as np
-import shap as shap
-import eli5 as eli5
-
+tf.compat.v1.disable_v2_behavior()
 
 bp = Blueprint('classifier', __name__)
 
@@ -26,7 +39,8 @@ app.config['IMAGES_FOLDER'] = IMAGES_FOLDER
 
 LR_cross_val_stats = pd.read_pickle(MODEL_PATH + 'cross_val_stats.pkl')
 XGB_cross_val_stats = pd.read_pickle(MODEL_PATH + 'XGB_cross_val_stats.pkl')
-SVM_cross_val_stats = pd.read_pickle(MODEL_PATH + 'SVM_cross_val_stats.pkl')
+# LSTM_cross_val_stats = pd.read_pickle(MODEL_PATH + 'LSTM_cross_val_stats.pkl')
+# make_keras_picklable()
 
 LR_main_data = pd.read_pickle(MODEL_PATH + 'main_data.pkl')
 XGB_main_data = pd.read_pickle(MODEL_PATH + 'XGB_main_data.pkl')
@@ -34,7 +48,56 @@ XGB_main_data = pd.read_pickle(MODEL_PATH + 'XGB_main_data.pkl')
 folds = len(LR_cross_val_stats["classifiers"])
 target_names = ['Non-Sensitive', 'Sensitive']
 vis_options = ["LIME", "ELI5"]
-clf_options = ["LR", "XGB", "SVM"]
+clf_options = ["LR", "XGB", "LSTM"]
+
+
+def decontract(text):
+    text = re.sub(r"won\'t", "will not", text)
+    text = re.sub(r"can\'t", "can not", text)
+    text = re.sub(r"n\'t", " not", text)
+    text = re.sub(r"\'re", " are", text)
+    text = re.sub(r"\'s", " is", text)
+    text = re.sub(r"\'d", " would", text)
+    text = re.sub(r"\'ll", " will", text)
+    text = re.sub(r"\'t", " not", text)
+    text = re.sub(r"\'ve", " have", text)
+    text = re.sub(r"\'m", " am", text)
+    return text
+
+
+lemmatizer = WordNetLemmatizer()
+
+
+def process_text(text):
+
+    stemmer = PorterStemmer()
+    stopwords_english = stopwords.words('english')
+    # remove stock market tickers like $GE
+    text = re.sub(r'\$\w*', '', text)
+    # remove old style retweet text "RT"
+    text = re.sub(r'^RT[\s]+', '', text)
+    # remove hyperlinks
+    text = re.sub(r'https?:\/\/.*[\r\n]*', '', text)
+    # remove hashtags
+    # only removing the hash # sign from the word
+    text = re.sub(r'#', '', text)
+    text = str(re.sub("\S*\d\S*", "", text).strip())
+    text = decontract(text)
+    # tokenize texts
+    tokenizer = TweetTokenizer(preserve_case=False, strip_handles=True,
+                               reduce_len=True)
+    tokens = tokenizer.tokenize(text)
+
+    texts_clean = []
+    for word in tokens:
+        if (word not in stopwords_english and  # remove stopwords
+                word not in string.punctuation+'...'):  # remove punctuation
+            #
+            stem_word = lemmatizer.lemmatize(
+                word, "v")  # Lemmatizing word
+            texts_clean.append(stem_word)
+
+    return " ".join(texts_clean)
 
 
 def get_doc_num(database="") -> int:
@@ -175,14 +238,15 @@ def get_specific_sens(sens: int, cross_val_stats: dict) -> pd:
 
 
 def get_clf_stats(clf: str) -> dict:
+
     if clf == 'LR':
         return LR_cross_val_stats
     elif clf == 'XGB':
         return XGB_cross_val_stats
-    elif clf == 'SVM':
-        return LR_cross_val_stats
-    else:
-        return XGB_cross_val_stats
+    elif clf == 'LSTM':
+        LSTM_cross_val_stats = pd.read_pickle(
+            MODEL_PATH + 'LSTM_cross_val_stats.pkl')
+        return LSTM_cross_val_stats
 
 
 def explainers(document_index: int, test_data: pd, test_labels: pd, extra_indexs: list, visual: str, cross_val_stats: dict) -> LimeTextExplainer:
@@ -199,43 +263,107 @@ def explainers(document_index: int, test_data: pd, test_labels: pd, extra_indexs
     specific_test = test_data.iloc[document_index]
     vectorizer = cross_val_stats["vectorizers"][index]
     model = cross_val_stats["classifiers"][index]
+    clf_name = get_clf()
+    max_len = 150
 
     def lime_explain(text=True):
-        def proba_predictor(texts):
-            feature = vectorizer.transform(texts)
-            pred = model.predict_proba(feature)
-            return pred
+        if clf_name == 'LSTM':
 
-        lime_explainer = LimeTextExplainer(
-            class_names=target_names)
+            def proba_predictor(arr):
+                processed = []
+                for i in arr:
+                    processed.append(process_text(i))
+                sequences = vectorizer.texts_to_sequences(processed)
+                Ex = sequence.pad_sequences(sequences, maxlen=max_len)
+                pred = model.predict(Ex)
+                returnable = []
+                for i in pred:
+                    temp = i[0]
+                    # I would recommend rounding temp and 1-temp off to 2 places
+                    returnable.append(np.array([1-temp, temp]))
+                return np.array(returnable)
 
-        lime_data = specific_test[0:1000]
-        # lime_data = specific_test
+            lime_explainer = LimeTextExplainer(
+                class_names=target_names)
 
-        lime_values = lime_explainer.explain_instance(
-            lime_data,
-            classifier_fn=proba_predictor,
-        )
+            lime_data = specific_test[0:1000]
+            # lime_data = specific_test
 
-        if text:
-            return lime_values.as_html(predict_proba=False, specific_predict_proba=False)
+            lime_values = lime_explainer.explain_instance(
+                lime_data,
+                classifier_fn=proba_predictor,
+            )
+
+            if text:
+                return lime_values.as_html(predict_proba=False, specific_predict_proba=False)
+            else:
+                return lime_values.as_html(text=False)
+
         else:
-            return lime_values.as_html(text=False)
+
+            def proba_predictor(texts):
+                feature = vectorizer.transform(texts)
+                pred = model.predict_proba(feature)
+                return pred
+
+            lime_explainer = LimeTextExplainer(
+                class_names=target_names)
+
+            lime_data = specific_test[0:1000]
+            # lime_data = specific_test
+
+            lime_values = lime_explainer.explain_instance(
+                lime_data,
+                classifier_fn=proba_predictor,
+            )
+
+            if text:
+                return lime_values.as_html(predict_proba=False, specific_predict_proba=False)
+            else:
+                return lime_values.as_html(text=False)
 
     def shap_explain():
         shap_values = cross_val_stats["shap_values"][index]
 
         force_plot = None
-        if get_clf() == 'LR':
+        if clf_name == 'LR':
             force_plot = shap.plots.force(
                 shap_values[document_index], matplotlib=False)
-        else:
+        elif clf_name == 'XGB':
             explainer = shap.TreeExplainer(model)
-            vec = cross_val_stats["vectorizers"][index]
-
             force_plot = shap.plots.force(
-                explainer.expected_value, shap_values[document_index], feature_names=vec.get_feature_names(), matplotlib=False)
+                explainer.expected_value, shap_values[document_index], feature_names=vectorizer.get_feature_names(), matplotlib=False)
             # explainer.expected_value, shap_values[ind], feature_names=vec.get_feature_names_out()
+        else:
+            X_train = cross_val_stats["train_features_list"][index]
+            X_test = cross_val_stats["test_features_list"][index]
+
+            sequences = vectorizer.texts_to_sequences(X_train)
+            sequences_matrix = sequence.pad_sequences(
+                sequences, maxlen=max_len)
+
+            processed = []
+            for i in X_test:
+                processed.append(process_text(i))
+
+            test_sequences = vectorizer.texts_to_sequences(processed)
+            test_sequences_matrix = sequence.pad_sequences(
+                test_sequences, maxlen=max_len)
+
+            explainer = shap.DeepExplainer(
+                model, sequences_matrix)
+
+            words = vectorizer.word_index
+            num2word = {}
+            for w in words.keys():
+                num2word[words[w]] = w
+            x_test_words = np.stack([np.array(list(map(lambda x: num2word.get(
+                x, "NONE"), test_sequences_matrix[i]))) for i in range(len(shap_values[0]))])
+
+            # plot the explanation of the first prediction
+            # Note the model is "multi-output" because it is rank-2 but only has one column
+            force_plot = shap.plots.force(
+                explainer.expected_value[0], shap_values[0][document_index], x_test_words[document_index])
 
         shap_html = f"<head>{shap.getjs()}</head><body>{force_plot.html()}</body>"
         return shap_html
@@ -261,7 +389,8 @@ def explainers(document_index: int, test_data: pd, test_labels: pd, extra_indexs
 
     def predictor(texts):
         predictions = []
-        feature = vectorizer.transform(texts)
+        vec = LR_cross_val_stats["vectorizers"][index]
+        feature = vec.transform(texts)
         models = {LR_cross_val_stats["classifiers"][index]: 'LR',
                   XGB_cross_val_stats["classifiers"][index]: 'XGB'}
 
@@ -360,12 +489,12 @@ def non_sensitive_info():
             clf = chosen_clf
             change_clf(clf)
 
-    shap_html, lime_probas_html, visual_html = get_visual_html(
+    shap_html, lime_probas_html, visual_html, prediction = get_visual_html(
         sensitivity, document_number, visual, clf)
 
     return render_template('classifier/non_sensitive_info.html', document_number=document_number+1, max_documents=max_documents,
                            curr_vis=visual, visual_html=visual_html, curr_clf=clf, shap_html=shap_html,
-                           lime_probas_html=lime_probas_html)
+                           lime_probas_html=lime_probas_html, prediction=prediction)
 
 
 @bp.route('/single-document-sensitivity-info', methods=('GET', 'POST'))
@@ -402,13 +531,13 @@ def single_document_sensitivity_info():
     test_data = cross_val_stats["test_features_list"]
     test_labels = cross_val_stats["test_labels_list"]
 
-    shap_html, lime_probas_html, visual_html, isSensitive = explainers(
+    shap_html, lime_probas_html, visual_html, isSensitive, prediction = explainers(
         document_number, test_data, test_labels, extra_indexs, visual, cross_val_stats)
 
     return render_template('classifier/single_document_sensitivity_info.html', document_number=document_number+1,
                            max_documents=max_documents, isSensitive=isSensitive, vis_options=vis_options,
                            curr_vis=visual, curr_clf=clf, lime_probas_html=lime_probas_html,
-                           shap_html=shap_html, visual_html=visual_html)
+                           shap_html=shap_html, visual_html=visual_html, prediction=prediction)
 
 
 @bp.route('/general-sensitivity-info', methods=('GET', 'POST'))

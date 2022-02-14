@@ -108,11 +108,11 @@ def test_non_sensitive_documents_visibility(client, app, auth, document_num, mes
 eli5 = 'ELI5'
 lime = 'LIME'
 lr = 'LR'
-svm = 'SVM'
+lstm = 'LSTM'
 xgb = 'XGB'
 
 visuals = [eli5, lime]
-# classifiers = [lr, svm, xgb]
+# classifiers = [lr, lstm, xgb]
 classifiers = [lr, xgb]
 
 clf_types = ['non-sensitive-info', 'sensitive-info',
