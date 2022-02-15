@@ -121,21 +121,26 @@ clf_types = ['non-sensitive-info', 'sensitive-info',
 diff_options = []
 
 for i in clf_types:
-    for j in visuals:
-        for k in classifiers:
-            if j == lime:
-                diff_options.append((i, j, k, b'Text with highlighted words'))
-            elif j == eli5:
-                diff_options.append((i, j, k, b'top features'))
+    # for j in visuals:
+    for k in classifiers:
+        # if j == lime:
+        diff_options.append((i, lime, k, b'Text with highlighted words'))
+        # elif j == eli5:
+        # diff_options.append((i, j, k, b'top features'))
 
 
 @pytest.mark.parametrize(('clf_type', 'visual', 'classifier', 'message'), diff_options)
 def test_dropdown_options(client, auth, clf_type,  visual, classifier, message):
     auth.login()
 
+    # response = client.post(
+    #     '/' + clf_type,
+    #     data={'clf_option': classifier, 'vis_option': visual}
+    # )
+
     response = client.post(
         '/' + clf_type,
-        data={'clf_option': classifier, 'vis_option': visual}
+        data={'clf_option': classifier}
     )
 
     assert message in response.data

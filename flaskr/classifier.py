@@ -5,8 +5,7 @@ from nltk.tokenize import TweetTokenizer
 import re
 from nltk.corpus import stopwords
 from nltk.stem import PorterStemmer
-import sys
-# import unpack
+import unpack
 import numpy as np
 # import eli5 as eli5
 import shap as shap
@@ -19,11 +18,6 @@ from flaskr.auth import login_required
 from flask import (
     Blueprint, flash, g, render_template, request, Flask
 )
-import nltk
-nltk.download('stopwords')
-nltk.download('wordnet')
-
-
 tf.compat.v1.disable_v2_behavior()
 
 bp = Blueprint('classifier', __name__)
@@ -39,16 +33,12 @@ app.config['IMAGES_FOLDER'] = IMAGES_FOLDER
 
 LR_cross_val_stats = pd.read_pickle(MODEL_PATH + 'cross_val_stats.pkl')
 XGB_cross_val_stats = pd.read_pickle(MODEL_PATH + 'XGB_cross_val_stats.pkl')
-# LSTM_cross_val_stats = pd.read_pickle(MODEL_PATH + 'LSTM_cross_val_stats.pkl')
-# make_keras_picklable()
 
 LR_main_data = pd.read_pickle(MODEL_PATH + 'main_data.pkl')
 XGB_main_data = pd.read_pickle(MODEL_PATH + 'XGB_main_data.pkl')
 
 folds = len(LR_cross_val_stats["classifiers"])
 target_names = ['Non-Sensitive', 'Sensitive']
-vis_options = ["LIME", "ELI5"]
-clf_options = ["LR", "XGB", "LSTM"]
 
 
 def decontract(text):
@@ -350,8 +340,7 @@ def explainers(document_index: int, test_data: pd, test_labels: pd, extra_indexs
             test_sequences_matrix = sequence.pad_sequences(
                 test_sequences, maxlen=max_len)
 
-            explainer = shap.DeepExplainer(
-                model, sequences_matrix)
+            explainer = shap.DeepExplainer(model, sequences_matrix)
 
             words = vectorizer.word_index
             num2word = {}
@@ -360,28 +349,28 @@ def explainers(document_index: int, test_data: pd, test_labels: pd, extra_indexs
             x_test_words = np.stack([np.array(list(map(lambda x: num2word.get(
                 x, "NONE"), test_sequences_matrix[i]))) for i in range(len(shap_values[0]))])
 
-            # plot the explanation of the first prediction
-            # Note the model is "multi-output" because it is rank-2 but only has one column
             force_plot = shap.plots.force(
                 explainer.expected_value[0], shap_values[0][document_index], x_test_words[document_index])
 
         shap_html = f"<head>{shap.getjs()}</head><body>{force_plot.html()}</body>"
+
         return shap_html
 
-    def eli5_explain():
-        eli5_html = eli5.show_prediction(
-            model, specific_test, vec=vectorizer, target_names=target_names, top=10)
-        return eli5_html
+    # def eli5_explain():
+        # eli5_html = eli5.show_prediction(
+        #     model, specific_test, vec=vectorizer, target_names=target_names, top=10)
+        # return eli5_html
 
     shap_html = shap_explain()
 
-    vis_html = None
+    # vis_html = None
     lime_html = lime_explain(text=False)
-    if visual == 'ELI5':
-        vis_html = eli5_explain()
+    # if visual == 'ELI5':
+    #     vis_html = pd.read_pickle(MODEL_PATH + 'XGB_eli5_html.pkl')
 
-    elif visual == 'LIME':
-        vis_html = lime_explain()
+    # elif visual == 'LIME':
+    #     vis_html = lime_explain()
+    vis_html = lime_explain()
 
     test_labels = test_labels[index]
     isSensitive = (
@@ -535,7 +524,7 @@ def single_document_sensitivity_info():
         document_number, test_data, test_labels, extra_indexs, visual, cross_val_stats)
 
     return render_template('classifier/single_document_sensitivity_info.html', document_number=document_number+1,
-                           max_documents=max_documents, isSensitive=isSensitive, vis_options=vis_options,
+                           max_documents=max_documents, isSensitive=isSensitive,
                            curr_vis=visual, curr_clf=clf, lime_probas_html=lime_probas_html,
                            shap_html=shap_html, visual_html=visual_html, prediction=prediction)
 
@@ -557,22 +546,29 @@ def general_sensitivity_info():
     else:
         clf = get_clf()
 
-    main_data = {}
     shap_images = []
     conf_mat_png = os.path.join(
         app.config['IMAGES_FOLDER'], clf+'/conf_mat.png')
 
+    predictions = {}
+    eli5_general = None
     if clf == 'LR':
-        main_data = LR_main_data
+        predictions = LR_main_data["predictions"]
+        # eli5_general = LR_main_data["eli5_general"]
         get_shap_images()
 
+    elif clf == 'XGB':
+        predictions = XGB_main_data["predictions"]
+        # eli5_general = XGB_main_data["eli5_general"]
+        get_shap_images()
     else:
-        main_data = XGB_main_data
+        LSTM_cross_val_stats = pd.read_pickle(
+            MODEL_PATH + 'LSTM_cross_val_stats.pkl')
+
+        predictions = LSTM_cross_val_stats["predictions"]
         get_shap_images()
 
-    predictions = main_data["predictions"]
-
-    eli5_general = main_data["eli5_general"]
+    # eli5_general = main_data["eli5_general"]
 
     return render_template('classifier/general_sensitivity_info.html', predictions=predictions, eli5_general=eli5_general,
                            conf_mat_png=conf_mat_png, curr_clf=clf, shap_images=shap_images)
