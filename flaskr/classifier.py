@@ -257,6 +257,14 @@ def explainers(document_index: int, test_data: pd, test_labels: pd, extra_indexs
     max_len = 150
 
     def lime_explain(text=True):
+        # lime_data = specific_test
+        lime_data = specific_test[0:1000]
+
+        lime_explainer = LimeTextExplainer(
+            class_names=target_names)
+
+        lime_values = None
+
         if clf_name == 'LSTM':
 
             def proba_predictor(arr):
@@ -269,48 +277,29 @@ def explainers(document_index: int, test_data: pd, test_labels: pd, extra_indexs
                 returnable = []
                 for i in pred:
                     temp = i[0]
-                    # I would recommend rounding temp and 1-temp off to 2 places
                     returnable.append(np.array([1-temp, temp]))
                 return np.array(returnable)
-
-            lime_explainer = LimeTextExplainer(
-                class_names=target_names)
-
-            lime_data = specific_test[0:1000]
-            # lime_data = specific_test
 
             lime_values = lime_explainer.explain_instance(
                 lime_data,
                 classifier_fn=proba_predictor,
             )
 
-            if text:
-                return lime_values.as_html(predict_proba=False, specific_predict_proba=False)
-            else:
-                return lime_values.as_html(text=False)
-
         else:
-
             def proba_predictor(texts):
                 feature = vectorizer.transform(texts)
                 pred = model.predict_proba(feature)
                 return pred
 
-            lime_explainer = LimeTextExplainer(
-                class_names=target_names)
-
-            lime_data = specific_test[0:1000]
-            # lime_data = specific_test
-
             lime_values = lime_explainer.explain_instance(
                 lime_data,
                 classifier_fn=proba_predictor,
             )
 
-            if text:
-                return lime_values.as_html(predict_proba=False, specific_predict_proba=False)
-            else:
-                return lime_values.as_html(text=False)
+        if text:
+            return lime_values.as_html(predict_proba=False, specific_predict_proba=False)
+        else:
+            return lime_values.as_html(text=False)
 
     def shap_explain():
         shap_values = cross_val_stats["shap_values"][index]
@@ -323,7 +312,6 @@ def explainers(document_index: int, test_data: pd, test_labels: pd, extra_indexs
             explainer = shap.TreeExplainer(model)
             force_plot = shap.plots.force(
                 explainer.expected_value, shap_values[document_index], feature_names=vectorizer.get_feature_names(), matplotlib=False)
-            # explainer.expected_value, shap_values[ind], feature_names=vec.get_feature_names_out()
         else:
             X_train = cross_val_stats["train_features_list"][index]
             X_test = cross_val_stats["test_features_list"][index]
@@ -362,22 +350,39 @@ def explainers(document_index: int, test_data: pd, test_labels: pd, extra_indexs
         # return eli5_html
 
     shap_html = shap_explain()
-
-    # vis_html = None
     lime_html = lime_explain(text=False)
-    # if visual == 'ELI5':
-    #     vis_html = pd.read_pickle(MODEL_PATH + 'XGB_eli5_html.pkl')
 
-    # elif visual == 'LIME':
-    #     vis_html = lime_explain()
-    vis_html = lime_explain()
+    vis_html = None
+    if visual == 'LIME':
+        vis_html = lime_explain()
+    # elif visual == 'ELI5':
+    #     vis_html = pd.read_pickle(MODEL_PATH + 'XGB_eli5_html.pkl')
 
     test_labels = test_labels[index]
     isSensitive = (
         "Sensitive" if test_labels.iloc[document_index] else "Non-Sensitive")
 
     def predictor(texts):
-        predictions = []
+
+        LSTM_cross_val_stats = pd.read_pickle(
+            MODEL_PATH + 'LSTM_cross_val_stats.pkl')
+
+        lstm_tok = LSTM_cross_val_stats["vectorizers"][index]
+        lstm_model = LSTM_cross_val_stats["classifiers"][index]
+
+        test_sequences = lstm_tok.texts_to_sequences(texts)
+        test_sequences_matrix = sequence.pad_sequences(
+            test_sequences, maxlen=max_len)
+
+        y_pred = ''
+        for i in lstm_model.predict(test_sequences_matrix):
+            if i > 0.5:
+                y_pred = 'Sensitive'
+            else:
+                y_pred = 'Non-Sensitive'
+
+        predictions = [{'LSTM': y_pred}]
+
         vec = LR_cross_val_stats["vectorizers"][index]
         feature = vec.transform(texts)
         models = {LR_cross_val_stats["classifiers"][index]: 'LR',
