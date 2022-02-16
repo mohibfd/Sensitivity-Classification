@@ -2,7 +2,7 @@
 
 {% block header %}
   <h2>
-    {% block title %}General Sensitive Information{% endblock %}
+    {% block title %}Collection Sensitivity Analysis{% endblock %}
   </h1>
 {% endblock %}
 
@@ -36,37 +36,40 @@
   </form>
 
   <div class="general_body">
-    <div class="f1_score">
-      <div>
-        F1 micro score:
-        {{ predictions["f1_micro"] }}
+    <!-- <div class="f1_score"> <div> F1 micro score: {{ predictions["f1_micro"] }} </div> <div> F1 macro score: {{ predictions["f1_macro"] }} </div> </div> <div class="f1_score"> <div> Accuracy: {{ predictions["accuracy"] }} </div> <div> Precision: {{ predictions["precision"] }} </div> </div> -->
+
+    <div class="matrix_container">
+      <div class="column">
+        <div class="pred">
+          F1 micro score:
+          {{ predictions["f1_micro"] }}
+        </div>
+        <div class="pred">
+          F1 macro score:
+          {{ predictions["f1_macro"] }}
+        </div>
       </div>
-      <div>
-        F1 macro score:
-        {{ predictions["f1_macro"] }}
+      <div class="center matrix">
+        <img src="{{conf_mat_png}}" width='70%' height='100%' alt="Confusion Matrix"/>
       </div>
-    </div>
-    <div class="f1_score">
-      <div>
-        Accuracy:
-        {{ predictions["accuracy"] }}
-      </div>
-      <div>
-        Precision:
-        {{ predictions["precision"] }}
+      <div class="column">
+        <div class="pred">
+          Accuracy:
+          {{ predictions["accuracy"] }}
+        </div>
+        <div class="pred">
+          Precision:
+          {{ predictions["precision"] }}
+        </div>
       </div>
     </div>
 
-    <div class="center">
-      <img src="{{conf_mat_png}}" width='70%' height='70%' alt="Confusion Matrix"/>
-    </div>
     <div class="center">
       {% for i in shap_images %}
-        <img src="{{i}}" width='45%' height='45%' alt="Shap image"/>
-
+        <!-- <div class="general_shap"> -->
+        <img src="{{i}}" width='30%' height='30%' alt="Shap image"/>
+        <!-- </div> -->
       {% endfor %}
-
-      <!-- <img src="{{url_for('static', filename='images/shap/LR/shap1.png')}}" width='45%' height='45%' alt="Shap image"/> <img src="{{url_for('static', filename='images/shap/LR/shap2.png')}}" width='45%' height='45%' alt="Shap image"/> <img src="{{url_for('static', filename='images/shap/LR/shap3.png')}}" width='45%' height='45%' alt="Shap image"/> <img src="{{url_for('static', filename='images/shap/LR/shap4.png')}}" width='45%' height='45%' alt="Shap image"/> <img src="{{url_for('static', filename='images/shap/LR/shap5.png')}}" width='45%' height='45%' alt="Shap image"/> -->
     </div>
     {% if eli5_general%}
       <div class="inline">
