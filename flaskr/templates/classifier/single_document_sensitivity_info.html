@@ -21,43 +21,101 @@
       <span class="visually-hidden">Loading...</span>
     </div>
 
-    {{prediction}}
+    <div class="flex">
 
-    <div class="double_dropdown">
-      <form method="post">
-        <div class="dropdown">
-          <button class="btn btn-secondary dropdown-toggle white_button" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
-            {{curr_vis}}
-            Visual
-          </button>
-          <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
-            <li>
-              <input class="dropdown-item" id="dropdown" type="submit" name="vis_option" value="LIME" onclick="loading();">
-            </li>
-            <li>
-              <input class="dropdown-item" id="dropdown" type="submit" name="vis_option" value="ELI5" onclick="loading();">
-            </li>
-            <li>
-              <input class="dropdown-item" id="dropdown" type="submit" name="vis_option" value="None" onclick="loading();">
-            </li>
-          </ul>
-          <button class="btn btn-secondary dropdown-toggle white_button" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
-            {{curr_clf}}
-            Classifier
-          </button>
-          <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
-            <li>
-              <input class="dropdown-item" id="dropdown" type="submit" name="clf_option" value="LR" onclick="loading();">
-            </li>
-            <li>
-              <input class="dropdown-item" id="dropdown" type="submit" name="clf_option" value="XGB" onclick="loading();">
-            </li>
-            <li>
-              <input class="dropdown-item" id="dropdown" type="submit" name="clf_option" value="LSTM" onclick="loading();">
-            </li>
-          </ul>
+      <div class="predic_container">
+        <div>
+          Classifiers' Prediction:
         </div>
-      </form>
+        <div class="horiz_space"></div>
+        <div class="column">
+          {% if outlier == 'LSTM' %}
+            <div class="inline outlier">
+              <div class="model_name">
+                LSTM ->
+              </div>
+              <div>
+                {{prediction[0]['LSTM']}}
+              </div>
+            </div>
+          {% else %}
+            <div class="inline">
+              <div class="model_name">
+                LSTM ->
+              </div>
+              <div>
+                {{prediction[0]['LSTM']}}
+              </div>
+            </div>
+          {% endif %}
+          {% if outlier == 'LR' %}
+            <div class="inline outlier">
+              <div class="model_name">
+                LR ----->
+              </div>
+              <div>
+                {{prediction[1]['LR']}}
+              </div>
+            </div>
+          {% else %}
+            <div class="inline">
+              <div class="model_name">
+                LR ----->
+              </div>
+              <div>
+                {{prediction[1]['LR']}}
+              </div>
+            </div>
+          {% endif %}
+          <div class="inline">
+            <div class="model_name">
+              XGB --->
+            </div>
+            <div>
+              {{prediction[2]['XGB']}}
+            </div>
+          </div>
+        </div>
+
+      </div>
+      <div class="double_dropdown">
+
+        <form method="post">
+          <div class="dropdown">
+            <button class="btn btn-secondary dropdown-toggle white_button" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+              {{curr_vis}}
+              Visual
+            </button>
+            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+              <li>
+                <input class="dropdown-item" id="dropdown" type="submit" name="vis_option" value="LIME" onclick="loading();">
+              </li>
+              <li>
+                <input class="dropdown-item" id="dropdown" type="submit" name="vis_option" value="ELI5" onclick="loading();">
+              </li>
+              <li>
+                <input class="dropdown-item" id="dropdown" type="submit" name="vis_option" value="None" onclick="loading();">
+              </li>
+            </ul>
+            <button class="btn btn-secondary dropdown-toggle white_button" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+              {{curr_clf}}
+              Classifier
+            </button>
+            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+              <li>
+                <input class="dropdown-item" id="dropdown" type="submit" name="clf_option" value="LR" onclick="loading();">
+              </li>
+              <li>
+                <input class="dropdown-item" id="dropdown" type="submit" name="clf_option" value="XGB" onclick="loading();">
+              </li>
+              <li>
+                <input class="dropdown-item" id="dropdown" type="submit" name="clf_option" value="LSTM" onclick="loading();">
+              </li>
+            </ul>
+          </div>
+        </form>
+      </div>
+      <div class="predic_container"></div>
     </div>
 
     <hr>
@@ -71,6 +129,10 @@
 
       {% if lime_probas_html %}
         {{ lime_probas_html|safe }}
+      {% endif %}
+
+      {% if eli5_html %}
+        {{ eli5_html|safe }}
       {% endif %}
     </div>
 
