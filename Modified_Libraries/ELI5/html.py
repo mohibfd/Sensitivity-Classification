@@ -13,7 +13,7 @@ from eli5.utils import max_or_0
 from .utils import (
     format_signed, format_value, format_weight, has_any_values_for_weights,
     replace_spaces, should_highlight_spaces)
-from .. import fields
+from . import fields
 from .features import FormattedFeatureName
 from .trees import tree2text
 from .text_helpers import prepare_weighted_spans, PreparedWeightedSpans
