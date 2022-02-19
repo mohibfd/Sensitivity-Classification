@@ -8,6 +8,7 @@ from nltk.stem import PorterStemmer
 import unpack
 import numpy as np
 # import eli5 as eli5
+import pickle
 import shap as shap
 from lime.lime_text import LimeTextExplainer
 import pandas as pd
@@ -31,14 +32,14 @@ app = Flask(__name__)
 app.config['IMAGES_FOLDER'] = IMAGES_FOLDER
 
 
-LR_cross_val_stats = pd.read_pickle(MODEL_PATH + 'cross_val_stats.pkl')
+LR_cross_val_stats = pd.read_pickle(MODEL_PATH + 'LR_cross_val_stats.pkl')
 XGB_cross_val_stats = pd.read_pickle(MODEL_PATH + 'XGB_cross_val_stats.pkl')
+data_labels = pd.read_pickle(MODEL_PATH + 'data_labels.pkl')
 
-LR_main_data = pd.read_pickle(MODEL_PATH + 'main_data.pkl')
-XGB_main_data = pd.read_pickle(MODEL_PATH + 'XGB_main_data.pkl')
-
-folds = len(LR_cross_val_stats["classifiers"])
 target_names = ['Non-Sensitive', 'Sensitive']
+folds = len(LR_cross_val_stats["classifiers"])
+doc_length = np.sum(
+    [len(LR_cross_val_stats["test_features_list"][i]) for i in range(folds)])
 
 
 def decontract(text):
@@ -210,7 +211,7 @@ def get_specific_sens(sens: int, cross_val_stats: dict) -> pd:
     extra_indexs = [0 for _ in range(folds)]
     indexs_counter = 0
 
-    average_length = int(LR_main_data["labels"].value_counts()[sens]/folds)
+    average_length = int(data_labels.value_counts()[sens]/folds)
     for i in range(len(test_data)):
         data = {'Body': test_data[i], 'Sensitive': test_labels[i]}
         test_df = pd.DataFrame(data)
@@ -248,9 +249,7 @@ def explainers(document_index: int, test_data: pd, test_labels: pd, extra_indexs
         index += 1
 
     document_index -= fold_length * index + extra_indexs[index]
-
-    test_data = test_data[index]
-    specific_test = test_data.iloc[document_index]
+    specific_test = test_data[index].iloc[document_index]
     vectorizer = cross_val_stats["vectorizers"][index]
     model = cross_val_stats["classifiers"][index]
     clf_name = get_clf()
@@ -263,7 +262,7 @@ def explainers(document_index: int, test_data: pd, test_labels: pd, extra_indexs
         lime_explainer = LimeTextExplainer(
             class_names=target_names)
 
-        lime_values = None
+        proba_predictor_func = None
 
         if clf_name == 'LSTM':
 
@@ -280,10 +279,7 @@ def explainers(document_index: int, test_data: pd, test_labels: pd, extra_indexs
                     returnable.append(np.array([1-temp, temp]))
                 return np.array(returnable)
 
-            lime_values = lime_explainer.explain_instance(
-                lime_data,
-                classifier_fn=proba_predictor,
-            )
+            proba_predictor_func = proba_predictor
 
         else:
             def proba_predictor(texts):
@@ -291,10 +287,12 @@ def explainers(document_index: int, test_data: pd, test_labels: pd, extra_indexs
                 pred = model.predict_proba(feature)
                 return pred
 
-            lime_values = lime_explainer.explain_instance(
-                lime_data,
-                classifier_fn=proba_predictor,
-            )
+            proba_predictor_func = proba_predictor
+
+        lime_values = lime_explainer.explain_instance(
+            lime_data,
+            classifier_fn=proba_predictor_func,
+        )
 
         if text:
             return lime_values.as_html(predict_proba=False, specific_predict_proba=False)
@@ -353,10 +351,14 @@ def explainers(document_index: int, test_data: pd, test_labels: pd, extra_indexs
     lime_html = lime_explain(text=False)
 
     vis_html = None
+    highlighting = True
     if visual == 'LIME':
         vis_html = lime_explain()
-    # elif visual == 'ELI5':
-    #     vis_html = pd.read_pickle(MODEL_PATH + 'XGB_eli5_html.pkl')
+    elif visual == 'ELI5':
+        vis_html = pickle.load(open(MODEL_PATH + "ELI5_example.pkl", 'rb'))
+    else:
+        vis_html = specific_test.lower()
+        highlighting = False
 
     test_labels = test_labels[index]
     isSensitive = (
@@ -398,7 +400,8 @@ def explainers(document_index: int, test_data: pd, test_labels: pd, extra_indexs
         return predictions
 
     prediction = predictor([specific_test])
-    return shap_html, lime_html, vis_html, isSensitive, prediction
+
+    return shap_html, lime_html, vis_html, isSensitive, prediction, highlighting
 
 
 def get_visual_html(sensitivity: int, document_number: int, visual: str, clf: str) -> LimeTextExplainer:
@@ -408,10 +411,10 @@ def get_visual_html(sensitivity: int, document_number: int, visual: str, clf: st
     test_data, test_labels, extra_indexs = get_specific_sens(
         sensitivity, cross_val_stats)
 
-    shap_html, lime_probas_html, visual_html, _, prediction = explainers(
+    shap_html, lime_probas_html, visual_html, _, prediction, highlighting = explainers(
         document_number, test_data, test_labels, extra_indexs, visual, cross_val_stats)
 
-    return shap_html, lime_probas_html, visual_html, prediction
+    return shap_html, lime_probas_html, visual_html, prediction, highlighting
 
 
 @bp.route('/')
@@ -426,7 +429,7 @@ def sensitive_info():
 
     document_number = get_doc_num(sensitivity)
 
-    max_documents = LR_main_data["labels"].value_counts()[sensitivity]
+    max_documents = data_labels.value_counts()[sensitivity]
 
     visual = get_visualisation()
 
@@ -447,12 +450,12 @@ def sensitive_info():
             clf = chosen_clf
             change_clf(clf)
 
-    shap_html, lime_probas_html, visual_html, prediction = get_visual_html(
+    shap_html, lime_probas_html, visual_html, prediction, highlighting = get_visual_html(
         sensitivity, document_number, visual, clf)
 
     return render_template('classifier/sensitive_info.html', document_number=document_number+1, max_documents=max_documents,
                            curr_vis=visual, visual_html=visual_html, curr_clf=clf, shap_html=shap_html,
-                           lime_probas_html=lime_probas_html, prediction=prediction)
+                           lime_probas_html=lime_probas_html, prediction=prediction, highlighting=highlighting)
 
 
 @bp.route('/non-sensitive-info', methods=('GET', 'POST'))
@@ -462,7 +465,7 @@ def non_sensitive_info():
 
     document_number = get_doc_num(sensitivity)
 
-    max_documents = LR_main_data["labels"].value_counts()[sensitivity]
+    max_documents = data_labels.value_counts()[sensitivity]
 
     visual = get_visualisation()
 
@@ -483,12 +486,12 @@ def non_sensitive_info():
             clf = chosen_clf
             change_clf(clf)
 
-    shap_html, lime_probas_html, visual_html, prediction = get_visual_html(
+    shap_html, lime_probas_html, visual_html, prediction, highlighting = get_visual_html(
         sensitivity, document_number, visual, clf)
 
     return render_template('classifier/non_sensitive_info.html', document_number=document_number+1, max_documents=max_documents,
                            curr_vis=visual, visual_html=visual_html, curr_clf=clf, shap_html=shap_html,
-                           lime_probas_html=lime_probas_html, prediction=prediction)
+                           lime_probas_html=lime_probas_html, prediction=prediction, highlighting=highlighting)
 
 
 @bp.route('/single-document-sensitivity-info', methods=('GET', 'POST'))
@@ -497,7 +500,7 @@ def single_document_sensitivity_info():
 
     document_number = get_doc_num()
 
-    max_documents = len(LR_main_data['labels'])
+    max_documents = len(data_labels)
 
     extra_indexs = [0 for _ in range(folds)]
 
@@ -525,18 +528,20 @@ def single_document_sensitivity_info():
     test_data = cross_val_stats["test_features_list"]
     test_labels = cross_val_stats["test_labels_list"]
 
-    shap_html, lime_probas_html, visual_html, isSensitive, prediction = explainers(
+    shap_html, lime_probas_html, visual_html, isSensitive, prediction, highlighting = explainers(
         document_number, test_data, test_labels, extra_indexs, visual, cross_val_stats)
 
     return render_template('classifier/single_document_sensitivity_info.html', document_number=document_number+1,
-                           max_documents=max_documents, isSensitive=isSensitive,
-                           curr_vis=visual, curr_clf=clf, lime_probas_html=lime_probas_html,
-                           shap_html=shap_html, visual_html=visual_html, prediction=prediction)
+                           max_documents=max_documents, isSensitive=isSensitive, curr_vis=visual, curr_clf=clf,
+                           lime_probas_html=lime_probas_html, shap_html=shap_html, visual_html=visual_html,
+                           prediction=prediction, highlighting=highlighting)
 
 
 @bp.route('/general-sensitivity-info', methods=('GET', 'POST'))
 @login_required
 def general_sensitivity_info():
+
+    shap_images = []
 
     def get_shap_images():
         for i in range(1, 6):
@@ -551,29 +556,21 @@ def general_sensitivity_info():
     else:
         clf = get_clf()
 
-    shap_images = []
     conf_mat_png = os.path.join(
         app.config['IMAGES_FOLDER'], clf+'/conf_mat.png')
 
     predictions = {}
     eli5_general = None
     if clf == 'LR':
-        predictions = LR_main_data["predictions"]
-        # eli5_general = LR_main_data["eli5_general"]
-        get_shap_images()
-
+        predictions = LR_cross_val_stats["predictions"]
     elif clf == 'XGB':
-        predictions = XGB_main_data["predictions"]
-        # eli5_general = XGB_main_data["eli5_general"]
-        get_shap_images()
+        predictions = XGB_cross_val_stats["predictions"]
     else:
         LSTM_cross_val_stats = pd.read_pickle(
             MODEL_PATH + 'LSTM_cross_val_stats.pkl')
 
         predictions = LSTM_cross_val_stats["predictions"]
-        get_shap_images()
-
-    # eli5_general = main_data["eli5_general"]
+    get_shap_images()
 
     return render_template('classifier/general_sensitivity_info.html', predictions=predictions, eli5_general=eli5_general,
                            conf_mat_png=conf_mat_png, curr_clf=clf, shap_images=shap_images)
