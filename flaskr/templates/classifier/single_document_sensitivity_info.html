@@ -21,11 +21,26 @@
       <span class="visually-hidden">Loading...</span>
     </div>
 
+    {{prediction}}
+
     <div class="double_dropdown">
       <form method="post">
         <div class="dropdown">
-          <!-- <button class="btn btn-secondary dropdown-toggle white_button" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false"> {{curr_vis}} Visual </button> <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1"> <li> <input class="dropdown-item" id="dropdown" type="submit" name="vis_option" value="LIME" onclick="loading();"> </li> <li> <input class="dropdown-item" id="dropdown" type="submit" name="vis_option" value="ELI5" onclick="loading();"> </li> </ul> -->
-
+          <button class="btn btn-secondary dropdown-toggle white_button" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+            {{curr_vis}}
+            Visual
+          </button>
+          <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+            <li>
+              <input class="dropdown-item" id="dropdown" type="submit" name="vis_option" value="LIME" onclick="loading();">
+            </li>
+            <li>
+              <input class="dropdown-item" id="dropdown" type="submit" name="vis_option" value="ELI5" onclick="loading();">
+            </li>
+            <li>
+              <input class="dropdown-item" id="dropdown" type="submit" name="vis_option" value="None" onclick="loading();">
+            </li>
+          </ul>
           <button class="btn btn-secondary dropdown-toggle white_button" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
             {{curr_clf}}
             Classifier
@@ -60,8 +75,16 @@
     </div>
 
     {% if visual_html %}
-      {{ visual_html|safe }}
+      {% if highlighting %}
+        {{ visual_html|safe }}
+
+      {% else %}
+        <span class="span">
+          {{ visual_html|safe }}
+        </span>
+      {% endif %}
     {% endif %}
+    <div class="large_spacing"></div>
 
   </div>
 
