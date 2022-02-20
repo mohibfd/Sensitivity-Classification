@@ -11,7 +11,7 @@ h2 {
 }
 h1 {
    text-align: center;
-   width: 100%;
+   width: 40%;
 }
 h2 {
    text-align: center;
@@ -356,12 +356,18 @@ input[required="required"] {
    display: flex;
    align-items: center;
 }
-.breadcrumb {
+.breadcrumb-item {
+   display: flex;
+}
+.custom_breadcrumb {
    height: 5vh;
    display: flex;
+   text-align: left;
+   padding: 0;
+   margin: 0;
    margin-left: 15px;
-   align-items: flex-end;
-   width: 350px;
+   align-items: center;
+   width: 30%;
 }
 div#content {
    display: none;
@@ -391,8 +397,12 @@ div#cursor {
 }
 nav .one_row {
    display: flex;
-   width: 190px;
-   margin-left: 30px;
+   width: 100%;
+   justify-content: flex-end;
+   /* padding-left: 20px; */
+   /* width: 500px; */
+   /* margin-left: 50px; */
+   /* background-color: red; */
 }
 .no_margin {
    margin: 0;
@@ -495,4 +505,7 @@ input[id="dropdown"] {
 .outlier {
    /* border: none; */
    border: 2px solid red;
+}
+.small_text {
+   font-size: 0.8em;
 }
