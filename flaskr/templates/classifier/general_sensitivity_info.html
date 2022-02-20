@@ -39,45 +39,67 @@
     <!-- <div class="f1_score"> <div> F1 micro score: {{ predictions["f1_micro"] }} </div> <div> F1 macro score: {{ predictions["f1_macro"] }} </div> </div> <div class="f1_score"> <div> Accuracy: {{ predictions["accuracy"] }} </div> <div> Precision: {{ predictions["precision"] }} </div> </div> -->
 
     <div class="matrix_container">
-      <div class="column">
+      <div class="column equal_flex">
         <div class="pred">
           F1 micro score:
           {{ predictions["f1_micro"] }}
+          <div class="small_text">
+            Calculates metrics globally by counting the total true positives, false negatives and false positives.
+          </div>
         </div>
         <div class="pred">
           F1 macro score:
           {{ predictions["f1_macro"] }}
+          <div class="small_text">
+            Calculates metrics for each label, and find their unweighted mean. This does not take label imbalance into account.
+          </div>
         </div>
       </div>
-      <div class="center matrix">
-        <img src="{{conf_mat_png}}" width='100%' height='100%' alt="Confusion Matrix"/>
+      <div class="column equal_flex white_background">
+        <div class="small_text">
+          Confusion matrix showing true labels vs predicted labels.
+        </div>
+        <div class="center">
+          <img src="{{conf_mat_png}}" width='100%' height='100%' alt="Confusion Matrix"/>
+        </div>
       </div>
-      <div class="column">
+      <div class="column equal_flex">
         <div class="pred">
           Accuracy:
           {{ predictions["accuracy"] }}
+          <div class="small_text">
+            Calculates labels predicted correctly.
+          </div>
         </div>
         <div class="pred">
           Precision:
           {{ predictions["precision"] }}
+          <div class="small_text">
+            Calculates the ratio tp / (tp + fp) where tp is the number of true positives and fp the number of false positives. The precision is intuitively the ability of the classifier not to label as positive a sample that is negative.
+          </div>
         </div>
       </div>
+    </div>
+  </div>
+
+  <div class="center">
+    <div class="shap_text">
+      The beeswarm plot is designed to display an information-dense summary of how the top features in a dataset impact the model’s output. Each instance in the given explanation is represented by a single dot on each feature flow. Each of the five graphs represents one of the cross validations
     </div>
 
-    <div class="center">
-      {% for i in shap_images %}
-        <!-- <div class="general_shap"> -->
-        <img src="{{i}}" width='30%' height='30%' alt="Shap image"/>
-        <!-- </div> -->
-      {% endfor %}
-    </div>
-    {% if eli5_general%}
-      <div class="inline">
-        <div class="push"></div>
-        <div class="column">
-          {{ eli5_general|safe }}
-        </div>
-      </div>
-    {% endif %}
+    {% for i in shap_images %}
+      <!-- <div class="general_shap"> -->
+      <img src="{{i}}" width='30%' height='30%' alt="Shap image"/>
+      <!-- </div> -->
+    {% endfor %}
   </div>
+  {% if eli5_general%}
+    <div class="inline">
+      <div class="push"></div>
+      <div class="column">
+        {{ eli5_general|safe }}
+      </div>
+    </div>
+  {% endif %}
+</div>
 {% endblock %}
