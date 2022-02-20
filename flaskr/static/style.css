@@ -178,19 +178,23 @@ input.danger {
 .register_form {
    max-width: 600px;
    margin: auto;
-   background-color: rgb(23, 25, 32);
+   background-color: white;
    padding: 25px 50px 0px 50px;
+   box-shadow: 0px 0px 2px 1px rgb(61, 60, 60);
 }
 .toggle_register {
    align-self: center;
 }
 input[id="submit"] {
-   background-color: rgb(63, 145, 117);
+   background-color: #377ba8;
    color: white;
    width: 100%;
    height: 50px;
    font-size: 1.5em;
    border: 0;
+}
+input[id="submit"]:hover {
+   background-color: #25516e;
 }
 input[value="Sign Up"] {
    background-color: rgb(63, 145, 117);
@@ -201,7 +205,7 @@ input[value="Sign Up"] {
    border: 0;
 }
 input[id="off"] {
-   background-color: rgb(77, 80, 79);
+   background-color: #377ba8;
    color: white;
    width: 200px;
    height: 45px;
@@ -210,17 +214,8 @@ input[id="off"] {
    text-align: center;
    margin: 0;
 }
-input[id="on"] {
-   background-color: rgb(63, 145, 117);
-   color: white;
-   width: 200px;
-   height: 45px;
-   font-size: 1.3em;
-   border: 0;
-   margin: 0;
-}
 input[id="off"]:hover {
-   background-color: rgb(42, 100, 81);
+   background-color: #25516e;
 }
 .toggle_register {
    display: flex;
@@ -234,16 +229,15 @@ input[id="off"]:hover {
 }
 input[required="required"] {
    border: 2px solid rgb(77, 80, 79);
-   background-color: rgb(23, 25, 32);
    font-size: 1.3em;
    padding-left: 10px;
    padding: 7px 0px 7px 7px;
-   color: white;
    margin: 20px 0px 20px 0px;
 }
 .fake_button {
    display: flex;
    width: 200px;
+   color: white;
    background-color: rgb(63, 145, 117);
    justify-content: center;
    align-items: center;
