@@ -22,64 +22,72 @@
     </div>
 
     <div class="flex">
-
-      <div class="predic_container">
-        <div>
-          Classifiers' Prediction:
+      <div class="predic_container column">
+        <div class="vertical_center">
+          Predictions
         </div>
-        <div class="horiz_space"></div>
-        <div class="column">
-          {% if outlier == 'LSTM' %}
-            <div class="inline outlier">
-              <div class="model_name">
-                LSTM ->
-              </div>
-              <div>
-                {{prediction[0]['LSTM']}}
-              </div>
-            </div>
-          {% else %}
-            <div class="inline">
-              <div class="model_name">
-                LSTM ->
-              </div>
-              <div>
-                {{prediction[0]['LSTM']}}
-              </div>
-            </div>
-          {% endif %}
+        <div class="inline center">
           {% if outlier == 'LR' %}
-            <div class="inline outlier">
+            <div class="outlier column">
               <div class="model_name">
-                LR ----->
+                LR
               </div>
               <div>
                 {{prediction[1]['LR']}}
               </div>
             </div>
           {% else %}
-            <div class="inline">
+            <div class="column">
               <div class="model_name">
-                LR ----->
+                LR
               </div>
               <div>
                 {{prediction[1]['LR']}}
               </div>
             </div>
           {% endif %}
-          <div class="inline">
-            <div class="model_name">
-              XGB --->
+          {% if outlier == 'XGB' %}
+            <div class="outlier column">
+              <div class="model_name">
+                XGB
+              </div>
+              <div>
+                {{prediction[2]['XGB']}}
+              </div>
             </div>
-            <div>
-              {{prediction[2]['XGB']}}
+          {% else %}
+            <div class="column">
+              <div class="model_name">
+                XGB
+              </div>
+              <div>
+                {{prediction[2]['XGB']}}
+              </div>
             </div>
-          </div>
+          {% endif %}
+          {% if outlier == 'LSTM' %}
+            <div class="outlier column">
+              <div class="model_name">
+                LSTM
+              </div>
+              <div>
+                {{prediction[0]['LSTM']}}
+              </div>
+            </div>
+          {% else %}
+            <div class="column">
+              <div class="model_name">
+                LSTM
+              </div>
+              <div>
+                {{prediction[0]['LSTM']}}
+              </div>
+            </div>
+          {% endif %}
         </div>
 
       </div>
       <div class="double_dropdown">
-
         <form method="post">
           <div class="dropdown">
             <button class="btn btn-secondary dropdown-toggle white_button" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
@@ -115,21 +123,35 @@
           </div>
         </form>
       </div>
-      <div class="predic_container"></div>
+      <div class="predic_container center_flex">
+        <div class="large_horiz_space"></div>
+        <div class="large_horiz_space"></div>
+        <div class="large_horiz_space"></div>
+
+        {% if shap_html %}
+          <div class="move_top">
+            {{curr_clf}}
+          </div>
+          {{lime_probas|safe }}
+        {% endif %}
+      </div>
     </div>
 
     <hr>
 
     <div class="visuals_container">
+
+      {% if lime_probas_html %}
+        {{ lime_probas_html|safe }}
+      {% endif %}
+
       <div class="shap">
         {% if shap_html %}
           {{ shap_html|safe }}
         {% endif %}
       </div>
 
-      {% if lime_probas_html %}
-        {{ lime_probas_html|safe }}
-      {% endif %}
+      <div class="large_horiz_space"></div>
 
       {% if eli5_html %}
         {{ eli5_html|safe }}
@@ -147,6 +169,24 @@
       {% endif %}
     {% endif %}
     <div class="large_spacing"></div>
+  </div>
+
+  <hr>
+
+  <div class="questionnaire">
+    {% if outlier != None %}
+      There is a disagreement between the classifiers. Please state which classifier(s) you think are correct.
+      <div class="end">
+        <div class="form-check form-check-inline">
+          <input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio1" value="option1">
+          <label class="form-check-label" for="inlineRadio1">1</label>
+        </div>
+        <div class="form-check form-check-inline">
+          <input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio2" value="option2">
+          <label class="form-check-label" for="inlineRadio2">2</label>
+        </div>
+      </div>
+    {% endif %}
 
   </div>
 
