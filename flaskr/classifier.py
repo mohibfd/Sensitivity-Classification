@@ -250,15 +250,18 @@ def explainers(document_index: int, test_data: pd, test_labels: pd, extra_indexs
 
     document_index -= fold_length * index + extra_indexs[index]
 
+    # index = 4
+    # document_index = 713
+
     specific_test = test_data[index].iloc[document_index]
     vectorizer = cross_val_stats["vectorizers"][index]
     model = cross_val_stats["classifiers"][index]
     clf_name = get_clf()
     max_len = 150
 
-    def lime_explain(text_only=False, probas_only=False):
+    def lime_explain(text_only=False, probas_only=False, lime_values=None):
         # lime_data = specific_test
-        lime_data = specific_test[0:1000]
+        lime_data = specific_test[0:2000]
 
         lime_explainer = LimeTextExplainer(
             class_names=target_names)
@@ -266,7 +269,6 @@ def explainers(document_index: int, test_data: pd, test_labels: pd, extra_indexs
         proba_predictor_func = None
 
         if clf_name == 'LSTM':
-
             def proba_predictor(arr):
                 processed = []
                 for i in arr:
@@ -290,15 +292,16 @@ def explainers(document_index: int, test_data: pd, test_labels: pd, extra_indexs
 
             proba_predictor_func = proba_predictor
 
-        lime_values = lime_explainer.explain_instance(
-            lime_data,
-            classifier_fn=proba_predictor_func,
-        )
+        if not lime_values:
+            lime_values = lime_explainer.explain_instance(
+                lime_data,
+                classifier_fn=proba_predictor_func,
+            )
 
         if text_only:
             return lime_values.as_html(predict_proba=False, specific_predict_proba=False)
         elif probas_only:
-            return lime_values.as_html(text=False,  specific_predict_proba=False)
+            return lime_values.as_html(text=False,  specific_predict_proba=False), lime_values
         else:
             return lime_values.as_html(text=False, predict_proba=False)
 
@@ -360,16 +363,15 @@ def explainers(document_index: int, test_data: pd, test_labels: pd, extra_indexs
         return eli5_weights
 
     shap_html = shap_explain()
-    lime_html = lime_explain()
     eli5_weights = get_eli5_weights()
-    lime_probas = lime_explain(probas_only=True)
-
+    lime_probas, lime_values = lime_explain(probas_only=True)
+    lime_html = lime_explain(lime_values=lime_values)
     eli5_html = eli5_weights[index][document_index]
 
     vis_html = None
     highlighting = True
     if visual == 'LIME':
-        vis_html = lime_explain(text_only=True)
+        vis_html = lime_explain(text_only=True, lime_values=lime_values)
     elif visual == 'ELI5':
         eli5_predictions = []
         if clf_name == 'LR':
@@ -553,20 +555,73 @@ def single_document_sensitivity_info():
 
     clf = get_clf()
 
+    # user_id = g.user['id']
+    # db = get_db()
+    # posts = db.execute(
+    #     'SELECT s.document_number, classifiers_chosen, feature1, feature2, feature3, feature4, feature5'
+    #     ' FROM survey s JOIN user u ON s.author_id = u.id'
+    #     ' ORDER BY s.document_number DESC'
+    # ).fetchall()
+
+    # import sys
+    # # accessing first document survey
+    # print(posts[0][0], file=sys.stderr)
+    # print(posts[0][1], file=sys.stderr)
+    # print(posts[0][2], file=sys.stderr)
+    # # accessing second document survey
+    # print(posts[1][0], file=sys.stderr)
+    # print(posts[1][1], file=sys.stderr)
+    # print(posts[1][2], file=sys.stderr)
+    # # accessing third document survey
+    # print(posts[2][0], file=sys.stderr)
+    # print(posts[2][1], file=sys.stderr)
+    # print(posts[2][2], file=sys.stderr)
+
     if request.method == 'POST':
         chosen_vis = request.form.get('vis_option')
-
         chosen_clf = request.form.get('clf_option')
+        change_docs = request.form.get('submit_button')
 
-        if chosen_vis == None and chosen_clf == None:
+        if change_docs:
             document_number = change_doc(
                 document_number, max_documents)
-        elif chosen_clf == None:
+        elif chosen_vis:
             visual = chosen_vis
             change_visual(visual)
-        else:
+        elif chosen_clf:
             clf = chosen_clf
             change_clf(clf)
+        else:
+            user_features = [request.form.get(
+                f'feature{i}') for i in range(1, 6)]
+            radio_option_clf = request.form.get('inlineRadioOptions')
+            error = None
+
+            for i in user_features:
+                if i == '':
+                    error = "Please enter 5 features"
+                    flash(error)
+                    break
+
+            outlier = request.form.get('outlier_name')
+            if radio_option_clf == None and outlier != 'None':
+                error = "Please choose one of the classifiers"
+                flash(error)
+
+            if error is None:
+                db = get_db()
+                db.execute(
+                    "INSERT INTO survey (author_id, document_number, feature1, feature2, feature3, feature4, feature5, classifiers_chosen) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+                    (g.user['id'], document_number, user_features[0], user_features[1],
+                     user_features[2], user_features[3], user_features[4], radio_option_clf),
+                )
+                db.commit()
+
+            user_id = g.user['id']
+
+            feat1 = db.execute(
+                'SELECT feature1 FROM survey WHERE author_id = ?', (user_id,)
+            ).fetchone()[0]
 
     cross_val_stats = get_clf_stats(clf)
 
