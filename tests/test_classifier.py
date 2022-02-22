@@ -112,8 +112,7 @@ lstm = 'LSTM'
 xgb = 'XGB'
 
 visuals = [eli5, lime]
-# classifiers = [lr, lstm, xgb]
-classifiers = [lr, xgb]
+classifiers = [lr, lstm, xgb]
 
 clf_types = ['non-sensitive-info', 'sensitive-info',
              'single-document-sensitivity-info']
@@ -121,26 +120,18 @@ clf_types = ['non-sensitive-info', 'sensitive-info',
 diff_options = []
 
 for i in clf_types:
-    # for j in visuals:
-    for k in classifiers:
-        # if j == lime:
-        diff_options.append((i, lime, k, b'Text with highlighted words'))
-        # elif j == eli5:
-        # diff_options.append((i, j, k, b'top features'))
+    for j in visuals:
+        for k in classifiers:
+            diff_options.append((i, j, k))
 
 
-@pytest.mark.parametrize(('clf_type', 'visual', 'classifier', 'message'), diff_options)
-def test_dropdown_options(client, auth, clf_type,  visual, classifier, message):
+@pytest.mark.parametrize(('clf_type', 'visual', 'classifier'), diff_options)
+def test_dropdown_options(client, auth, clf_type,  visual, classifier):
     auth.login()
-
-    # response = client.post(
-    #     '/' + clf_type,
-    #     data={'clf_option': classifier, 'vis_option': visual}
-    # )
 
     response = client.post(
         '/' + clf_type,
-        data={'clf_option': classifier}
+        data={'clf_option': classifier, 'vis_option': visual}
     )
 
-    assert message in response.data
+    assert response.status_code == 200
