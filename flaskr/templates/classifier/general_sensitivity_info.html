@@ -36,22 +36,20 @@
   </form>
 
   <div class="general_body">
-    <!-- <div class="f1_score"> <div> F1 micro score: {{ predictions["f1_micro"] }} </div> <div> F1 macro score: {{ predictions["f1_macro"] }} </div> </div> <div class="f1_score"> <div> Accuracy: {{ predictions["accuracy"] }} </div> <div> Precision: {{ predictions["precision"] }} </div> </div> -->
-
     <div class="matrix_container">
       <div class="column equal_flex">
         <div class="pred">
-          F1 micro score:
-          {{ predictions["f1_micro"] }}
+          Accuracy:
+          {{ predictions["accuracy"] }}
           <div class="small_text">
-            Calculates metrics globally by counting the total true positives, false negatives and false positives.
+            Calculates labels predicted correctly.
           </div>
         </div>
         <div class="pred">
-          F1 macro score:
-          {{ predictions["f1_macro"] }}
+          Precision:
+          {{ predictions["precision"] }}
           <div class="small_text">
-            Calculates metrics for each label, and find their unweighted mean. This does not take label imbalance into account.
+            The precision is intuitively the ability of the classifier not to label as positive a sample that is negative.
           </div>
         </div>
       </div>
@@ -65,17 +63,17 @@
       </div>
       <div class="column equal_flex">
         <div class="pred">
-          Accuracy:
-          {{ predictions["accuracy"] }}
+          Recall:
+          {{ predictions["recall"] }}
           <div class="small_text">
-            Calculates labels predicted correctly.
+            The recall is intuitively the ability of the classifier to find all the positive samples.
           </div>
         </div>
         <div class="pred">
-          Precision:
-          {{ predictions["precision"] }}
+          F1:
+          {{ predictions["f1_weighted"] }}
           <div class="small_text">
-            Calculates the ratio tp / (tp + fp) where tp is the number of true positives and fp the number of false positives. The precision is intuitively the ability of the classifier not to label as positive a sample that is negative.
+            The F1 score can be interpreted as a harmonic mean of the precision and recall.
           </div>
         </div>
       </div>

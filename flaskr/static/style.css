@@ -539,18 +539,14 @@ input[id="dropdown"] {
    margin: 3%;
    display: flex;
 }
-.end {
+.end_response {
    display: flex;
    flex: 1;
    justify-content: flex-end;
+   height: 40px;
 }
 .move_top {
    margin-bottom: 50px;
-}
-.roww {
-   width: 40%;
-   display: flex;
-   flex-direction: row;
 }
 .center_flex {
    justify-content: center;
@@ -562,4 +558,16 @@ input[id="dropdown"] {
 .btn-lg {
    width: 150px;
    margin: 0 2%;
+}
+.limit_width {
+   width: 100px;
+   margin: 0 0.5%;
+}
+.questionnaire_btn {
+   align-self: flex-end;
+   padding-top: 20px;
+}
+.invisible {
+   width: 0;
+   height: 0;
 }
