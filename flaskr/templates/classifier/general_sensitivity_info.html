@@ -84,13 +84,11 @@
 
   <div class="center">
     <div class="shap_text">
-      The beeswarm plot is designed to display an information-dense summary of how the top features in a dataset impact the model’s output. Each instance in the given explanation is represented by a single dot on each feature flow. Each of the five graphs represents one of the cross validations
+      The beeswarm plot displays an information-dense summary of how the top features in a dataset impact the model’s output. Each instance in the given explanation is represented by a single dot on each feature flow. Each of the five graphs represents one of the cross-validations. The graph illustrates the most critical features on the corpus level, not the document level.
     </div>
 
     {% for i in shap_images %}
-      <!-- <div class="general_shap"> -->
       <img src="{{i}}" width='30%' height='30%' alt="Shap image"/>
-      <!-- </div> -->
     {% endfor %}
   </div>
   {% if eli5_general%}
