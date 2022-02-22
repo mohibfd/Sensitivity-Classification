@@ -25,7 +25,7 @@
               <img src="{{url_for('static', filename='images/lock.png')}}" class="card-img-top" alt="classifier info">
             </div>
             <div class="card-body">
-              <h5 class="card-title">Classifier Information</h5>
+              <h5 class="card-title">Collection Sensitivity Analysis</h5>
               <p class="card-text">Statistical information about how well the model predicts and what features it deems important on the corpus level.</p>
               <form action="{{ url_for('classifier.general_sensitivity_info') }}">
                 <div class="center no_margin">
