@@ -249,13 +249,14 @@ def explainers(document_index: int, test_data: pd, test_labels: pd, extra_indexs
         index += 1
 
     document_index -= fold_length * index + extra_indexs[index]
+
     specific_test = test_data[index].iloc[document_index]
     vectorizer = cross_val_stats["vectorizers"][index]
     model = cross_val_stats["classifiers"][index]
     clf_name = get_clf()
     max_len = 150
 
-    def lime_explain(text=True):
+    def lime_explain(text_only=False, probas_only=False):
         # lime_data = specific_test
         lime_data = specific_test[0:1000]
 
@@ -294,10 +295,12 @@ def explainers(document_index: int, test_data: pd, test_labels: pd, extra_indexs
             classifier_fn=proba_predictor_func,
         )
 
-        if text:
+        if text_only:
             return lime_values.as_html(predict_proba=False, specific_predict_proba=False)
+        elif probas_only:
+            return lime_values.as_html(text=False,  specific_predict_proba=False)
         else:
-            return lime_values.as_html(text=False)
+            return lime_values.as_html(text=False, predict_proba=False)
 
     def shap_explain():
         shap_values = cross_val_stats["shap_values"][index]
@@ -342,19 +345,44 @@ def explainers(document_index: int, test_data: pd, test_labels: pd, extra_indexs
 
         return shap_html
 
+    def get_eli5_weights():
+        eli5_weights = []
+        if clf_name == 'LR':
+            eli5_weights = pickle.load(
+                open(MODEL_PATH + "LR_ELI5_explanations.pkl", 'rb'))["weights"]
+        elif clf_name == 'XGB':
+            eli5_weights = pickle.load(
+                open(MODEL_PATH + "XGB_ELI5_explanations.pkl", 'rb'))["weights"]
+        else:
+            eli5_weights = pickle.load(
+                open(MODEL_PATH + "LSTM_ELI5_explanations.pkl", 'rb'))["weights"]
+
+        return eli5_weights
+
     shap_html = shap_explain()
-    lime_html = lime_explain(text=False)
-    eli5_weights = pickle.load(open(MODEL_PATH + "ELI5_weights.pkl", 'rb'))
-    eli5_html = eli5_weights[document_index]
+    lime_html = lime_explain()
+    eli5_weights = get_eli5_weights()
+    lime_probas = lime_explain(probas_only=True)
+
+    eli5_html = eli5_weights[index][document_index]
 
     vis_html = None
     highlighting = True
     if visual == 'LIME':
-        vis_html = lime_explain()
+        vis_html = lime_explain(text_only=True)
     elif visual == 'ELI5':
-        eli5_predictions = pickle.load(
-            open(MODEL_PATH + "ELI5_predictions.pkl", 'rb'))
-        vis_html = eli5_predictions[document_index]
+        eli5_predictions = []
+        if clf_name == 'LR':
+            eli5_predictions = pickle.load(
+                open(MODEL_PATH + "LR_ELI5_explanations.pkl", 'rb'))["predictions"]
+        elif clf_name == 'XGB':
+            eli5_predictions = pickle.load(
+                open(MODEL_PATH + "XGB_ELI5_explanations.pkl", 'rb'))["predictions"]
+        else:
+            eli5_predictions = pickle.load(
+                open(MODEL_PATH + "LSTM_ELI5_explanations.pkl", 'rb'))["predictions"]
+
+        vis_html = eli5_predictions[index][document_index]
     else:
         vis_html = specific_test.lower()
         highlighting = False
@@ -403,18 +431,20 @@ def explainers(document_index: int, test_data: pd, test_labels: pd, extra_indexs
                 non_sens_clfs.append(name)
 
         outlier = None
-
-        if sens_clfs != 0 and non_sens_clfs != 0:
+        common_classifiers = None
+        if len(sens_clfs) != 0 and len(non_sens_clfs) != 0:
             if len(sens_clfs) == 1:
                 outlier = sens_clfs[0]
+                common_classifiers = non_sens_clfs[0] + ', ' + non_sens_clfs[1]
             else:
                 outlier = non_sens_clfs[0]
+                common_classifiers = sens_clfs[0] + ', ' + sens_clfs[1]
 
-        return predictions, outlier
+        return predictions, outlier, common_classifiers
 
-    prediction, outlier = predictor([specific_test])
+    prediction, outlier, common_classifiers = predictor([specific_test])
 
-    return shap_html, lime_html, vis_html, isSensitive, prediction, highlighting, eli5_html, outlier
+    return shap_html, lime_html, vis_html, isSensitive, prediction, highlighting, eli5_html, outlier, lime_probas, common_classifiers
 
 
 def get_visual_html(sensitivity: int, document_number: int, visual: str, clf: str) -> LimeTextExplainer:
@@ -424,10 +454,10 @@ def get_visual_html(sensitivity: int, document_number: int, visual: str, clf: st
     test_data, test_labels, extra_indexs = get_specific_sens(
         sensitivity, cross_val_stats)
 
-    shap_html, lime_probas_html, visual_html, _, prediction, highlighting, eli5_html, outlier = explainers(
+    shap_html, lime_probas_html, visual_html, _, prediction, highlighting, eli5_html, outlier, lime_probas, common_classifiers = explainers(
         document_number, test_data, test_labels, extra_indexs, visual, cross_val_stats)
 
-    return shap_html, lime_probas_html, visual_html, prediction, highlighting, eli5_html, outlier
+    return shap_html, lime_probas_html, visual_html, prediction, highlighting, eli5_html, outlier, lime_probas, common_classifiers
 
 
 @bp.route('/')
@@ -463,13 +493,13 @@ def sensitive_info():
             clf = chosen_clf
             change_clf(clf)
 
-    shap_html, lime_probas_html, visual_html, prediction, highlighting, eli5_html, outlier = get_visual_html(
+    shap_html, lime_probas_html, visual_html, prediction, highlighting, eli5_html, outlier, lime_probas, common_classifiers = get_visual_html(
         sensitivity, document_number, visual, clf)
 
     return render_template('classifier/sensitive_info.html', document_number=document_number+1, max_documents=max_documents,
                            curr_vis=visual, visual_html=visual_html, curr_clf=clf, shap_html=shap_html,
                            lime_probas_html=lime_probas_html, prediction=prediction, highlighting=highlighting,
-                           eli5_html=eli5_html, outlier=outlier)
+                           eli5_html=eli5_html, outlier=outlier, lime_probas=lime_probas, common_classifiers=common_classifiers)
 
 
 @bp.route('/non-sensitive-info', methods=('GET', 'POST'))
@@ -500,13 +530,13 @@ def non_sensitive_info():
             clf = chosen_clf
             change_clf(clf)
 
-    shap_html, lime_probas_html, visual_html, prediction, highlighting, eli5_html, outlier = get_visual_html(
+    shap_html, lime_probas_html, visual_html, prediction, highlighting, eli5_html, outlier, lime_probas, common_classifiers = get_visual_html(
         sensitivity, document_number, visual, clf)
 
     return render_template('classifier/non_sensitive_info.html', document_number=document_number+1, max_documents=max_documents,
                            curr_vis=visual, visual_html=visual_html, curr_clf=clf, shap_html=shap_html,
                            lime_probas_html=lime_probas_html, prediction=prediction, highlighting=highlighting,
-                           eli5_html=eli5_html, outlier=outlier)
+                           eli5_html=eli5_html, outlier=outlier, lime_probas=lime_probas, common_classifiers=common_classifiers)
 
 
 @bp.route('/single-document-sensitivity-info', methods=('GET', 'POST'))
@@ -543,14 +573,14 @@ def single_document_sensitivity_info():
     test_data = cross_val_stats["test_features_list"]
     test_labels = cross_val_stats["test_labels_list"]
 
-    shap_html, lime_probas_html, visual_html, isSensitive, prediction, highlighting, eli5_html, outlier = explainers(
+    shap_html, lime_probas_html, visual_html, isSensitive, prediction, highlighting, eli5_html, outlier, lime_probas, common_classifiers = explainers(
         document_number, test_data, test_labels, extra_indexs, visual, cross_val_stats)
 
     return render_template('classifier/single_document_sensitivity_info.html', document_number=document_number+1,
                            max_documents=max_documents, isSensitive=isSensitive, curr_vis=visual, curr_clf=clf,
                            lime_probas_html=lime_probas_html, shap_html=shap_html, visual_html=visual_html,
                            prediction=prediction, highlighting=highlighting, eli5_html=eli5_html,
-                           outlier=outlier)
+                           outlier=outlier, lime_probas=lime_probas, common_classifiers=common_classifiers)
 
 
 @bp.route('/general-sensitivity-info', methods=('GET', 'POST'))
