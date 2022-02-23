@@ -111,7 +111,7 @@
             <img src="{{url_for('static', filename='images/confidential_folders.png')}}" class="d-block w-100" alt="...">
             <div class="carousel-caption d-none d-md-block">
               <h3 class="black_text">Sensitive Information</h3>
-              <p class="carousel_text black_text">However, due to the sensitive nature of these documents, each document needs to be reviewed to identify and withhold any sensitivities.</p>
+              <p class="carousel_text black_text limit_text_width2">However, due to the sensitive nature of these documents, each document needs to be reviewed to identify and protect any sensitivities.</p>
             </div>
           </div>
         </div>
@@ -120,7 +120,7 @@
             <img src="{{url_for('static', filename='images/classifier.png')}}" class="d-block w-100" alt="...">
             <div class="carousel-caption d-none d-md-block">
               <h3 class="black_text">Classifiers</h3>
-              <p class="carousel_text black_text">This website helps solve this problem using three different classifiers. The first classifier is a linear model (logistic regression); the second classifier is a tree-based model (xgboost); and finally, the third model is a deep learning model (long short-term memory).</p>
+              <p class="carousel_text black_text limit_text_width">This website helps solve this problem using three different classifiers. The first classifier is a linear model (logistic regression); the second classifier is a tree-based model (xgboost); and finally, the third model is a deep learning model (long short-term memory).</p>
             </div>
           </div>
         </div>
@@ -154,7 +154,6 @@
       <span class="visually-hidden">Next</span>
     </button>
   </div>
-  <!-- <div class="back_image"> <div class="main_page_content"> <div class="half_text"> <div class="title"> WHY </div> Government departments, such as the Ministry of Defence, produce a large amount of written communications that are essential for the international operations of government. Freedom of Information Laws legislate that these documents should be released to the public. However, many of these documents contain sensitive information. Therefore, each document needs to be reviewed to identify and withhold any sensitivities. This website is a sensitivity review application that integrates automatic sensitivity classification. </div> <div class="half_text"> <div class="title"> How </div> This system displays documents along with the classifier's predictions as to whether the documents contain any sensitive information. Importantly, the system provides useful information to explain why it has predicted that a document is (not) sensitive, such as colour coded highlighting of important term features within a document. The system produces useful reports to visualise the similarities and differences between what the classifier belives to be the most important features of sensitivity and features that are present in the collection being reviewed. </div> <div class="large_spacing"></div> </div> <div class="ending"> To see the classifier and the explanations made by it, please register or login. </div> </div> -->
 
 {% endif %}
 

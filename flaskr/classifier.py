@@ -42,7 +42,7 @@ doc_length = np.sum(
     [len(LR_cross_val_stats["test_features_list"][i]) for i in range(folds)])
 
 #
-survey = False
+survey = True
 #
 
 
