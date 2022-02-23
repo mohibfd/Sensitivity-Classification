@@ -88,10 +88,16 @@
       <div class="double_dropdown">
         <form method="post">
           <div class="dropdown">
-            <button class="btn btn-secondary dropdown-toggle white_button" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
-              {{curr_vis}}
-              Visual
-            </button>
+            {% if curr_vis == 'None' %}
+              <button class="btn btn-secondary dropdown-toggle white_button" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+                No Visual
+              </button>
+            {% else %}
+              <button class="btn btn-secondary dropdown-toggle white_button" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+                {{curr_vis}}
+                Visual
+              </button>
+            {% endif %}
             <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
               <li>
                 <input class="dropdown-item" id="dropdown" type="submit" name="vis_option" value="LIME" onclick="loading();">
