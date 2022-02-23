@@ -702,6 +702,7 @@ def single_document_sensitivity_info():
     extra_indexs = [0 for _ in range(folds)]
 
     visual = get_visualisation()
+
     clf = get_clf()
 
     # user_id = g.user['id']
@@ -732,6 +733,10 @@ def single_document_sensitivity_info():
         change_docs = request.form.get('submit_button')
 
         if change_docs:
+            if survey:
+                visual = None
+                change_visual('None')
+
             document_number = change_doc(
                 document_number, max_documents)
         elif chosen_vis:
