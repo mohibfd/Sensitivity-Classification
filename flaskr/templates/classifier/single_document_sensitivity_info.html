@@ -237,6 +237,7 @@
           ...
         </div>
 
+        <!-- # user eval -->
         {% if document_number == 1 %}
           <li class="page-item">
             <input class="page-link small_btn" type="submit" name="submit_button" value="{{document_number+1}}" onclick="loading();">
@@ -247,12 +248,8 @@
           <li class="page-item">
             <input class="page-link small_btn" type="submit" name="submit_button" value="{{document_number+3}}" onclick="loading();">
           </li>
-          <li class="page-item">
-            <input class="page-link small_btn" type="submit" name="submit_button" value="{{document_number+4}}" onclick="loading();">
-          </li>
-          <li class="page-item">
-            <input class="page-link small_btn" type="submit" name="submit_button" value="{{document_number+5}}" onclick="loading();">
-          </li>
+          <!-- <li class="page-item"> <input class="page-link small_btn" type="submit" name="submit_button" value="{{document_number+4}}" onclick="loading();"> </li> -->
+          <!-- <li class="page-item"> <input class="page-link small_btn" type="submit" name="submit_button" value="{{document_number+5}}" onclick="loading();"> </li> -->
         {% elif document_number == 2 %}
           <li class="page-item active">
             <input class="page-link small_btn" type="submit" name="submit_button" value="{{document_number}}" onclick="loading();">
@@ -263,12 +260,7 @@
           <li class="page-item">
             <input class="page-link small_btn" type="submit" name="submit_button" value="{{document_number+2}}" onclick="loading();">
           </li>
-          <li class="page-item">
-            <input class="page-link small_btn" type="submit" name="submit_button" value="{{document_number+3}}" onclick="loading();">
-          </li>
-          <li class="page-item">
-            <input class="page-link small_btn" type="submit" name="submit_button" value="{{document_number+4}}" onclick="loading();">
-          </li>
+          <!-- <li class="page-item"> <input class="page-link small_btn" type="submit" name="submit_button" value="{{document_number+3}}" onclick="loading();"> </li> <li class="page-item"> <input class="page-link small_btn" type="submit" name="submit_button" value="{{document_number+4}}" onclick="loading();"> </li> -->
         {% elif document_number == 3 %}
           <li class="page-item">
             <input class="page-link small_btn" type="submit" name="submit_button" value="{{document_number-1}}" onclick="loading();">
@@ -279,12 +271,7 @@
           <li class="page-item">
             <input class="page-link small_btn" type="submit" name="submit_button" value="{{document_number+1}}" onclick="loading();">
           </li>
-          <li class="page-item">
-            <input class="page-link small_btn" type="submit" name="submit_button" value="{{document_number+2}}" onclick="loading();">
-          </li>
-          <li class="page-item">
-            <input class="page-link small_btn" type="submit" name="submit_button" value="{{document_number+3}}" onclick="loading();">
-          </li>
+          <!-- <li class="page-item"> <input class="page-link small_btn" type="submit" name="submit_button" value="{{document_number+2}}" onclick="loading();"> </li> <li class="page-item"> <input class="page-link small_btn" type="submit" name="submit_button" value="{{document_number+3}}" onclick="loading();"> </li> -->
         {% elif document_number < max_documents - 2 %}
           <li class="page-item">
             <input class="page-link small_btn" type="submit" name="submit_button" value="{{document_number-2}}" onclick="loading();">
@@ -295,12 +282,7 @@
           <li class="page-item active">
             <input class="page-link small_btn" type="submit" name="submit_button" value="{{document_number}}" onclick="loading();">
           </li>
-          <li class="page-item">
-            <input class="page-link small_btn" type="submit" name="submit_button" value="{{document_number+1}}" onclick="loading();">
-          </li>
-          <li class="page-item">
-            <input class="page-link small_btn" type="submit" name="submit_button" value="{{document_number+2}}" onclick="loading();">
-          </li>
+          <!-- <li class="page-item"> <input class="page-link small_btn" type="submit" name="submit_button" value="{{document_number+1}}" onclick="loading();"> </li> <li class="page-item"> <input class="page-link small_btn" type="submit" name="submit_button" value="{{document_number+2}}" onclick="loading();"> </li> -->
         {% elif document_number == max_documents - 2 %}
           <li class="page-item">
             <input class="page-link small_btn" type="submit" name="submit_button" value="{{document_number-3}}" onclick="loading();">
@@ -311,19 +293,10 @@
           <li class="page-item">
             <input class="page-link small_btn" type="submit" name="submit_button" value="{{document_number-1}}" onclick="loading();">
           </li>
-          <li class="page-item active">
-            <input class="page-link small_btn" type="submit" name="submit_button" value="{{document_number}}" onclick="loading();">
-          </li>
-          <li class="page-item">
-            <input class="page-link small_btn" type="submit" name="submit_button" value="{{document_number+1}}" onclick="loading();">
-          </li>
+          <!-- <li class="page-item active"> <input class="page-link small_btn" type="submit" name="submit_button" value="{{document_number}}" onclick="loading();"> </li> <li class="page-item"> <input class="page-link small_btn" type="submit" name="submit_button" value="{{document_number+1}}" onclick="loading();"> </li> -->
         {% elif document_number == max_documents - 1 %}
-          <li class="page-item">
-            <input class="page-link small_btn" type="submit" name="submit_button" value="{{document_number-4}}" onclick="loading();">
-          </li>
-          <li class="page-item">
-            <input class="page-link small_btn" type="submit" name="submit_button" value="{{document_number-3}}" onclick="loading();">
-          </li>
+          <!-- <li class="page-item"> <input class="page-link small_btn" type="submit" name="submit_button" value="{{document_number-4}}" onclick="loading();"> </li> -->
+          <!-- <li class="page-item"> <input class="page-link small_btn" type="submit" name="submit_button" value="{{document_number-3}}" onclick="loading();"> </li> -->
           <li class="page-item">
             <input class="page-link small_btn" type="submit" name="submit_button" value="{{document_number-2}}" onclick="loading();">
           </li>
@@ -334,12 +307,7 @@
             <input class="page-link small_btn" type="submit" name="submit_button" value="{{document_number}}" onclick="loading();">
           </li>
         {% else %}
-          <li class="page-item">
-            <input class="page-link small_btn" type="submit" name="submit_button" value="{{document_number-5}}" onclick="loading();">
-          </li>
-          <li class="page-item">
-            <input class="page-link small_btn" type="submit" name="submit_button" value="{{document_number-4}}" onclick="loading();">
-          </li>
+          <!-- <li class="page-item"> <input class="page-link small_btn" type="submit" name="submit_button" value="{{document_number-5}}" onclick="loading();"> </li> <li class="page-item"> <input class="page-link small_btn" type="submit" name="submit_button" value="{{document_number-4}}" onclick="loading();"> </li> -->
           <li class="page-item">
             <input class="page-link small_btn" type="submit" name="submit_button" value="{{document_number-3}}" onclick="loading();">
           </li>

@@ -41,6 +41,10 @@ folds = len(LR_cross_val_stats["classifiers"])
 doc_length = np.sum(
     [len(LR_cross_val_stats["test_features_list"][i]) for i in range(folds)])
 
+#
+survey = False
+#
+
 
 def decontract(text):
     text = re.sub(r"won\'t", "will not", text)
@@ -250,16 +254,41 @@ def explainers(document_index: int, test_data: pd, test_labels: pd, extra_indexs
 
     document_index -= fold_length * index + extra_indexs[index]
 
-    # index = 4
-    # document_index = 713
+    survey_documents = test_data
 
-    specific_test = test_data[index].iloc[document_index]
+    specific_test = ''
+    if survey:
+        # user eval
+        if document_index == 0:
+            specific_test = survey_documents[0]
+            index = 0
+            document_index = 565
+        elif document_index == 1:
+            specific_test = survey_documents[1]
+            index = 1
+            document_index = 616
+        elif document_index == 2:
+            specific_test = survey_documents[2]
+            index = 2
+            document_index = 142
+        elif document_index == 3:
+            specific_test = survey_documents[3]
+            index = 3
+            document_index = 575
+        elif document_index == 4:
+            specific_test = survey_documents[4]
+            index = 4
+            document_index = 713
+    else:
+        specific_test = test_data[index].iloc[document_index]
+
     vectorizer = cross_val_stats["vectorizers"][index]
     model = cross_val_stats["classifiers"][index]
     clf_name = get_clf()
     max_len = 150
 
     def lime_explain(text_only=False, probas_only=False, lime_values=None):
+
         # lime_data = specific_test
         lime_data = specific_test[0:2000]
 
@@ -317,32 +346,36 @@ def explainers(document_index: int, test_data: pd, test_labels: pd, extra_indexs
             force_plot = shap.plots.force(
                 explainer.expected_value, shap_values[document_index], feature_names=vectorizer.get_feature_names(), matplotlib=False)
         else:
-            X_train = cross_val_stats["train_features_list"][index]
-            X_test = cross_val_stats["test_features_list"][index]
+            if survey:
+                force_plot = pickle.load(
+                    open(MODEL_PATH + "LSTM_shap_surveys.pkl", 'rb'))[index]
+            else:
+                X_train = cross_val_stats["train_features_list"][index]
+                X_test = cross_val_stats["test_features_list"][index]
 
-            sequences = vectorizer.texts_to_sequences(X_train)
-            sequences_matrix = sequence.pad_sequences(
-                sequences, maxlen=max_len)
+                sequences = vectorizer.texts_to_sequences(X_train)
+                sequences_matrix = sequence.pad_sequences(
+                    sequences, maxlen=max_len)
 
-            processed = []
-            for i in X_test:
-                processed.append(process_text(i))
+                processed = []
+                for i in X_test:
+                    processed.append(process_text(i))
 
-            test_sequences = vectorizer.texts_to_sequences(processed)
-            test_sequences_matrix = sequence.pad_sequences(
-                test_sequences, maxlen=max_len)
+                test_sequences = vectorizer.texts_to_sequences(processed)
+                test_sequences_matrix = sequence.pad_sequences(
+                    test_sequences, maxlen=max_len)
 
-            explainer = shap.DeepExplainer(model, sequences_matrix)
+                explainer = shap.DeepExplainer(model, sequences_matrix)
 
-            words = vectorizer.word_index
-            num2word = {}
-            for w in words.keys():
-                num2word[words[w]] = w
-            x_test_words = np.stack([np.array(list(map(lambda x: num2word.get(
-                x, "NONE"), test_sequences_matrix[i]))) for i in range(len(shap_values[0]))])
+                words = vectorizer.word_index
+                num2word = {}
+                for w in words.keys():
+                    num2word[words[w]] = w
+                x_test_words = np.stack([np.array(list(map(lambda x: num2word.get(
+                    x, "NONE"), test_sequences_matrix[i]))) for i in range(len(shap_values[0]))])
 
-            force_plot = shap.plots.force(
-                explainer.expected_value[0], shap_values[0][document_index], x_test_words[document_index])
+                force_plot = shap.plots.force(
+                    explainer.expected_value[0], shap_values[0][document_index], x_test_words[document_index])
 
         shap_html = f"<head>{shap.getjs()}</head><body>{force_plot.html()}</body>"
 
@@ -373,25 +406,44 @@ def explainers(document_index: int, test_data: pd, test_labels: pd, extra_indexs
     if visual == 'LIME':
         vis_html = lime_explain(text_only=True, lime_values=lime_values)
     elif visual == 'ELI5':
+        # Survey
         eli5_predictions = []
         if clf_name == 'LR':
-            eli5_predictions = pickle.load(
-                open(MODEL_PATH + "LR_ELI5_explanations.pkl", 'rb'))["predictions"]
+            if survey:
+                eli5_predictions = pickle.load(
+                    open(MODEL_PATH + "LR_eli5_explanations_survey.pkl", 'rb'))["predictions"]
+            else:
+                eli5_predictions = pickle.load(
+                    open(MODEL_PATH + "LR_ELI5_explanations.pkl", 'rb'))["predictions"]
         elif clf_name == 'XGB':
-            eli5_predictions = pickle.load(
-                open(MODEL_PATH + "XGB_ELI5_explanations.pkl", 'rb'))["predictions"]
+            if survey:
+                eli5_predictions = pickle.load(
+                    open(MODEL_PATH + "XGB_eli5_explanations_survey.pkl", 'rb'))["predictions"]
+            else:
+                eli5_predictions = pickle.load(
+                    open(MODEL_PATH + "XGB_ELI5_explanations.pkl", 'rb'))["predictions"]
         else:
-            eli5_predictions = pickle.load(
-                open(MODEL_PATH + "LSTM_ELI5_explanations.pkl", 'rb'))["predictions"]
+            if survey:
+                eli5_predictions = pickle.load(
+                    open(MODEL_PATH + "LSTM_eli5_explanations_survey.pkl", 'rb'))["predictions"]
+            else:
+                eli5_predictions = pickle.load(
+                    open(MODEL_PATH + "LSTM_ELI5_explanations.pkl", 'rb'))["predictions"]
 
-        vis_html = eli5_predictions[index][document_index]
+        if survey:
+            vis_html = eli5_predictions[index]
+        else:
+            vis_html = eli5_predictions[index][document_index]
+
     else:
         vis_html = specific_test.lower()
         highlighting = False
 
     test_labels = test_labels[index]
-    isSensitive = (
-        "Sensitive" if test_labels.iloc[document_index] else "Non-Sensitive")
+    # user eval
+    # isSensitive = (
+    # "Sensitive" if test_labels.iloc[document_index] else "Non-Sensitive")
+    isSensitive = None
 
     def predictor(texts):
         sens_clfs = []
@@ -453,8 +505,21 @@ def get_visual_html(sensitivity: int, document_number: int, visual: str, clf: st
 
     cross_val_stats = get_clf_stats(clf)
 
+    test_data = []
     test_data, test_labels, extra_indexs = get_specific_sens(
         sensitivity, cross_val_stats)
+
+    if survey:
+        survey_documents = pickle.load(
+            open(MODEL_PATH + "survey_documents.pkl", 'rb'))
+
+        if sensitivity == 1:
+            test_data = [survey_documents[0], survey_documents[1],
+                         survey_documents[2], survey_documents[4]]
+        else:
+            test_data = [survey_documents[0], survey_documents[1],
+                         survey_documents[2], survey_documents[3]]
+    # else:
 
     shap_html, lime_probas_html, visual_html, _, prediction, highlighting, eli5_html, outlier, lime_probas, common_classifiers = explainers(
         document_number, test_data, test_labels, extra_indexs, visual, cross_val_stats)
@@ -472,9 +537,24 @@ def classifier_main_page():
 def sensitive_info():
     sensitivity = 1
 
-    document_number = get_doc_num(sensitivity)
+    document_number = 0
+    if survey:
+        user_id = g.user['id']
+        db = get_db()
+        document_number = db.execute(
+            'SELECT document_number FROM user WHERE id = ?', (user_id,)
+        ).fetchone()[0] + 1
+        if document_number == 5:
+            document_number = 4
+    else:
+        document_number = get_doc_num(sensitivity)
 
-    max_documents = data_labels.value_counts()[sensitivity]
+    # user eval
+    max_documents = 0
+    if survey:
+        max_documents = 4
+    else:
+        max_documents = data_labels.value_counts()[sensitivity]
 
     visual = get_visualisation()
 
@@ -482,23 +562,48 @@ def sensitive_info():
 
     if request.method == 'POST':
         chosen_vis = request.form.get('vis_option')
-
         chosen_clf = request.form.get('clf_option')
+        change_docs = request.form.get('submit_button')
 
-        if chosen_vis == None and chosen_clf == None:
+        if change_docs:
             document_number = change_doc(
-                document_number, max_documents, sensitivity)
-        elif chosen_clf == None:
+                document_number, max_documents) + 1
+        elif chosen_vis:
             visual = chosen_vis
             change_visual(visual)
-        else:
+        elif chosen_clf:
             clf = chosen_clf
             change_clf(clf)
+        else:
+            user_features = [request.form.get(
+                f'feature{i}') for i in range(1, 6)]
+            radio_option_clf = request.form.get('inlineRadioOptions')
+            error = None
+
+            for i in user_features:
+                if i == '':
+                    error = "Please enter 5 features"
+                    flash(error)
+                    break
+
+            outlier = request.form.get('outlier_name')
+            if radio_option_clf == None and outlier != 'None':
+                error = "Please choose one of the classifiers"
+                flash(error)
+
+            if error is None:
+                db = get_db()
+                db.execute(
+                    "INSERT INTO survey (author_id, document_number, feature1, feature2, feature3, feature4, feature5, classifiers_chosen) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+                    (g.user['id'], document_number, user_features[0], user_features[1],
+                     user_features[2], user_features[3], user_features[4], radio_option_clf),
+                )
+                db.commit()
 
     shap_html, lime_probas_html, visual_html, prediction, highlighting, eli5_html, outlier, lime_probas, common_classifiers = get_visual_html(
         sensitivity, document_number, visual, clf)
 
-    return render_template('classifier/sensitive_info.html', document_number=document_number+1, max_documents=max_documents,
+    return render_template('classifier/sensitive_info.html', document_number=document_number, max_documents=max_documents,
                            curr_vis=visual, visual_html=visual_html, curr_clf=clf, shap_html=shap_html,
                            lime_probas_html=lime_probas_html, prediction=prediction, highlighting=highlighting,
                            eli5_html=eli5_html, outlier=outlier, lime_probas=lime_probas, common_classifiers=common_classifiers)
@@ -509,9 +614,24 @@ def sensitive_info():
 def non_sensitive_info():
     sensitivity = 0
 
-    document_number = get_doc_num(sensitivity)
+    document_number = 0
+    if survey:
+        user_id = g.user['id']
+        db = get_db()
+        document_number = db.execute(
+            'SELECT document_number FROM user WHERE id = ?', (user_id,)
+        ).fetchone()[0] + 1
+        if document_number == 5:
+            document_number = 4
+    else:
+        document_number = get_doc_num(sensitivity)
 
-    max_documents = data_labels.value_counts()[sensitivity]
+    # user eval
+    max_documents = 0
+    if survey:
+        max_documents = 4
+    else:
+        max_documents = data_labels.value_counts()[sensitivity]
 
     visual = get_visualisation()
 
@@ -519,23 +639,48 @@ def non_sensitive_info():
 
     if request.method == 'POST':
         chosen_vis = request.form.get('vis_option')
-
         chosen_clf = request.form.get('clf_option')
+        change_docs = request.form.get('submit_button')
 
-        if chosen_vis == None and chosen_clf == None:
+        if change_docs:
             document_number = change_doc(
-                document_number, max_documents, sensitivity)
-        elif chosen_clf == None:
+                document_number, max_documents) + 1
+        elif chosen_vis:
             visual = chosen_vis
             change_visual(visual)
-        else:
+        elif chosen_clf:
             clf = chosen_clf
             change_clf(clf)
+        else:
+            user_features = [request.form.get(
+                f'feature{i}') for i in range(1, 6)]
+            radio_option_clf = request.form.get('inlineRadioOptions')
+            error = None
+
+            for i in user_features:
+                if i == '':
+                    error = "Please enter 5 features"
+                    flash(error)
+                    break
+
+            outlier = request.form.get('outlier_name')
+            if radio_option_clf == None and outlier != 'None':
+                error = "Please choose one of the classifiers"
+                flash(error)
+
+            if error is None:
+                db = get_db()
+                db.execute(
+                    "INSERT INTO survey (author_id, document_number, feature1, feature2, feature3, feature4, feature5, classifiers_chosen) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+                    (g.user['id'], document_number, user_features[0], user_features[1],
+                     user_features[2], user_features[3], user_features[4], radio_option_clf),
+                )
+                db.commit()
 
     shap_html, lime_probas_html, visual_html, prediction, highlighting, eli5_html, outlier, lime_probas, common_classifiers = get_visual_html(
         sensitivity, document_number, visual, clf)
 
-    return render_template('classifier/non_sensitive_info.html', document_number=document_number+1, max_documents=max_documents,
+    return render_template('classifier/non_sensitive_info.html', document_number=document_number, max_documents=max_documents,
                            curr_vis=visual, visual_html=visual_html, curr_clf=clf, shap_html=shap_html,
                            lime_probas_html=lime_probas_html, prediction=prediction, highlighting=highlighting,
                            eli5_html=eli5_html, outlier=outlier, lime_probas=lime_probas, common_classifiers=common_classifiers)
@@ -547,12 +692,16 @@ def single_document_sensitivity_info():
 
     document_number = get_doc_num()
 
-    max_documents = len(data_labels)
+    # user eval
+    max_documents = 0
+    if survey:
+        max_documents = 5
+    else:
+        max_documents = len(data_labels)
 
     extra_indexs = [0 for _ in range(folds)]
 
     visual = get_visualisation()
-
     clf = get_clf()
 
     # user_id = g.user['id']
@@ -617,15 +766,14 @@ def single_document_sensitivity_info():
                 )
                 db.commit()
 
-            user_id = g.user['id']
-
-            feat1 = db.execute(
-                'SELECT feature1 FROM survey WHERE author_id = ?', (user_id,)
-            ).fetchone()[0]
-
     cross_val_stats = get_clf_stats(clf)
 
-    test_data = cross_val_stats["test_features_list"]
+    test_data = []
+    if survey:
+        test_data = pickle.load(
+            open(MODEL_PATH + "survey_documents.pkl", 'rb'))
+    else:
+        test_data = cross_val_stats["test_features_list"]
     test_labels = cross_val_stats["test_labels_list"]
 
     shap_html, lime_probas_html, visual_html, isSensitive, prediction, highlighting, eli5_html, outlier, lime_probas, common_classifiers = explainers(

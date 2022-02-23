@@ -544,6 +544,7 @@ input[id="dropdown"] {
    flex: 1;
    justify-content: flex-end;
    height: 40px;
+   margin-bottom: 1%;
 }
 .move_top {
    margin-bottom: 50px;

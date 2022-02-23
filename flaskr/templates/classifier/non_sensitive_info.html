@@ -14,65 +14,146 @@
 {% endblock %}
 
 {% block content %}
-
   <div class="page_padding">
     <div id="loading" class="spinner-border end" role="status">
       <span class="visually-hidden">Loading...</span>
     </div>
 
-    {{prediction}}
-
-    <div class="double_dropdown">
-      <form method="post">
-        <div class="dropdown">
-          <button class="btn btn-secondary dropdown-toggle white_button" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
-            {{curr_vis}}
-            Visual
-          </button>
-          <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
-            <li>
-              <input class="dropdown-item" id="dropdown" type="submit" name="vis_option" value="LIME" onclick="loading();">
-            </li>
-            <li>
-              <input class="dropdown-item" id="dropdown" type="submit" name="vis_option" value="ELI5" onclick="loading();">
-            </li>
-            <li>
-              <input class="dropdown-item" id="dropdown" type="submit" name="vis_option" value="None" onclick="loading();">
-            </li>
-          </ul>
-
-          <button class="btn btn-secondary dropdown-toggle white_button" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
-            {{curr_clf}}
-            Classifier
-          </button>
-          <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
-            <li>
-              <input class="dropdown-item" id="dropdown" type="submit" name="clf_option" value="LR" onclick="loading();">
-            </li>
-            <li>
-              <input class="dropdown-item" id="dropdown" type="submit" name="clf_option" value="XGB" onclick="loading();">
-            </li>
-            <li>
-              <input class="dropdown-item" id="dropdown" type="submit" name="clf_option" value="LSTM" onclick="loading();">
-            </li>
-          </ul>
+    <div class="flex">
+      <div class="predic_container column">
+        <div class="vertical_center">
+          Predictions
         </div>
-      </form>
-    </div>
+        <div class="inline center">
+          {% if outlier == 'LR' %}
+            <div class="outlier column">
+              <div class="model_name">
+                LR
+              </div>
+              <div>
+                {{prediction[1]['LR']}}
+              </div>
+            </div>
+          {% else %}
+            <div class="column">
+              <div class="model_name">
+                LR
+              </div>
+              <div>
+                {{prediction[1]['LR']}}
+              </div>
+            </div>
+          {% endif %}
+          {% if outlier == 'XGB' %}
+            <div class="outlier column">
+              <div class="model_name">
+                XGB
+              </div>
+              <div>
+                {{prediction[2]['XGB']}}
+              </div>
+            </div>
+          {% else %}
+            <div class="column">
+              <div class="model_name">
+                XGB
+              </div>
+              <div>
+                {{prediction[2]['XGB']}}
+              </div>
+            </div>
+          {% endif %}
+          {% if outlier == 'LSTM' %}
+            <div class="outlier column">
+              <div class="model_name">
+                LSTM
+              </div>
+              <div>
+                {{prediction[0]['LSTM']}}
+              </div>
+            </div>
+          {% else %}
+            <div class="column">
+              <div class="model_name">
+                LSTM
+              </div>
+              <div>
+                {{prediction[0]['LSTM']}}
+              </div>
+            </div>
+          {% endif %}
+        </div>
 
-    <!-- <div class="double_dropdown"> <form method="post"> <div> <select name="vis_options"> {% for option in vis_options %} <option value="{{ option }}" name="vis_options" selected="SELECTED">{{ option }}</option> {% endfor %} </select> <select name="clf_options"> {% for clf in clf_options %} <option value="{{ clf }}" name="clf_options" selected="SELECTED">{{ clf }}</option> {% endfor %} </select> <input type="submit" name="options_button" value="submit" onclick="loading();"> </div> </form> </div> -->
+      </div>
+      <div class="double_dropdown">
+        <form method="post">
+          <div class="dropdown">
+            <button class="btn btn-secondary dropdown-toggle white_button" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+              {{curr_vis}}
+              Visual
+            </button>
+            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+              <li>
+                <input class="dropdown-item" id="dropdown" type="submit" name="vis_option" value="LIME" onclick="loading();">
+              </li>
+              <li>
+                <input class="dropdown-item" id="dropdown" type="submit" name="vis_option" value="ELI5" onclick="loading();">
+              </li>
+              <li>
+                <input class="dropdown-item" id="dropdown" type="submit" name="vis_option" value="None" onclick="loading();">
+              </li>
+            </ul>
+            <button class="btn btn-secondary dropdown-toggle white_button" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+              {{curr_clf}}
+              Classifier
+            </button>
+            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+              <li>
+                <input class="dropdown-item" id="dropdown" type="submit" name="clf_option" value="LR" onclick="loading();">
+              </li>
+              <li>
+                <input class="dropdown-item" id="dropdown" type="submit" name="clf_option" value="XGB" onclick="loading();">
+              </li>
+              <li>
+                <input class="dropdown-item" id="dropdown" type="submit" name="clf_option" value="LSTM" onclick="loading();">
+              </li>
+            </ul>
+          </div>
+        </form>
+      </div>
+      <div class="predic_container center_flex">
+        <div class="large_horiz_space"></div>
+        <div class="large_horiz_space"></div>
+        <div class="large_horiz_space"></div>
+
+        {% if lime_probas %}
+          <div class="move_top">
+            {{curr_clf}}
+          </div>
+          {{lime_probas|safe }}
+        {% endif %}
+      </div>
+    </div>
 
     <hr>
 
     <div class="visuals_container">
+
+      {% if lime_probas_html %}
+        {{ lime_probas_html|safe }}
+      {% endif %}
+
       <div class="shap">
         {% if shap_html %}
           {{ shap_html|safe }}
         {% endif %}
       </div>
 
-      {% if lime_probas_html %}
-        {{ lime_probas_html|safe }}
+      <div class="large_horiz_space"></div>
+      <div class="large_horiz_space"></div>
+
+      {% if eli5_html %}
+        {{ eli5_html|safe }}
       {% endif %}
     </div>
 
@@ -87,6 +168,43 @@
       {% endif %}
     {% endif %}
     <div class="large_spacing"></div>
+  </div>
+
+  <hr>
+
+  <div class="questionnaire column">
+    <form method="post">
+      <div class="row">
+        Please write the top five features (words) that you found most helpful.
+        <div class="row end_response">
+          <input type="text" name="feature1" class="form-control limit_width" placeholder="Feature 1">
+          <input type="text" name="feature2" class="form-control limit_width" placeholder="Feature 2">
+          <input type="text" name="feature3" class="form-control limit_width" placeholder="Feature 3">
+          <input type="text" name="feature4" class="form-control limit_width" placeholder="Feature 4">
+          <input type="text" name="feature5" class="form-control limit_width" placeholder="Feature 5">
+        </div>
+      </div>
+      {% if outlier != None %}
+        <div class="row">
+          There is a disagreement between the classifiers. Please state which classifier(s) you think is (are) correct.
+          <div class="end_response">
+            <div class="form-check form-check-inline">
+              <input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio1" value="{{outlier}}">
+              <label class="form-check-label" for="inlineRadio1">{{outlier}}</label>
+            </div>
+            <div class="form-check form-check-inline">
+              <input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio2" value="{{common_classifiers}}">
+              <label class="form-check-label" for="inlineRadio2">{{common_classifiers}}</label>
+            </div>
+          </div>
+        </div>
+      {% endif %}
+      <div class="questionnaire_btn">
+        <input class="btn btn-primary btn-mid" type="submit" value="Submit" onclick="loading();">
+        <input type="text" name="outlier_name" class="invisible" placeholder="Feature 5" value="{{outlier}}">
+
+      </div>
+    </form>
 
   </div>
 
@@ -117,6 +235,7 @@
           ...
         </div>
 
+        <!-- # user eval -->
         {% if document_number == 1 %}
           <li class="page-item">
             <input class="page-link small_btn" type="submit" name="submit_button" value="{{document_number+1}}" onclick="loading();">
@@ -124,15 +243,9 @@
           <li class="page-item">
             <input class="page-link small_btn" type="submit" name="submit_button" value="{{document_number+2}}" onclick="loading();">
           </li>
-          <li class="page-item">
-            <input class="page-link small_btn" type="submit" name="submit_button" value="{{document_number+3}}" onclick="loading();">
-          </li>
-          <li class="page-item">
-            <input class="page-link small_btn" type="submit" name="submit_button" value="{{document_number+4}}" onclick="loading();">
-          </li>
-          <li class="page-item">
-            <input class="page-link small_btn" type="submit" name="submit_button" value="{{document_number+5}}" onclick="loading();">
-          </li>
+          <!-- <li class="page-item"> <input class="page-link small_btn" type="submit" name="submit_button" value="{{document_number+3}}" onclick="loading();"> </li> -->
+          <!-- <li class="page-item"> <input class="page-link small_btn" type="submit" name="submit_button" value="{{document_number+4}}" onclick="loading();"> </li> -->
+          <!-- <li class="page-item"> <input class="page-link small_btn" type="submit" name="submit_button" value="{{document_number+5}}" onclick="loading();"> </li> -->
         {% elif document_number == 2 %}
           <li class="page-item active">
             <input class="page-link small_btn" type="submit" name="submit_button" value="{{document_number}}" onclick="loading();">
@@ -140,15 +253,8 @@
           <li class="page-item">
             <input class="page-link small_btn" type="submit" name="submit_button" value="{{document_number+1}}" onclick="loading();">
           </li>
-          <li class="page-item">
-            <input class="page-link small_btn" type="submit" name="submit_button" value="{{document_number+2}}" onclick="loading();">
-          </li>
-          <li class="page-item">
-            <input class="page-link small_btn" type="submit" name="submit_button" value="{{document_number+3}}" onclick="loading();">
-          </li>
-          <li class="page-item">
-            <input class="page-link small_btn" type="submit" name="submit_button" value="{{document_number+4}}" onclick="loading();">
-          </li>
+          <!-- <li class="page-item"> <input class="page-link small_btn" type="submit" name="submit_button" value="{{document_number+2}}" onclick="loading();"> </li> -->
+          <!-- <li class="page-item"> <input class="page-link small_btn" type="submit" name="submit_button" value="{{document_number+3}}" onclick="loading();"> </li> <li class="page-item"> <input class="page-link small_btn" type="submit" name="submit_button" value="{{document_number+4}}" onclick="loading();"> </li> -->
         {% elif document_number == 3 %}
           <li class="page-item">
             <input class="page-link small_btn" type="submit" name="submit_button" value="{{document_number-1}}" onclick="loading();">
@@ -156,15 +262,8 @@
           <li class="page-item active">
             <input class="page-link small_btn" type="submit" name="submit_button" value="{{document_number}}" onclick="loading();">
           </li>
-          <li class="page-item">
-            <input class="page-link small_btn" type="submit" name="submit_button" value="{{document_number+1}}" onclick="loading();">
-          </li>
-          <li class="page-item">
-            <input class="page-link small_btn" type="submit" name="submit_button" value="{{document_number+2}}" onclick="loading();">
-          </li>
-          <li class="page-item">
-            <input class="page-link small_btn" type="submit" name="submit_button" value="{{document_number+3}}" onclick="loading();">
-          </li>
+          <!-- <li class="page-item"> <input class="page-link small_btn" type="submit" name="submit_button" value="{{document_number+1}}" onclick="loading();"> </li> -->
+          <!-- <li class="page-item"> <input class="page-link small_btn" type="submit" name="submit_button" value="{{document_number+2}}" onclick="loading();"> </li> <li class="page-item"> <input class="page-link small_btn" type="submit" name="submit_button" value="{{document_number+3}}" onclick="loading();"> </li> -->
         {% elif document_number < max_documents - 2 %}
           <li class="page-item">
             <input class="page-link small_btn" type="submit" name="submit_button" value="{{document_number-2}}" onclick="loading();">
@@ -172,15 +271,8 @@
           <li class="page-item">
             <input class="page-link small_btn" type="submit" name="submit_button" value="{{document_number-1}}" onclick="loading();">
           </li>
-          <li class="page-item active">
-            <input class="page-link small_btn" type="submit" name="submit_button" value="{{document_number}}" onclick="loading();">
-          </li>
-          <li class="page-item">
-            <input class="page-link small_btn" type="submit" name="submit_button" value="{{document_number+1}}" onclick="loading();">
-          </li>
-          <li class="page-item">
-            <input class="page-link small_btn" type="submit" name="submit_button" value="{{document_number+2}}" onclick="loading();">
-          </li>
+          <!-- <li class="page-item active"> <input class="page-link small_btn" type="submit" name="submit_button" value="{{document_number}}" onclick="loading();"> </li> -->
+          <!-- <li class="page-item"> <input class="page-link small_btn" type="submit" name="submit_button" value="{{document_number+1}}" onclick="loading();"> </li> <li class="page-item"> <input class="page-link small_btn" type="submit" name="submit_button" value="{{document_number+2}}" onclick="loading();"> </li> -->
         {% elif document_number == max_documents - 2 %}
           <li class="page-item">
             <input class="page-link small_btn" type="submit" name="submit_button" value="{{document_number-3}}" onclick="loading();">
@@ -188,25 +280,12 @@
           <li class="page-item">
             <input class="page-link small_btn" type="submit" name="submit_button" value="{{document_number-2}}" onclick="loading();">
           </li>
-          <li class="page-item">
-            <input class="page-link small_btn" type="submit" name="submit_button" value="{{document_number-1}}" onclick="loading();">
-          </li>
-          <li class="page-item active">
-            <input class="page-link small_btn" type="submit" name="submit_button" value="{{document_number}}" onclick="loading();">
-          </li>
-          <li class="page-item">
-            <input class="page-link small_btn" type="submit" name="submit_button" value="{{document_number+1}}" onclick="loading();">
-          </li>
+          <!-- <li class="page-item"> <input class="page-link small_btn" type="submit" name="submit_button" value="{{document_number-1}}" onclick="loading();"> </li> -->
+          <!-- <li class="page-item active"> <input class="page-link small_btn" type="submit" name="submit_button" value="{{document_number}}" onclick="loading();"> </li> <li class="page-item"> <input class="page-link small_btn" type="submit" name="submit_button" value="{{document_number+1}}" onclick="loading();"> </li> -->
         {% elif document_number == max_documents - 1 %}
-          <li class="page-item">
-            <input class="page-link small_btn" type="submit" name="submit_button" value="{{document_number-4}}" onclick="loading();">
-          </li>
-          <li class="page-item">
-            <input class="page-link small_btn" type="submit" name="submit_button" value="{{document_number-3}}" onclick="loading();">
-          </li>
-          <li class="page-item">
-            <input class="page-link small_btn" type="submit" name="submit_button" value="{{document_number-2}}" onclick="loading();">
-          </li>
+          <!-- <li class="page-item"> <input class="page-link small_btn" type="submit" name="submit_button" value="{{document_number-4}}" onclick="loading();"> </li> -->
+          <!-- <li class="page-item"> <input class="page-link small_btn" type="submit" name="submit_button" value="{{document_number-3}}" onclick="loading();"> </li> -->
+          <!-- <li class="page-item"> <input class="page-link small_btn" type="submit" name="submit_button" value="{{document_number-2}}" onclick="loading();"> </li> -->
           <li class="page-item">
             <input class="page-link small_btn" type="submit" name="submit_button" value="{{document_number-1}}" onclick="loading();">
           </li>
@@ -214,15 +293,8 @@
             <input class="page-link small_btn" type="submit" name="submit_button" value="{{document_number}}" onclick="loading();">
           </li>
         {% else %}
-          <li class="page-item">
-            <input class="page-link small_btn" type="submit" name="submit_button" value="{{document_number-5}}" onclick="loading();">
-          </li>
-          <li class="page-item">
-            <input class="page-link small_btn" type="submit" name="submit_button" value="{{document_number-4}}" onclick="loading();">
-          </li>
-          <li class="page-item">
-            <input class="page-link small_btn" type="submit" name="submit_button" value="{{document_number-3}}" onclick="loading();">
-          </li>
+          <!-- <li class="page-item"> <input class="page-link small_btn" type="submit" name="submit_button" value="{{document_number-5}}" onclick="loading();"> </li> <li class="page-item"> <input class="page-link small_btn" type="submit" name="submit_button" value="{{document_number-4}}" onclick="loading();"> </li> -->
+          <!-- <li class="page-item"> <input class="page-link small_btn" type="submit" name="submit_button" value="{{document_number-3}}" onclick="loading();"> </li> -->
           <li class="page-item">
             <input class="page-link small_btn" type="submit" name="submit_button" value="{{document_number-2}}" onclick="loading();">
           </li>
