@@ -612,12 +612,12 @@ input[id="dropdown"] {
 }
 .dark {
    color: black;
-   /* background-color: black; */
-}
-.carousel-control-prev-icon {
-   color: black;
-   /* background-color: black; */
 }
 .white_text {
    color: white;
+}
+.carousel-control-next-icon,
+.carousel-control-prev-icon {
+   height: 75px;
+   width: 75px;
 }
