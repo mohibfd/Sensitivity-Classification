@@ -55,10 +55,41 @@
       </div>
       <div class="column equal_flex white_background">
         <div class="small_text">
-          Confusion matrix showing true labels vs predicted labels.
+          The confusion matrix plot displays the true document's sensitvity vs the classifier's predicted sensitivity over all 3801 documents.
         </div>
         <div class="center">
-          <img src="{{conf_mat_png}}" width='100%' height='100%' alt="Confusion Matrix"/>
+          <div class="flex">
+            <div class="flex matrix_label">
+              <div>
+                True
+              </div>
+              <div class="space"></div>
+              <div>
+                Label
+              </div>
+            </div>
+            <div class="matrix_subtext">
+              <div class="flex rotate_text non_sens_text">
+                <div>
+                  Non-
+                </div>
+                <div>
+                  Sensitive
+                </div>
+              </div>
+              <div class="rotate_text sens_text">Sensitive</div>
+            </div>
+            <img src="{{conf_mat_png}}" width='100%' height='100%' alt="Confusion Matrix"/>
+          </div>
+          <div class="flex matrix_subtext x_axis">
+            <div>
+              Non-Sensitive
+            </div>
+            <div>Sensitive</div>
+          </div>
+          <div class="matrix_predicted_label">
+            Predicted Label
+          </div>
         </div>
       </div>
       <div class="column equal_flex">

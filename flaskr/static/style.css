@@ -574,3 +574,36 @@ input[id="dropdown"] {
 .questionnaire_text {
    font-size: 1.3em;
 }
+.matrix_subtext {
+   font-size: 0.7em;
+   justify-content: space-evenly;
+}
+.x_axis {
+   width: 86%;
+}
+.rotate_text {
+   display: flex;
+   transform: rotate(-90deg);
+   align-items: center;
+   width: 30px;
+}
+.matrix_label {
+   transform: rotate(-90deg);
+   align-items: center;
+   justify-content: center;
+   width: 15px;
+   font-size: 0.8em;
+}
+.non_sens_text {
+   height: 285px;
+}
+.sens_text {
+   height: 100px;
+}
+.matrix_predicted_label {
+   margin-right: 70px;
+   font-size: 0.8em;
+}
+.space {
+   margin-left: 0.3em;
+}

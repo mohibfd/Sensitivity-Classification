@@ -710,14 +710,24 @@ def single_document_sensitivity_info():
     # posts = db.execute(
     #     'SELECT s.document_number, classifiers_chosen, feature1, feature2, feature3, feature4, feature5'
     #     ' FROM survey s JOIN user u ON s.author_id = u.id'
-    #     ' ORDER BY s.document_number DESC'
+    #     ' WHERE u.id = ?'
+    #     ' ORDER BY s.document_number DESC',
+    #     (user_id,)
     # ).fetchall()
 
     # import sys
     # # accessing first document survey
+    # print(len(posts), file=sys.stderr)
     # print(posts[0][0], file=sys.stderr)
     # print(posts[0][1], file=sys.stderr)
     # print(posts[0][2], file=sys.stderr)
+    # for i in posts[0]:
+    #     print(i, file=sys.stderr)
+    # for i in posts[1]:
+    #     print(i, file=sys.stderr)
+    # print(posts[0], file=sys.stderr)
+    # print(posts[1], file=sys.stderr)
+
     # # accessing second document survey
     # print(posts[1][0], file=sys.stderr)
     # print(posts[1][1], file=sys.stderr)
