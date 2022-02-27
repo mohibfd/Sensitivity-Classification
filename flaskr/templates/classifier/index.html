@@ -26,7 +26,7 @@
             </div>
             <div class="card-body">
               <h5 class="card-title">Collection Sensitivity Analysis</h5>
-              <p class="card-text">Statistical information about how well the model predicts and what features it deems important on the corpus level.</p>
+              <p class="card-text">Statistical information about how well the model predicts documents' sensitivities and what features (words) it deems important on the corpus level.</p>
               <form action="{{ url_for('classifier.general_sensitivity_info') }}">
                 <div class="center no_margin">
                   <input type="submit" value="View" class="btn btn-primary btn-mid" onclick="loading();"/>
@@ -42,7 +42,7 @@
             </div>
             <div class="card-body">
               <h5 class="card-title">Sensitive and Non-Sensitive Documents Explanations</h5>
-              <p class="card-text">Visualise which features influence the classifier's decision making for all sensitive and non-sensitive documents.</p>
+              <p class="card-text">Visualise which features (words) influence the classifier's decision making for all sensitive and non-sensitive documents.</p>
               <form action="{{ url_for('classifier.single_document_sensitivity_info') }}">
                 <div class="center no_margin">
                   <input type="submit" value="View" class="btn btn-primary btn-mid" onclick="loading();"/>
@@ -59,7 +59,7 @@
             </div>
             <div class="card-body">
               <h5 class="card-title">Non-Sensitive Documents Explanations</h5>
-              <p class="card-text">Visualise which features influence the classifier's decision making for all non-sensitive documents.</p>
+              <p class="card-text">Visualise which features (words) influence the classifier's decision making for all documents predicted as non-sensitive.</p>
               <form action="{{ url_for('classifier.non_sensitive_info') }}">
                 <div class="center no_margin">
                   <input type="submit" value="View" class="btn btn-primary btn-mid" onclick="loading();"/>
@@ -75,7 +75,7 @@
             </div>
             <div class="card-body">
               <h5 class="card-title">Sensitive Documents Explanations</h5>
-              <p class="card-text">Visualise which features influence the classifier's decision making for all sensitive documents.</p>
+              <p class="card-text">Visualise which features (words) influence the classifier's decision making for all documents predicted as sensitive.</p>
               <form action="{{ url_for('classifier.sensitive_info') }}">
                 <div class="center no_margin">
                   <input type="submit" value="View" class="btn btn-primary btn-mid" onclick="loading();"/>
@@ -86,7 +86,6 @@
         </div>
       </div>
     </div>
-    <!-- <div class="top"> <a class="top_left block_link" href="{{ url_for('classifier.sensitive_info') }}"> Sensitive Documents Explanations </a> <a class="top_right block_link" href="{{ url_for('classifier.non_sensitive_info') }}"> Non-Sensitive Documents Explanations </a> </div> <div class="bottom"> <a class="bottom_left block_link" href="{{ url_for('classifier.single_document_sensitivity_info') }}"> Sensitive and Non-Sensitive Documents Explanations </a> <a class="bottom_right block_link" href="{{ url_for('classifier.general_sensitivity_info') }}"> Classifier Information </a> </div> -->
 
   {% else %}
     <div id="carouselExampleCaptions" class="carousel slide" data-bs-ride="carousel">

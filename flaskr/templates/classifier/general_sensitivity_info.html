@@ -113,9 +113,29 @@
 
   <div class="center">
     <div class="shap_text">
-      The beeswarm plot displays an information-dense summary of how the top features in a dataset impact the model’s output. Each instance in the given explanation is represented by a single dot on each feature flow. Each of the five graphs represents one of the cross-validations. The graph illustrates the most critical features on the corpus level, not the document level.
-    </div>
+      The beeswarm plot displays an information-dense summary of how the top features in a dataset impact the model’s output. Each instance in the given explanation is represented by a single dot on each feature flow. Each of the five graphs represents one of the cross-validations. The graph illustrates the most critical features on the corpus level, not the document level. In the plots below, for example, we can see that
 
+      {% if curr_clf == 'LR' or curr_clf == 'XGB' %}
+        the more frequently the word
+        {% if curr_clf == 'LR' %}
+          00
+        {% endif %}
+        {% if curr_clf == 'XGB' %}
+          unclas
+        {% endif %}
+        occurs, the less sensitive the document is. Conversely, the more frequently the word
+        {% if curr_clf == 'LR' %}
+          vietnam
+        {% endif %}
+        {% if curr_clf == 'XGB' %}
+          2005
+        {% endif %}
+        occurs, the more sensitive the document is.
+      {% endif %}
+      {% if curr_clf == 'LSTM' %}
+        the top features are sometimes causing the classifier to predict sensitive and other times non-sensitive.
+      {% endif %}
+    </div>
     {% for i in shap_images %}
       <img src="{{i}}" width='30%' height='30%' alt="Shap image"/>
     {% endfor %}
