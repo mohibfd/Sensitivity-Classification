@@ -328,6 +328,9 @@ input[required="required"] {
 .small_spacing {
    padding-bottom: 20px;
 }
+.smallest_spacing {
+   padding-bottom: 15px;
+}
 .half_text {
    width: 50%;
    margin: 2%;
@@ -606,4 +609,15 @@ input[id="dropdown"] {
 }
 .space {
    margin-left: 0.3em;
+}
+.dark {
+   color: black;
+   /* background-color: black; */
+}
+.carousel-control-prev-icon {
+   color: black;
+   /* background-color: black; */
+}
+.white_text {
+   color: white;
 }
