@@ -101,6 +101,8 @@ def get_doc_num(database="") -> int:
     document_number = 0
 
     if database == 0:
+        import sys
+
         document_number = db.execute(
             'SELECT non_sens_document_number FROM user WHERE id = ?', (
                 user_id,)
@@ -176,13 +178,16 @@ def change_doc(document_number: int, max_documents: int, database="") -> int:
             document_number -= 1
 
     elif request.form['submit_button'] == 'Next':
-        if (document_number == max_documents-1):
+        if (document_number == max_documents-1 and not survey):
             flash("There are no more documents")
         else:
             document_number += 1
 
     else:
-        document_number = int(request.form['submit_button'])-1
+        if survey and (database == 'change'):
+            document_number = int(request.form['submit_button'])
+        else:
+            document_number = int(request.form['submit_button'])-1
 
     if database == 0:
         db.execute(
@@ -543,7 +548,7 @@ def sensitive_info():
         db = get_db()
         document_number = db.execute(
             'SELECT document_number FROM user WHERE id = ?', (user_id,)
-        ).fetchone()[0] + 1
+        ).fetchone()[0]
         if document_number == 5:
             document_number = 4
     else:
@@ -566,8 +571,12 @@ def sensitive_info():
         change_docs = request.form.get('submit_button')
 
         if change_docs:
-            document_number = change_doc(
-                document_number, max_documents) + 1
+            if survey:
+                document_number = change_doc(
+                    document_number, max_documents, 'change')
+            else:
+                document_number = change_doc(
+                    document_number, max_documents, sensitivity)
         elif chosen_vis:
             visual = chosen_vis
             change_visual(visual)
@@ -602,6 +611,9 @@ def sensitive_info():
 
     shap_html, lime_probas_html, visual_html, prediction, highlighting, eli5_html, outlier, lime_probas, common_classifiers = get_visual_html(
         sensitivity, document_number, visual, clf)
+
+    if not survey:
+        document_number += 1
 
     return render_template('classifier/sensitive_info.html', document_number=document_number, max_documents=max_documents,
                            curr_vis=visual, visual_html=visual_html, curr_clf=clf, shap_html=shap_html,
@@ -620,7 +632,7 @@ def non_sensitive_info():
         db = get_db()
         document_number = db.execute(
             'SELECT document_number FROM user WHERE id = ?', (user_id,)
-        ).fetchone()[0] + 1
+        ).fetchone()[0]
         if document_number == 5:
             document_number = 4
     else:
@@ -643,8 +655,13 @@ def non_sensitive_info():
         change_docs = request.form.get('submit_button')
 
         if change_docs:
-            document_number = change_doc(
-                document_number, max_documents) + 1
+            if survey:
+                document_number = change_doc(
+                    document_number, max_documents, 'change')
+            else:
+                document_number = change_doc(
+                    document_number, max_documents, sensitivity)
+
         elif chosen_vis:
             visual = chosen_vis
             change_visual(visual)
@@ -679,6 +696,9 @@ def non_sensitive_info():
 
     shap_html, lime_probas_html, visual_html, prediction, highlighting, eli5_html, outlier, lime_probas, common_classifiers = get_visual_html(
         sensitivity, document_number, visual, clf)
+
+    if not survey:
+        document_number += 1
 
     return render_template('classifier/non_sensitive_info.html', document_number=document_number, max_documents=max_documents,
                            curr_vis=visual, visual_html=visual_html, curr_clf=clf, shap_html=shap_html,
