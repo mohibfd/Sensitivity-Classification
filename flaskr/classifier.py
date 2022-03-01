@@ -1,4 +1,3 @@
-import tensorflow as tf
 from nltk.stem import WordNetLemmatizer
 import string
 from nltk.tokenize import TweetTokenizer
@@ -13,13 +12,14 @@ import shap as shap
 from lime.lime_text import LimeTextExplainer
 import pandas as pd
 import os
-from tensorflow.keras.preprocessing import sequence
 from flaskr.db import get_db
 from flaskr.auth import login_required
 from flask import (
     Blueprint, flash, g, render_template, request, Flask
 )
-tf.compat.v1.disable_v2_behavior()
+# import tensorflow as tf
+# from tensorflow.keras.preprocessing import sequence
+# tf.compat.v1.disable_v2_behavior()
 
 bp = Blueprint('classifier', __name__)
 
