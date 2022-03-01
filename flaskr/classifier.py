@@ -4,7 +4,7 @@ from nltk.tokenize import TweetTokenizer
 import re
 from nltk.corpus import stopwords
 from nltk.stem import PorterStemmer
-import unpack
+# import unpack
 import numpy as np
 # import eli5 as eli5
 import pickle
