@@ -1,3 +1,0 @@
-flaskr/model/LR_cross_val_stats.pkl
-flaskr/model/XGB_cross_val_stats.pkl
-flaskr/model/LSTM_cross_val_stats.pkl
