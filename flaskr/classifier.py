@@ -31,19 +31,37 @@ IMAGES_FOLDER = os.path.join('static', 'images')
 app = Flask(__name__)
 app.config['IMAGES_FOLDER'] = IMAGES_FOLDER
 
-
-LR_cross_val_stats = pd.read_pickle(MODEL_PATH + 'LR_cross_val_stats.pkl')
-XGB_cross_val_stats = pd.read_pickle(MODEL_PATH + 'XGB_cross_val_stats.pkl')
-data_labels = pd.read_pickle(MODEL_PATH + 'data_labels.pkl')
-
-target_names = ['Non-Sensitive', 'Sensitive']
-folds = len(LR_cross_val_stats["classifiers"])
-doc_length = np.sum(
-    [len(LR_cross_val_stats["test_features_list"][i]) for i in range(folds)])
-
 #
 survey = True
 #
+
+LR_cross_val_stats = []
+XGB_cross_val_stats = []
+
+if survey:
+    LR_cross_val_stats = None
+else:
+    LR_cross_val_stats = pd.read_pickle(MODEL_PATH + 'LR_cross_val_stats.pkl')
+
+if survey:
+    XGB_cross_val_stats = None
+else:
+    XGB_cross_val_stats = pd.read_pickle(
+        MODEL_PATH + 'XGB_cross_val_stats.pkl')
+
+data_labels = []
+if not survey:
+    data_labels = pd.read_pickle(MODEL_PATH + 'data_labels.pkl')
+
+
+target_names = ['Non-Sensitive', 'Sensitive']
+
+folds = 5
+if not survey:
+    folds = len(LR_cross_val_stats["classifiers"])
+
+# doc_length = np.sum(
+#     [len(LR_cross_val_stats["test_features_list"][i]) for i in range(folds)])
 
 
 def decontract(text):
@@ -101,8 +119,6 @@ def get_doc_num(database="") -> int:
     document_number = 0
 
     if database == 0:
-        import sys
-
         document_number = db.execute(
             'SELECT non_sens_document_number FROM user WHERE id = ?', (
                 user_id,)
@@ -238,12 +254,17 @@ def get_specific_sens(sens: int, cross_val_stats: dict) -> pd:
 
 
 def get_clf_stats(clf: str) -> dict:
-
     if clf == 'LR':
+        if survey:
+            return None
         return LR_cross_val_stats
     elif clf == 'XGB':
+        if survey:
+            return None
         return XGB_cross_val_stats
     elif clf == 'LSTM':
+        if survey:
+            return None
         LSTM_cross_val_stats = pd.read_pickle(
             MODEL_PATH + 'LSTM_cross_val_stats.pkl')
         return LSTM_cross_val_stats
@@ -264,32 +285,18 @@ def explainers(document_index: int, test_data: pd, test_labels: pd, extra_indexs
     specific_test = ''
     if survey:
         # user eval
-        if document_index == 0:
-            specific_test = survey_documents[0]
-            index = 0
-            document_index = 565
-        elif document_index == 1:
-            specific_test = survey_documents[1]
-            index = 1
-            document_index = 616
-        elif document_index == 2:
-            specific_test = survey_documents[2]
-            index = 2
-            document_index = 142
-        elif document_index == 3:
-            specific_test = survey_documents[3]
-            index = 3
-            document_index = 575
-        elif document_index == 4:
-            specific_test = survey_documents[4]
-            index = 4
-            document_index = 713
+        index = document_index
+        specific_test = survey_documents[index]
     else:
         specific_test = test_data[index].iloc[document_index]
 
-    vectorizer = cross_val_stats["vectorizers"][index]
-    model = cross_val_stats["classifiers"][index]
     clf_name = get_clf()
+    vectorizer = None
+    model = None
+    if not survey:
+        vectorizer = cross_val_stats["vectorizers"][index]
+        model = cross_val_stats["classifiers"][index]
+
     max_len = 150
 
     def lime_explain(text_only=False, probas_only=False, lime_values=None):
@@ -340,16 +347,28 @@ def explainers(document_index: int, test_data: pd, test_labels: pd, extra_indexs
             return lime_values.as_html(text=False, predict_proba=False)
 
     def shap_explain():
-        shap_values = cross_val_stats["shap_values"][index]
+        shap_values = None
+        if not survey:
+            shap_values = cross_val_stats["shap_values"][index]
 
         force_plot = None
         if clf_name == 'LR':
-            force_plot = shap.plots.force(
-                shap_values[document_index], matplotlib=False)
+            if survey:
+                force_plot = pickle.load(
+                    open(MODEL_PATH + "LR_shap_surveys.pkl", 'rb'))[index]
+            else:
+                force_plot = shap.plots.force(
+                    shap_values[document_index], matplotlib=False)
+
         elif clf_name == 'XGB':
-            explainer = shap.TreeExplainer(model)
-            force_plot = shap.plots.force(
-                explainer.expected_value, shap_values[document_index], feature_names=vectorizer.get_feature_names(), matplotlib=False)
+            if survey:
+                force_plot = pickle.load(
+                    open(MODEL_PATH + "XGB_shap_surveys.pkl", 'rb'))[index]
+            else:
+                explainer = shap.TreeExplainer(model)
+                force_plot = shap.plots.force(
+                    explainer.expected_value, shap_values[document_index], feature_names=vectorizer.get_feature_names(), matplotlib=False)
+
         else:
             if survey:
                 force_plot = pickle.load(
@@ -389,29 +408,59 @@ def explainers(document_index: int, test_data: pd, test_labels: pd, extra_indexs
     def get_eli5_weights():
         eli5_weights = []
         if clf_name == 'LR':
-            eli5_weights = pickle.load(
-                open(MODEL_PATH + "LR_ELI5_explanations.pkl", 'rb'))["weights"]
+            if survey:
+                eli5_weights = pickle.load(
+                    open(MODEL_PATH + "LR_eli5_explanations_survey.pkl", 'rb'))["weights"]
+            else:
+                eli5_weights = pickle.load(
+                    open(MODEL_PATH + "LR_ELI5_explanations.pkl", 'rb'))["weights"]
         elif clf_name == 'XGB':
-            eli5_weights = pickle.load(
-                open(MODEL_PATH + "XGB_ELI5_explanations.pkl", 'rb'))["weights"]
+            if survey:
+                eli5_weights = pickle.load(
+                    open(MODEL_PATH + "XGB_eli5_explanations_survey.pkl", 'rb'))["weights"]
+            else:
+                eli5_weights = pickle.load(
+                    open(MODEL_PATH + "XGB_ELI5_explanations.pkl", 'rb'))["weights"]
         else:
-            eli5_weights = pickle.load(
-                open(MODEL_PATH + "LSTM_ELI5_explanations.pkl", 'rb'))["weights"]
+            if survey:
+                eli5_weights = pickle.load(
+                    open(MODEL_PATH + "LSTM_eli5_explanations_survey.pkl", 'rb'))["weights"]
+            else:
+                eli5_weights = pickle.load(
+                    open(MODEL_PATH + "LSTM_ELI5_explanations.pkl", 'rb'))["weights"]
 
         return eli5_weights
 
     shap_html = shap_explain()
     eli5_weights = get_eli5_weights()
-    lime_probas, lime_values = lime_explain(probas_only=True)
-    lime_html = lime_explain(lime_values=lime_values)
-    eli5_html = eli5_weights[index][document_index]
+    eli5_html = None
+    if survey:
+        eli5_html = eli5_weights[index]
+    else:
+        eli5_html = eli5_weights[index][document_index]
+
+    lime_probas = None
+    lime_values = None
+    lime_html = None
+    if survey:
+        lime_pickle = pickle.load(
+            open(MODEL_PATH + f"survey_lime_{clf_name}.pkl", 'rb'))
+        lime_probas = lime_pickle[index]['proba']
+        lime_html = lime_pickle[index]['graph']
+
+    else:
+        lime_probas, lime_values = lime_explain(probas_only=True)
+        lime_html = lime_explain(lime_values=lime_values)
 
     vis_html = None
     highlighting = True
     if visual == 'LIME':
-        vis_html = lime_explain(text_only=True, lime_values=lime_values)
+        if survey:
+            vis_html = pickle.load(
+                open(MODEL_PATH + f"survey_lime_{clf_name}.pkl", 'rb'))[index]['highlighting']
+        else:
+            vis_html = lime_explain(text_only=True, lime_values=lime_values)
     elif visual == 'ELI5':
-        # Survey
         eli5_predictions = []
         if clf_name == 'LR':
             if survey:
@@ -444,7 +493,7 @@ def explainers(document_index: int, test_data: pd, test_labels: pd, extra_indexs
         vis_html = specific_test.lower()
         highlighting = False
 
-    test_labels = test_labels[index]
+    # test_labels = test_labels[index]
     # user eval
     # isSensitive = (
     # "Sensitive" if test_labels.iloc[document_index] else "Non-Sensitive")
@@ -453,41 +502,78 @@ def explainers(document_index: int, test_data: pd, test_labels: pd, extra_indexs
     def predictor(texts):
         sens_clfs = []
         non_sens_clfs = []
+        predictions = []
 
-        LSTM_cross_val_stats = pd.read_pickle(
-            MODEL_PATH + 'LSTM_cross_val_stats.pkl')
+        if survey:
 
-        lstm_tok = LSTM_cross_val_stats["vectorizers"][index]
-        lstm_model = LSTM_cross_val_stats["classifiers"][index]
-
-        test_sequences = lstm_tok.texts_to_sequences(texts)
-        test_sequences_matrix = sequence.pad_sequences(
-            test_sequences, maxlen=max_len)
-
-        y_pred = ''
-        for i in lstm_model.predict(test_sequences_matrix):
-            if i > 0.5:
-                y_pred = 'Sensitive'
-                sens_clfs.append('LSTM')
-            else:
-                y_pred = 'Non-Sensitive'
-                non_sens_clfs.append('LSTM')
-
-        predictions = [{'LSTM': y_pred}]
-
-        vec = LR_cross_val_stats["vectorizers"][index]
-        feature = vec.transform(texts)
-        models = {LR_cross_val_stats["classifiers"][index]: 'LR',
-                  XGB_cross_val_stats["classifiers"][index]: 'XGB'}
-
-        for model, name in models.items():
-            pred = model.predict(feature)
-            if pred == True:
-                predictions.append({name: 'Sensitive'})
+            def sens_pred(name):
                 sens_clfs.append(name)
-            else:
-                predictions.append({name: 'Non-Sensitive'})
+                predictions.append({name: 'Sensitive'})
+
+            def non_sens_pred(name):
                 non_sens_clfs.append(name)
+                predictions.append({name: 'Non-Sensitive'})
+
+            if index == 0:
+                non_sens_pred('LSTM')
+                sens_pred('LR')
+                non_sens_pred('XGB')
+
+            if index == 1:
+                non_sens_pred('LSTM')
+                sens_pred('LR')
+                sens_pred('XGB')
+
+            if index == 2:
+                non_sens_pred('LSTM')
+                sens_pred('LR')
+                sens_pred('XGB')
+
+            if index == 3:
+                non_sens_pred('LSTM')
+                non_sens_pred('LR')
+                non_sens_pred('XGB')
+
+            if index == 4:
+                sens_pred('LSTM')
+                sens_pred('LR')
+                sens_pred('XGB')
+
+        else:
+            LSTM_cross_val_stats = pd.read_pickle(
+                MODEL_PATH + 'LSTM_cross_val_stats.pkl')
+
+            lstm_tok = LSTM_cross_val_stats["vectorizers"][index]
+            lstm_model = LSTM_cross_val_stats["classifiers"][index]
+
+            test_sequences = lstm_tok.texts_to_sequences(texts)
+            test_sequences_matrix = sequence.pad_sequences(
+                test_sequences, maxlen=max_len)
+
+            y_pred = ''
+            for i in lstm_model.predict(test_sequences_matrix):
+                if i > 0.5:
+                    y_pred = 'Sensitive'
+                    sens_clfs.append('LSTM')
+                else:
+                    y_pred = 'Non-Sensitive'
+                    non_sens_clfs.append('LSTM')
+
+            predictions = [{'LSTM': y_pred}]
+
+            vec = LR_cross_val_stats["vectorizers"][index]
+            feature = vec.transform(texts)
+            models = {LR_cross_val_stats["classifiers"][index]: 'LR',
+                      XGB_cross_val_stats["classifiers"][index]: 'XGB'}
+
+            for model, name in models.items():
+                pred = model.predict(feature)
+                if pred == True:
+                    predictions.append({name: 'Sensitive'})
+                    sens_clfs.append(name)
+                else:
+                    predictions.append({name: 'Non-Sensitive'})
+                    non_sens_clfs.append(name)
 
         outlier = None
         common_classifiers = None
@@ -511,8 +597,8 @@ def get_visual_html(sensitivity: int, document_number: int, visual: str, clf: st
     cross_val_stats = get_clf_stats(clf)
 
     test_data = []
-    test_data, test_labels, extra_indexs = get_specific_sens(
-        sensitivity, cross_val_stats)
+    test_labels = None
+    extra_indexs = 0
 
     if survey:
         survey_documents = pickle.load(
@@ -524,7 +610,9 @@ def get_visual_html(sensitivity: int, document_number: int, visual: str, clf: st
         else:
             test_data = [survey_documents[0], survey_documents[1],
                          survey_documents[2], survey_documents[3]]
-    # else:
+    else:
+        test_data, test_labels, extra_indexs = get_specific_sens(
+            sensitivity, cross_val_stats)
 
     shap_html, lime_probas_html, visual_html, _, prediction, highlighting, eli5_html, outlier, lime_probas, common_classifiers = explainers(
         document_number, test_data, test_labels, extra_indexs, visual, cross_val_stats)
@@ -810,12 +898,13 @@ def single_document_sensitivity_info():
     cross_val_stats = get_clf_stats(clf)
 
     test_data = []
+    test_labels = []
     if survey:
         test_data = pickle.load(
             open(MODEL_PATH + "survey_documents.pkl", 'rb'))
     else:
         test_data = cross_val_stats["test_features_list"]
-    test_labels = cross_val_stats["test_labels_list"]
+        test_labels = cross_val_stats["test_labels_list"]
 
     shap_html, lime_probas_html, visual_html, isSensitive, prediction, highlighting, eli5_html, outlier, lime_probas, common_classifiers = explainers(
         document_number, test_data, test_labels, extra_indexs, visual, cross_val_stats)
@@ -852,14 +941,27 @@ def general_sensitivity_info():
     predictions = {}
     eli5_general = None
     if clf == 'LR':
-        predictions = LR_cross_val_stats["predictions"]
-    elif clf == 'XGB':
-        predictions = XGB_cross_val_stats["predictions"]
-    else:
-        LSTM_cross_val_stats = pd.read_pickle(
-            MODEL_PATH + 'LSTM_cross_val_stats.pkl')
+        if survey:
+            predictions = pd.read_pickle(
+                MODEL_PATH + 'LR_predictions.pkl')
+        else:
+            predictions = LR_cross_val_stats["predictions"]
 
-        predictions = LSTM_cross_val_stats["predictions"]
+    elif clf == 'XGB':
+        if survey:
+            predictions = pd.read_pickle(
+                MODEL_PATH + 'XGB_predictions.pkl')
+        else:
+            predictions = XGB_cross_val_stats["predictions"]
+
+    else:
+        if survey:
+            predictions = pd.read_pickle(
+                MODEL_PATH + 'LSTM_predictions.pkl')
+        else:
+            predictions = pd.read_pickle(
+                MODEL_PATH + 'LSTM_cross_val_stats.pkl')['predictions']
+
     get_shap_images()
 
     return render_template('classifier/general_sensitivity_info.html', predictions=predictions, eli5_general=eli5_general,

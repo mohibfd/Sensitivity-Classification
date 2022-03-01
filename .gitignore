@@ -15,9 +15,6 @@ build/
 
 **/.DS_Store
 
-flaskr/static/images/LR
-flaskr/static/images/XGB
-flaskr/static/images/LSTM
 
 flaskr/model/data_labels.pkl
 flaskr/model/LR_cross_val_stats.pkl
