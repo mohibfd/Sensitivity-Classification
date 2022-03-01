@@ -551,6 +551,9 @@ def sensitive_info():
         ).fetchone()[0]
         if document_number == 5:
             document_number = 4
+        elif document_number == 0:
+            document_number = 1
+
     else:
         document_number = get_doc_num(sensitivity)
 
@@ -635,6 +638,9 @@ def non_sensitive_info():
         ).fetchone()[0]
         if document_number == 5:
             document_number = 4
+        elif document_number == 0:
+            document_number = 1
+
     else:
         document_number = get_doc_num(sensitivity)
 
