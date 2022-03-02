@@ -8,7 +8,7 @@
 
 {% block breadcrumb %}
   <li class="breadcrumb-item">
-    <a href="{{ url_for('classifier.classifier_main_page') }}">Home</a>
+    <a href="{{ url_for('classifier.general') }}">Home</a>
   </li>
   <li class="breadcrumb-item active" aria-current="page">Sensitive Info</li>
 {% endblock %}
@@ -177,42 +177,7 @@
   </div>
 
   <hr>
-
-  <div class="questionnaire column">
-    <form method="post">
-      <div class="row questionnaire_text">
-        Please write the top five features (words) that you found most helpful.
-        <div class="row end_response">
-          <input type="text" name="feature1" class="form-control limit_width" placeholder="Feature 1">
-          <input type="text" name="feature2" class="form-control limit_width" placeholder="Feature 2">
-          <input type="text" name="feature3" class="form-control limit_width" placeholder="Feature 3">
-          <input type="text" name="feature4" class="form-control limit_width" placeholder="Feature 4">
-          <input type="text" name="feature5" class="form-control limit_width" placeholder="Feature 5">
-        </div>
-      </div>
-      {% if outlier != None %}
-        <div class="row questionnaire_text">
-          There is a disagreement between the classifiers. Please state which classifier(s) you think is (are) correct.
-          <div class="end_response">
-            <div class="form-check form-check-inline">
-              <input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio1" value="{{outlier}}">
-              <label class="form-check-label" for="inlineRadio1">{{outlier}}</label>
-            </div>
-            <div class="form-check form-check-inline">
-              <input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio2" value="{{common_classifiers}}">
-              <label class="form-check-label" for="inlineRadio2">{{common_classifiers}}</label>
-            </div>
-          </div>
-        </div>
-      {% endif %}
-      <div class="questionnaire_btn">
-        <input class="btn btn-primary btn-mid" type="submit" value="Submit" onclick="loading();">
-        <input type="text" name="outlier_name" class="invisible" placeholder="Feature 5" value="{{outlier}}">
-
-      </div>
-    </form>
-
-  </div>
+  <!-- <div class="questionnaire column"> <form method="post"> <div class="row questionnaire_text"> Please write the top five features (words) that you found most helpful. <div class="row end_response"> <input type="text" name="feature1" class="form-control limit_width" placeholder="Feature 1"> <input type="text" name="feature2" class="form-control limit_width" placeholder="Feature 2"> <input type="text" name="feature3" class="form-control limit_width" placeholder="Feature 3"> <input type="text" name="feature4" class="form-control limit_width" placeholder="Feature 4"> <input type="text" name="feature5" class="form-control limit_width" placeholder="Feature 5"> </div> </div> {% if outlier != None %} <div class="row questionnaire_text"> There is a disagreement between the classifiers. Please state which classifier(s) you think is (are) correct. <div class="end_response"> <div class="form-check form-check-inline"> <input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio1" value="{{outlier}}"> <label class="form-check-label" for="inlineRadio1">{{outlier}}</label> </div> <div class="form-check form-check-inline"> <input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio2" value="{{common_classifiers}}"> <label class="form-check-label" for="inlineRadio2">{{common_classifiers}}</label> </div> </div> </div> {% endif %} <div class="questionnaire_btn"> <input class="btn btn-primary btn-mid" type="submit" value="Submit" onclick="loading();"> <input type="text" name="outlier_name" class="invisible" placeholder="Feature 5" value="{{outlier}}"> </div> </form> </div> -->
 
   <form method="post">
     <nav aria-label="Page navigation example" class="doc_num_nav">

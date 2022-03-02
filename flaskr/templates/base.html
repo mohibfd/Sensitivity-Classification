@@ -39,22 +39,7 @@
 
     <ul>
       <li class="one_row">
-        {% if g.user %}
-          <div class="username">
-            {{ g.user['username'] }}
-
-          </div>
-          <i class="fas fa-sign-out-alt">
-            <a href="{{  url_for('auth.logout') }}" class="btn btn-primary btn-mid">Log Out</a>
-          </i>
-        {% else %}
-          <a href="{{ url_for('auth.login') }}" class="btn btn-primary btn-mid">
-            Login
-          </a>
-          <a href="{{ url_for('auth.register') }}" class="btn btn-primary btn-mid">
-            Register
-          </a>
-        {% endif %}
+        <!-- {% if g.user %} <div class="username"> {{ g.user['username'] }} </div> <i class="fas fa-sign-out-alt"> <a href="{{ url_for('auth.logout') }}" class="btn btn-primary btn-mid">Log Out</a> </i> {% else %} <a href="{{ url_for('classifier.general') }}" class="btn btn-primary btn-mid"> Login </a> <a href="{{ url_for('classifier.general') }}" class="btn btn-primary btn-mid"> Register </a> {% endif %} -->
       </li>
     </ul>
   </nav>

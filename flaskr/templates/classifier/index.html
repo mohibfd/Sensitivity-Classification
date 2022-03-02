@@ -133,14 +133,12 @@
               <h3 class="black_text">Classifier Explanations</h3>
               <p class="carousel_text black_text">Furthermore, this website interprets and explains each classifier's predictions and visualises them using third-party libraries: LIME, SHAP, and ELI5.</p>
               <div class="spacing"></div>
-              <p class="carousel_text black_text">Sign up or Log in to see these explanations in real time.</p>
+              <p class="carousel_text black_text">View these document explanations in real time.</p>
               <div class="small_spacing"></div>
-              <a href="{{ url_for('auth.login') }}" class="btn btn-primary btn-lg">
-                Login
+              <a href="{{ url_for('classifier.general') }}" class="btn btn-primary btn-lg">
+                View
               </a>
-              <a href="{{ url_for('auth.register') }}" class="btn btn-primary btn-lg">
-                Register
-              </a>
+              <div class="smallest_spacing"></div>
             </div>
           </div>
         </div>
