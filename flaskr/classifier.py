@@ -717,7 +717,7 @@ def sensitive_info():
                 error = "Please choose one of the classifiers"
                 flash(error)
 
-            if error is None:
+            if error == None:
                 db = get_db()
                 db.execute(
                     "INSERT INTO survey (author_id, document_number, feature1, feature2, feature3, feature4, feature5, classifiers_chosen) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
@@ -806,7 +806,7 @@ def non_sensitive_info():
                 error = "Please choose one of the classifiers"
                 flash(error)
 
-            if error is None:
+            if error == None:
                 db = get_db()
                 db.execute(
                     "INSERT INTO survey (author_id, document_number, feature1, feature2, feature3, feature4, feature5, classifiers_chosen) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
@@ -912,7 +912,7 @@ def single_document_sensitivity_info():
                 error = "Please choose one of the classifiers"
                 flash(error)
 
-            if error is None:
+            if error == None:
                 db = get_db()
                 db.execute(
                     "INSERT INTO survey (author_id, document_number, feature1, feature2, feature3, feature4, feature5, classifiers_chosen) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
