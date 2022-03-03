@@ -45,7 +45,8 @@ def register():
             except exc.IntegrityError:
                 error = f"USER {username} is already registered."
             else:
-                return redirect(url_for("auth.login"))
+                session['user_id'] = user.id
+                return redirect(url_for('index'))
 
         flash(error)
     return render_template('auth/register.html')
