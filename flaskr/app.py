@@ -1,29 +1,19 @@
 from . import classifier
 from . import auth
 from . import db
-from flask import Flask
 import os
+from flask import Flask
 
 app = Flask(__name__)
+env_config = os.getenv("APP_SETTINGS", "config.DevelopmentConfig")
+app.config.from_object(env_config)
 
 
 @app.route("/")
 def index():
-    return "Hello World!"
+    secret_key = app.config.get("SECRET_KEY")
+    return f"The configured secret key is {secret_key}."
 
-
-# create and configure the app
-app = Flask(__name__, instance_relative_config=True)
-app.config.from_mapping(
-    SECRET_KEY='dev',
-    DATABASE=os.path.join(app.instance_path, 'flaskr.sqlite'),
-)
-
-# ensure the instance folder exists
-try:
-    os.makedirs(app.instance_path)
-except OSError:
-    pass
 
 db.init_app(app)
 
