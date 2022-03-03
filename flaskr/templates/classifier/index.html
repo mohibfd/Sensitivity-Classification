@@ -10,72 +10,144 @@
 
 {% block content %}
 
-  <!-- {% if g.user %} <div id="loading" class="spinner-border end" role="status"> <span class="visually-hidden">Loading...</span> </div> <div class="card_container"> <div class="row row-cols-1 row-cols-md-2 g-4 limited_width"> <div class="col"> <div class="card text-center"> <div class="img_container"> <img src="{{url_for('static', filename='images/lock.png')}}" class="card-img-top" alt="classifier info"> </div> <div class="card-body"> <h5 class="card-title">Collection Sensitivity Analysis</h5> <p class="card-text">Statistical information about how well the model predicts documents' sensitivities and what features (words) it deems important on the corpus level.</p> <form action="{{ url_for('classifier.general_sensitivity_info') }}"> <div class="center no_margin"> <input type="submit" value="View" class="btn btn-primary btn-mid" onclick="loading();"/> </div> </form> </div> </div> </div> <div class="col"> <div class="card text-center"> <div class="img_container"> <img src="{{url_for('static', filename='images/green_red_lock.svg')}}" class="card-img-top" alt="(non) safe"> </div> <div class="card-body"> <h5 class="card-title">Sensitive and Non-Sensitive Documents Explanations</h5> <p class="card-text">Visualise which features (words) influence the classifier's decision making for all sensitive and non-sensitive documents.</p> <form action="{{ url_for('classifier.single_document_sensitivity_info') }}"> <div class="center no_margin"> <input type="submit" value="View" class="btn btn-primary btn-mid" onclick="loading();"/> </div> </form> </div> </div> </div> <div class="col"> <div class="card text-center"> <div class="img_container"> <img src="{{url_for('static', filename='images/green_lock.jpeg')}}" class="card-img-top" alt="safe"> </div> <div class="card-body"> <h5 class="card-title">Non-Sensitive Documents Explanations</h5> <p class="card-text">Visualise which features (words) influence the classifier's decision making for all documents predicted as non-sensitive.</p> <form action="{{ url_for('classifier.non_sensitive_info') }}"> <div class="center no_margin"> <input type="submit" value="View" class="btn btn-primary btn-mid" onclick="loading();"/> </div> </form> </div> </div> </div> <div class="col"> <div class="card text-center"> <div class="img_container"> <img src="{{url_for('static', filename='images/confidential.webp')}}" class="card-img-top" alt="confidental"> </div> <div class="card-body"> <h5 class="card-title">Sensitive Documents Explanations</h5> <p class="card-text">Visualise which features (words) influence the classifier's decision making for all documents predicted as sensitive.</p> <form action="{{ url_for('classifier.sensitive_info') }}"> <div class="center no_margin"> <input type="submit" value="View" class="btn btn-primary btn-mid" onclick="loading();"/> </div> </form> </div> </div> </div> </div> </div> {% else %} -->
-  <div id="carouselExampleCaptions" class="carousel carousel-dark slide" data-bs-ride="carousel">
-    <div class="carousel-indicators">
-      <button type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
-      <button type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide-to="1" aria-label="Slide 2"></button>
-      <button type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide-to="2" aria-label="Slide 3"></button>
-      <button type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide-to="3" aria-label="Slide 4"></button>
+  {% if g.user %}
+    <div id="loading" class="spinner-border end" role="status">
+      <span class="visually-hidden">Loading...</span>
     </div>
-    <div class="carousel-inner">
-      <div class="carousel-item active" data-bs-interval="15000000">
-        <div class="max_height_95">
-          <img src="{{url_for('static', filename='images/freedom-of-information.jpeg')}}" class="d-block w-100 perfect_fit" alt="...">
-          <div class="carousel-caption d-none d-md-block">
-            <h3 class="white_text">Sensitive Govermental Documents</h3>
-            <p class="carousel_text white_text">Government departments, such as the Ministry of Defence, produce a large number of written communications essential for the international operations of government. Freedom of Information Laws legislates that these documents should be released to the public.</p>
-            <div class="small_spacing"></div>
+    <div class="card_container">
+      <div class="row row-cols-1 row-cols-md-2 g-4 limited_width">
+        <div class="col">
+          <div class="card text-center">
+            <div class="img_container">
+              <img src="{{url_for('static', filename='images/lock.png')}}" class="card-img-top" alt="classifier info">
+            </div>
+            <div class="card-body">
+              <h5 class="card-title">Collection Sensitivity Analysis</h5>
+              <p class="card-text">Statistical information about how well the model predicts documents' sensitivities and what features (words) it deems important on the corpus level.</p>
+              <form action="{{ url_for('classifier.general_sensitivity_info') }}">
+                <div class="center no_margin">
+                  <input type="submit" value="View" class="btn btn-primary btn-mid" onclick="loading();"/>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+        <div class="col">
+          <div class="card text-center">
+            <div class="img_container">
+              <img src="{{url_for('static', filename='images/green_red_lock.svg')}}" class="card-img-top" alt="(non) safe">
+            </div>
+            <div class="card-body">
+              <h5 class="card-title">Sensitive and Non-Sensitive Documents Explanations</h5>
+              <p class="card-text">Visualise which features (words) influence the classifier's decision making for all sensitive and non-sensitive documents.</p>
+              <form action="{{ url_for('classifier.single_document_sensitivity_info') }}">
+                <div class="center no_margin">
+                  <input type="submit" value="View" class="btn btn-primary btn-mid" onclick="loading();"/>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+        <div class="col">
+          <div class="card text-center">
+            <div class="img_container">
+              <img src="{{url_for('static', filename='images/green_lock.jpeg')}}" class="card-img-top" alt="safe">
+            </div>
+            <div class="card-body">
+              <h5 class="card-title">Non-Sensitive Documents Explanations</h5>
+              <p class="card-text">Visualise which features (words) influence the classifier's decision making for all documents predicted as non-sensitive.</p>
+              <form action="{{ url_for('classifier.non_sensitive_info') }}">
+                <div class="center no_margin">
+                  <input type="submit" value="View" class="btn btn-primary btn-mid" onclick="loading();"/>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+        <div class="col">
+          <div class="card text-center">
+            <div class="img_container">
+              <img src="{{url_for('static', filename='images/confidential.jpeg')}}" class="card-img-top" alt="confidental">
+            </div>
+            <div class="card-body">
+              <h5 class="card-title">Sensitive Documents Explanations</h5>
+              <p class="card-text">Visualise which features (words) influence the classifier's decision making for all documents predicted as sensitive.</p>
+              <form action="{{ url_for('classifier.sensitive_info') }}">
+                <div class="center no_margin">
+                  <input type="submit" value="View" class="btn btn-primary btn-mid" onclick="loading();"/>
+                </div>
+              </form>
+            </div>
           </div>
         </div>
       </div>
-      <div class="carousel-item" data-bs-interval="15000">
-        <div class="max_height_95">
-          <img src="{{url_for('static', filename='images/confidential_folders.png')}}" class="d-block w-100" alt="...">
-          <div class="carousel-caption d-none d-md-block">
-            <h3 class="black_text">Sensitive Information</h3>
-            <p class="carousel_text black_text limit_text_width2">However, due to the sensitive nature of these documents, each document needs to be reviewed to identify and protect any sensitivities.</p>
-            <div class="smallest_spacing"></div>
-          </div>
-        </div>
-      </div>
-      <div class="carousel-item" data-bs-interval="15000">
-        <div class="max_height_95">
-          <img src="{{url_for('static', filename='images/classifier.png')}}" class="d-block w-100" alt="...">
-          <div class="carousel-caption d-none d-md-block">
-            <h3 class="black_text">Classifiers</h3>
-            <p class="carousel_text black_text limit_text_width">This website helps solve this problem using three different classifiers. The first classifier is a linear model (logistic regression); the second classifier is a tree-based model (xgboost); and finally, the third model is a deep learning model (long short-term memory).</p>
-          </div>
-        </div>
-      </div>
-
-      <div class="carousel-item" data-bs-interval="100000">
-        <div class="max_height_95">
-          <img src="{{url_for('static', filename='images/explanations.png')}}" class="d-block w-100" alt="...">
-          <div class="carousel-caption d-none d-md-block">
-            <h3 class="black_text">Classifier Explanations</h3>
-            <p class="carousel_text black_text">Furthermore, this website interprets and explains each classifier's predictions and visualises them using third-party libraries: LIME, SHAP, and ELI5.</p>
-            <div class="spacing"></div>
-            <p class="carousel_text black_text">View these document explanations in real time.</p>
-            <div class="small_spacing"></div>
-            <a href="{{ url_for('classifier.general') }}" class="btn btn-primary btn-lg">
-              View
-            </a>
-            <div class="smallest_spacing"></div>
-          </div>
-        </div>
-      </div>
-
     </div>
-    <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide="prev">
-      <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-      <span class="visually-hidden">Previous</span>
-    </button>
-    <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide="next">
-      <span class="carousel-control-next-icon" aria-hidden="true"></span>
-      <span class="visually-hidden">Next</span>
-    </button>
-  </div>
-  <!-- {% endif %} -->
+  {% else %}
+    <div id="carouselExampleCaptions" class="carousel carousel-dark slide" data-bs-ride="carousel">
+      <div class="carousel-indicators">
+        <button type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
+        <button type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide-to="1" aria-label="Slide 2"></button>
+        <button type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide-to="2" aria-label="Slide 3"></button>
+        <button type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide-to="3" aria-label="Slide 4"></button>
+      </div>
+      <div class="carousel-inner">
+        <div class="carousel-item active" data-bs-interval="15000000">
+          <div class="max_height_95">
+            <img src="{{url_for('static', filename='images/freedom-of-information.jpeg')}}" class="d-block w-100 perfect_fit" alt="...">
+            <div class="carousel-caption d-none d-md-block">
+              <h3 class="white_text">Sensitive Govermental Documents</h3>
+              <p class="carousel_text white_text">Government departments, such as the Ministry of Defence, produce a large number of written communications essential for the international operations of government. Freedom of Information Laws legislates that these documents should be released to the public.</p>
+              <div class="small_spacing"></div>
+            </div>
+          </div>
+        </div>
+        <div class="carousel-item" data-bs-interval="15000">
+          <div class="max_height_95">
+            <img src="{{url_for('static', filename='images/confidential_folders.png')}}" class="d-block w-100" alt="...">
+            <div class="carousel-caption d-none d-md-block">
+              <h3 class="black_text">Sensitive Information</h3>
+              <p class="carousel_text black_text limit_text_width2">However, due to the sensitive nature of these documents, each document needs to be reviewed to identify and protect any sensitivities.</p>
+              <div class="smallest_spacing"></div>
+            </div>
+          </div>
+        </div>
+        <div class="carousel-item" data-bs-interval="15000">
+          <div class="max_height_95">
+            <img src="{{url_for('static', filename='images/classifier.png')}}" class="d-block w-100" alt="...">
+            <div class="carousel-caption d-none d-md-block">
+              <h3 class="black_text">Classifiers</h3>
+              <p class="carousel_text black_text limit_text_width">This website helps solve this problem using three different classifiers. The first classifier is a linear model (logistic regression); the second classifier is a tree-based model (xgboost); and finally, the third model is a deep learning model (long short-term memory).</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="carousel-item" data-bs-interval="100000">
+          <div class="max_height_95">
+            <img src="{{url_for('static', filename='images/explanations.png')}}" class="d-block w-100" alt="...">
+            <div class="carousel-caption d-none d-md-block">
+              <h3 class="black_text">Classifier Explanations</h3>
+              <p class="carousel_text black_text">Furthermore, this website interprets and explains each classifier's predictions and visualises them using third-party libraries: LIME, SHAP, and ELI5.</p>
+              <div class="spacing"></div>
+              <p class="carousel_text black_text">View these document explanations in real time.</p>
+              <div class="small_spacing"></div>
+              <a href="{{ url_for('auth.register') }}" class="btn btn-primary btn-lg">
+                View
+              </a>
+              <div class="smallest_spacing"></div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+      <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide="prev">
+        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+        <span class="visually-hidden">Previous</span>
+      </button>
+      <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide="next">
+        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+        <span class="visually-hidden">Next</span>
+      </button>
+    </div>
+  {% endif %}
 
 {% endblock %}

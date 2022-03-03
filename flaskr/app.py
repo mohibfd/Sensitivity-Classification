@@ -1,33 +1,24 @@
-from . import classifier
-from . import auth
-from . import db
-from flask import Flask
 import os
+from flask import Flask
 
-app = Flask(__name__)
-
-
-@app.route("/")
-def index():
-    return "Hello World!"
+from .extensions import db
 
 
-# create and configure the app
-app = Flask(__name__, instance_relative_config=True)
-app.config.from_mapping(
-    SECRET_KEY='dev',
-    DATABASE=os.path.join(app.instance_path, 'flaskr.sqlite'),
-)
+def create_app(test_config=None):
 
-# ensure the instance folder exists
-try:
-    os.makedirs(app.instance_path)
-except OSError:
-    pass
+    app = Flask(__name__, instance_relative_config=True)
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///db.sqlite3'
+    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+    app.config.from_mapping(
+        SECRET_KEY='dev',
+    )
+    db.init_app(app)
 
-db.init_app(app)
+    from . import auth
+    app.register_blueprint(auth.bp)
 
-app.register_blueprint(auth.bp)
+    from . import classifier
+    app.register_blueprint(classifier.bp)
+    app.add_url_rule('/', endpoint='index')
 
-app.register_blueprint(classifier.bp)
-app.add_url_rule('/', endpoint='index')
+    return app

@@ -12,11 +12,14 @@ import shap as shap
 from lime.lime_text import LimeTextExplainer
 import pandas as pd
 import os
-from flaskr.db import get_db
+# from flaskr.db import get_db
 from flaskr.auth import login_required
 from flask import (
     Blueprint, flash, g, render_template, request, Flask
 )
+from . user import User
+from .extensions import db
+
 # import tensorflow as tf
 # from tensorflow.keras.preprocessing import sequence
 # tf.compat.v1.disable_v2_behavior()
@@ -37,6 +40,10 @@ survey = True
 
 LR_cross_val_stats = []
 XGB_cross_val_stats = []
+
+survey_documents = pickle.load(
+    open(MODEL_PATH + "survey_documents.pkl", 'rb'))
+
 
 if survey:
     LR_cross_val_stats = None
@@ -62,26 +69,6 @@ if not survey:
 
 # doc_length = np.sum(
 #     [len(LR_cross_val_stats["test_features_list"][i]) for i in range(folds)])
-survey_documents = pickle.load(
-    open(MODEL_PATH + "survey_documents.pkl", 'rb'))
-default_doc_num = 0
-default_clf = 'LR'
-default_visual = 'None'
-
-
-def change_default_num(new_num):
-    global default_doc_num
-    default_doc_num = new_num
-
-
-def change_default_clf(new_clf):
-    global default_clf
-    default_clf = new_clf
-
-
-def change_default_visual(new_visual):
-    global default_visual
-    default_visual = new_visual
 
 
 def decontract(text):
@@ -134,54 +121,55 @@ def process_text(text):
 
 
 def get_doc_num(database="") -> int:
-    document_number = default_doc_num
-    # user_id = g.user['id']
-    # db = get_db()
+    user_id = g.user.id
+    # db =()
+    document_number = 0
+    user = User.query.filter_by(id=user_id).first()
 
-    # if database == 0:
-    #     document_number = db.execute(
-    #         'SELECT non_sens_document_number FROM user WHERE id = ?', (
-    #             user_id,)
-    #     ).fetchone()[0]
-    # elif database == 1:
-    #     document_number = db.execute(
-    #         'SELECT sens_document_number FROM user WHERE id = ?', (user_id,)
-    #     ).fetchone()[0]
-    # else:
-    #     document_number = db.execute(
-    #         'SELECT document_number FROM user WHERE id = ?', (user_id,)
-    #     ).fetchone()[0]
+    if database == 0:
+        document_number = user.non_sens_document_number
+        # document_number = db.execute(
+        #     'SELECT non_sens_document_number FROM user WHERE id = ?', (
+        #         user_id,)
+        # ).fetchone()[0]
+    elif database == 1:
+        document_number = user.sens_document_number
+    else:
+        document_number = user.document_number
 
     return document_number
 
 
 def get_visualisation() -> str:
-    # user_id = g.user['id']
+    user_id = g.user.id
     # db = get_db()
 
-    # visual = db.execute(
-    #     'SELECT visualisation_method FROM user WHERE id = ?', (user_id,)
-    # ).fetchone()[0]
+    user = User.query.filter_by(id=user_id).first()
+    visual = user.visualisation_method
 
-    visual = default_visual
     return visual
 
 
 def get_clf() -> str:
-    # user_id = g.user['id']
+    user_id = g.user.id
     # db = get_db()
 
+    user = User.query.filter_by(id=user_id).first()
+    clf = user.clf_method
     # clf = db.execute(
     #     'SELECT clf_method FROM user WHERE id = ?', (user_id,)
     # ).fetchone()[0]
 
-    clf = default_clf
     return clf
 
 
 def change_visual(visual: str):
-    # user_id = g.user['id']
+    user_id = g.user.id
     # db = get_db()
+
+    user = User.query.filter_by(id=user_id).first()
+    user.visualisation_method = visual
+    db.session.commit()
 
     # db.execute(
     #     'UPDATE user SET visualisation_method = ?'
@@ -189,14 +177,14 @@ def change_visual(visual: str):
     #     (visual, user_id)
     # )
 
-    # db.commit()
-
-    change_default_visual(visual)
-
 
 def change_clf(clf: str):
-    # user_id = g.user['id']
+    user_id = g.user.id
     # db = get_db()
+
+    user = User.query.filter_by(id=user_id).first()
+    user.clf_method = clf
+    db.session.commit()
 
     # db.execute(
     #     'UPDATE user SET clf_method = ?'
@@ -206,12 +194,11 @@ def change_clf(clf: str):
 
     # db.commit()
 
-    change_default_clf(clf)
-
 
 def change_doc(document_number: int, max_documents: int, database="") -> int:
-    # user_id = g.user['id']
+    user_id = g.user.id
     # db = get_db()
+    user = User.query.filter_by(id=user_id).first()
 
     if request.form['submit_button'] == "Prev":
         if (document_number == 0):
@@ -220,7 +207,7 @@ def change_doc(document_number: int, max_documents: int, database="") -> int:
             document_number -= 1
 
     elif request.form['submit_button'] == 'Next':
-        if (document_number == max_documents-1):
+        if (document_number == max_documents-1 and not survey):
             flash("There are no more documents")
         else:
             document_number += 1
@@ -231,31 +218,17 @@ def change_doc(document_number: int, max_documents: int, database="") -> int:
         else:
             document_number = int(request.form['submit_button'])-1
 
-    # if document_number >= max_documents:
-    #     flash("There are no previous documents")
+    if database == 0:
+        user.non_sens_document_number = document_number
 
-    change_default_num(document_number)
+    elif database == 1:
+        user.sens_document_number = document_number
 
-    # if database == 0:
-    #     db.execute(
-    #         'UPDATE user SET non_sens_document_number = ?'
-    #         ' WHERE id = ?',
-    #         (document_number, user_id)
-    #     )
-    # elif database == 1:
-    #     db.execute(
-    #         'UPDATE user SET sens_document_number = ?'
-    #         ' WHERE id = ?',
-    #         (document_number, user_id)
-    #     )
-    # else:
-    #     db.execute(
-    #         'UPDATE user SET document_number = ?'
-    #         ' WHERE id = ?',
-    #         (document_number, user_id)
-    #     )
+    else:
+        user.document_number = document_number
 
     # db.commit()
+    db.session.commit()
 
     return document_number
 
@@ -626,9 +599,12 @@ def get_visual_html(sensitivity: int, document_number: int, visual: str, clf: st
 
     test_data = []
     test_labels = None
-    extra_indexs = [0 for _ in range(folds)]
+    extra_indexs = 0
 
     if survey:
+        survey_documents = pickle.load(
+            open(MODEL_PATH + "survey_documents.pkl", 'rb'))
+
         if sensitivity == 1:
             test_data = [survey_documents[0], survey_documents[1],
                          survey_documents[2], survey_documents[4]]
@@ -651,25 +627,25 @@ def classifier_main_page():
 
 
 @bp.route('/sensitive-info', methods=('GET', 'POST'))
-# @login_required
+@login_required
 def sensitive_info():
     sensitivity = 1
 
-    document_number = 0
+    # document_number = 0
+    document_number = get_doc_num()
     if survey:
         # user_id = g.user['id']
         # db = get_db()
         # document_number = db.execute(
         #     'SELECT document_number FROM user WHERE id = ?', (user_id,)
         # ).fetchone()[0]
-        document_number = get_doc_num(sensitivity)
         if document_number == 4:
             document_number = 3
         # elif document_number == 0:
-        #     document_number = 1
+            # document_number = 1
 
-    else:
-        document_number = get_doc_num(sensitivity)
+    # else:
+    #     document_number = get_doc_num(sensitivity)
 
     # user eval
     max_documents = 0
@@ -700,31 +676,6 @@ def sensitive_info():
         elif chosen_clf:
             clf = chosen_clf
             change_clf(clf)
-        else:
-            user_features = [request.form.get(
-                f'feature{i}') for i in range(1, 6)]
-            radio_option_clf = request.form.get('inlineRadioOptions')
-            error = None
-
-            for i in user_features:
-                if i == '':
-                    error = "Please enter 5 features"
-                    flash(error)
-                    break
-
-            outlier = request.form.get('outlier_name')
-            if radio_option_clf == None and outlier != 'None':
-                error = "Please choose one of the classifiers"
-                flash(error)
-
-            if error == None:
-                db = get_db()
-                db.execute(
-                    "INSERT INTO survey (author_id, document_number, feature1, feature2, feature3, feature4, feature5, classifiers_chosen) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-                    (g.user['id'], document_number, user_features[0], user_features[1],
-                     user_features[2], user_features[3], user_features[4], radio_option_clf),
-                )
-                db.commit()
 
     shap_html, lime_probas_html, visual_html, prediction, highlighting, eli5_html, outlier, lime_probas, common_classifiers = get_visual_html(
         sensitivity, document_number, visual, clf)
@@ -739,25 +690,25 @@ def sensitive_info():
 
 
 @bp.route('/non-sensitive-info', methods=('GET', 'POST'))
-# @login_required
+@login_required
 def non_sensitive_info():
     sensitivity = 0
 
-    document_number = 0
+    # document_number = 0
+    document_number = get_doc_num()
     if survey:
         # user_id = g.user['id']
         # db = get_db()
         # document_number = db.execute(
         #     'SELECT document_number FROM user WHERE id = ?', (user_id,)
         # ).fetchone()[0]
-        document_number = get_doc_num(sensitivity)
-        if document_number == 4:
-            document_number = 3
+        if document_number == 5:
+            document_number = 4
         # elif document_number == 0:
-        #     document_number = 1
+            # document_number = 1
 
-    else:
-        document_number = get_doc_num(sensitivity)
+    # else:
+    #     document_number = get_doc_num(sensitivity)
 
     # user eval
     max_documents = 0
@@ -789,31 +740,6 @@ def non_sensitive_info():
         elif chosen_clf:
             clf = chosen_clf
             change_clf(clf)
-        else:
-            user_features = [request.form.get(
-                f'feature{i}') for i in range(1, 6)]
-            radio_option_clf = request.form.get('inlineRadioOptions')
-            error = None
-
-            for i in user_features:
-                if i == '':
-                    error = "Please enter 5 features"
-                    flash(error)
-                    break
-
-            outlier = request.form.get('outlier_name')
-            if radio_option_clf == None and outlier != 'None':
-                error = "Please choose one of the classifiers"
-                flash(error)
-
-            if error == None:
-                db = get_db()
-                db.execute(
-                    "INSERT INTO survey (author_id, document_number, feature1, feature2, feature3, feature4, feature5, classifiers_chosen) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-                    (g.user['id'], document_number, user_features[0], user_features[1],
-                     user_features[2], user_features[3], user_features[4], radio_option_clf),
-                )
-                db.commit()
 
     shap_html, lime_probas_html, visual_html, prediction, highlighting, eli5_html, outlier, lime_probas, common_classifiers = get_visual_html(
         sensitivity, document_number, visual, clf)
@@ -828,7 +754,7 @@ def non_sensitive_info():
 
 
 @bp.route('/single-document-sensitivity-info', methods=('GET', 'POST'))
-# @login_required
+@login_required
 def single_document_sensitivity_info():
 
     document_number = get_doc_num()
@@ -887,6 +813,7 @@ def single_document_sensitivity_info():
             if survey:
                 visual = None
                 change_visual('None')
+
             document_number = change_doc(
                 document_number, max_documents)
         elif chosen_vis:
@@ -912,21 +839,22 @@ def single_document_sensitivity_info():
                 error = "Please choose one of the classifiers"
                 flash(error)
 
-            if error == None:
-                db = get_db()
-                db.execute(
-                    "INSERT INTO survey (author_id, document_number, feature1, feature2, feature3, feature4, feature5, classifiers_chosen) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-                    (g.user['id'], document_number, user_features[0], user_features[1],
-                     user_features[2], user_features[3], user_features[4], radio_option_clf),
-                )
-                db.commit()
+            # if error is None:
+            #     db = get_db()
+            #     db.execute(
+            #         "INSERT INTO survey (author_id, document_number, feature1, feature2, feature3, feature4, feature5, classifiers_chosen) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+            #         (g.user['id'], document_number, user_features[0], user_features[1],
+            #          user_features[2], user_features[3], user_features[4], radio_option_clf),
+            #     )
+            #     db.commit()
 
     cross_val_stats = get_clf_stats(clf)
 
     test_data = []
     test_labels = []
     if survey:
-        test_data = survey_documents
+        test_data = pickle.load(
+            open(MODEL_PATH + "survey_documents.pkl", 'rb'))
     else:
         test_data = cross_val_stats["test_features_list"]
         test_labels = cross_val_stats["test_labels_list"]
@@ -942,7 +870,7 @@ def single_document_sensitivity_info():
 
 
 @bp.route('/general-sensitivity-info', methods=('GET', 'POST'))
-# @login_required
+@login_required
 def general_sensitivity_info():
 
     shap_images = []
@@ -991,8 +919,3 @@ def general_sensitivity_info():
 
     return render_template('classifier/general_sensitivity_info.html', predictions=predictions, eli5_general=eli5_general,
                            conf_mat_png=conf_mat_png, curr_clf=clf, shap_images=shap_images)
-
-
-@bp.route('/main-page')
-def general():
-    return render_template('classifier/main_page.html')
