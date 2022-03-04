@@ -521,7 +521,7 @@ def explainers(document_index: int, test_data: pd, test_labels: pd, extra_indexs
                 non_sens_pred('XGB')
 
             elif specific_test == survey_documents[1]:
-                non_sens_pred('LSTM')
+                sens_pred('LSTM')
                 sens_pred('LR')
                 sens_pred('XGB')
 
@@ -536,45 +536,46 @@ def explainers(document_index: int, test_data: pd, test_labels: pd, extra_indexs
                 non_sens_pred('XGB')
 
             elif specific_test == survey_documents[4]:
-                sens_pred('LSTM')
+                non_sens_pred('LSTM')
                 sens_pred('LR')
                 sens_pred('XGB')
 
-        else:
-            LSTM_cross_val_stats = pd.read_pickle(
-                MODEL_PATH + 'LSTM_cross_val_stats.pkl')
+        # The maths behind this needs fixing since this is wrong
+        # else:
+        #     LSTM_cross_val_stats = pd.read_pickle(
+        #         MODEL_PATH + 'LSTM_cross_val_stats.pkl')
 
-            lstm_tok = LSTM_cross_val_stats["vectorizers"][index]
-            lstm_model = LSTM_cross_val_stats["classifiers"][index]
+        #     lstm_tok = LSTM_cross_val_stats["vectorizers"][index]
+        #     lstm_model = LSTM_cross_val_stats["classifiers"][index]
 
-            test_sequences = lstm_tok.texts_to_sequences(texts)
-            test_sequences_matrix = sequence.pad_sequences(
-                test_sequences, maxlen=max_len)
+        #     test_sequences = lstm_tok.texts_to_sequences(texts)
+        #     test_sequences_matrix = sequence.pad_sequences(
+        #         test_sequences, maxlen=max_len)
 
-            y_pred = ''
-            for i in lstm_model.predict(test_sequences_matrix):
-                if i > 0.5:
-                    y_pred = 'Sensitive'
-                    sens_clfs.append('LSTM')
-                else:
-                    y_pred = 'Non-Sensitive'
-                    non_sens_clfs.append('LSTM')
+        #     y_pred = ''
+        #     for i in lstm_model.predict(test_sequences_matrix):
+        #         if i > 0.5:
+        #             y_pred = 'Sensitive'
+        #             sens_clfs.append('LSTM')
+        #         else:
+        #             y_pred = 'Non-Sensitive'
+        #             non_sens_clfs.append('LSTM')
 
-            predictions = [{'LSTM': y_pred}]
+        #     predictions = [{'LSTM': y_pred}]
 
-            vec = LR_cross_val_stats["vectorizers"][index]
-            feature = vec.transform(texts)
-            models = {LR_cross_val_stats["classifiers"][index]: 'LR',
-                      XGB_cross_val_stats["classifiers"][index]: 'XGB'}
+        #     vec = LR_cross_val_stats["vectorizers"][index]
+        #     feature = vec.transform(texts)
+        #     models = {LR_cross_val_stats["classifiers"][index]: 'LR',
+        #               XGB_cross_val_stats["classifiers"][index]: 'XGB'}
 
-            for model, name in models.items():
-                pred = model.predict(feature)
-                if pred == True:
-                    predictions.append({name: 'Sensitive'})
-                    sens_clfs.append(name)
-                else:
-                    predictions.append({name: 'Non-Sensitive'})
-                    non_sens_clfs.append(name)
+        #     for model, name in models.items():
+        #         pred = model.predict(feature)
+        #         if pred == True:
+        #             predictions.append({name: 'Sensitive'})
+        #             sens_clfs.append(name)
+        #         else:
+        #             predictions.append({name: 'Non-Sensitive'})
+        #             non_sens_clfs.append(name)
 
         outlier = None
         common_classifiers = None
