@@ -610,8 +610,8 @@ def get_visual_html(sensitivity: int, document_number: int, visual: str, clf: st
             test_data = [survey_documents[0], survey_documents[1],
                          survey_documents[2], survey_documents[4]]
         else:
-            test_data = [survey_documents[0], survey_documents[1],
-                         survey_documents[2], survey_documents[3]]
+            test_data = [survey_documents[0], survey_documents[2],
+                         survey_documents[3], survey_documents[4]]
     else:
         test_data, test_labels, extra_indexs = get_specific_sens(
             sensitivity, cross_val_stats)
