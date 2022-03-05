@@ -521,7 +521,7 @@ input[id="dropdown"] {
    object-fit: cover;
 }
 .carousel_text {
-   font-size: 1.55em;
+   font-size: 1.5em;
    margin: 0 10%;
 }
 .black_text {
@@ -614,7 +614,7 @@ input[id="dropdown"] {
    color: black;
 }
 .white_text {
-   color: white;
+   color: rgb(227, 227, 227);
 }
 .carousel-control-next-icon,
 .carousel-control-prev-icon {

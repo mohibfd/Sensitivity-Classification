@@ -46,13 +46,6 @@
           <i class="fas fa-sign-out-alt">
             <a href="{{ url_for('auth.logout') }}" class="btn btn-primary btn-mid">Log Out</a>
           </i>
-        {% else %}
-          <a href="{{ url_for('auth.register') }}" class="btn btn-primary btn-mid">
-            Register
-          </a>
-          <a href="{{ url_for('auth.login') }}" class="btn btn-primary btn-mid">
-            Login
-          </a>
         {% endif %}
       </li>
     </ul>
