@@ -452,9 +452,9 @@ input[id="dropdown"] {
 .pred {
    font-size: 1em;
    text-align: center;
-   margin: 5%;
+   margin: 3%;
    padding: 1%;
-   padding-top: 4%;
+   padding-top: 3%;
    background-color: #e3f2fd;
    height: 100%;
    display: flex;

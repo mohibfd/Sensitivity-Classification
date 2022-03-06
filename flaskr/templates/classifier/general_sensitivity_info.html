@@ -39,21 +39,36 @@
     <div class="matrix_container">
       <div class="column equal_flex">
         <div class="pred">
-          Accuracy:
-          {{ predictions["accuracy"] }}
+          Recall (Non-Sensitive):
+          {{ predictions["non_sens_recall"] }}
           <div class="small_text">
-            Calculates labels predicted correctly.
+            This recall is intuitively the ability of the classifier to find all the non-sensitive samples.
           </div>
         </div>
         <div class="pred">
-          Precision:
-          {{ predictions["precision"] }}
+          Precision (Non-Sensitive):
+          {{ predictions["non_sens_precision"] }}
           <div class="small_text">
-            The precision is intuitively the ability of the classifier not to label as positive a sample that is negative.
+            This precision is intuitively the ability of the classifier not to label as non-sensitive a sample that is sensitive.
+          </div>
+        </div>
+        <div class="pred">
+          F1 (Non-Sensitive):
+          {{ predictions["non_sens_f1"] }}
+          <div class="small_text">
+            This F1 score can be interpreted as a harmonic mean of the sensitive precision and recall.
           </div>
         </div>
       </div>
       <div class="column equal_flex white_background">
+        <div class="pred">
+          Accuracy:
+          {{ predictions["accuracy"] }}
+          <div class="small_text">
+            The classifier predicted
+            {{ predictions["accuracy"][2:4] }}% of the documents correctly
+          </div>
+        </div>
         <div class="small_text">
           The confusion matrix plot displays the true document's sensitvity vs the classifier's predicted sensitivity over all 3801 documents.
         </div>
@@ -94,17 +109,24 @@
       </div>
       <div class="column equal_flex">
         <div class="pred">
-          Recall:
-          {{ predictions["recall"] }}
+          Recall (Sensitive):
+          {{ predictions["sens_recall"] }}
           <div class="small_text">
-            The recall is intuitively the ability of the classifier to find all the positive samples.
+            This recall is intuitively the ability of the classifier to find all the sensitive samples.
           </div>
         </div>
         <div class="pred">
-          F1:
-          {{ predictions["f1_weighted"] }}
+          Precision (Sensitive):
+          {{ predictions["sens_precision"] }}
           <div class="small_text">
-            The F1 score can be interpreted as a harmonic mean of the precision and recall.
+            This precision is intuitively the ability of the classifier not to label as sensitive a sample that is non-sensitive.
+          </div>
+        </div>
+        <div class="pred">
+          F1 (Sensitive):
+          {{ predictions["sens_f1"] }}
+          <div class="small_text">
+            This F1 score can be interpreted as a harmonic mean of the sensitive precision and recall.
           </div>
         </div>
       </div>
