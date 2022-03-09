@@ -703,8 +703,8 @@ def non_sensitive_info():
         # document_number = db.execute(
         #     'SELECT document_number FROM user WHERE id = ?', (user_id,)
         # ).fetchone()[0]
-        if document_number == 5:
-            document_number = 4
+        if document_number == 4:
+            document_number = 3
         # elif document_number == 0:
             # document_number = 1
 
