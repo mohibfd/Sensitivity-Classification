@@ -621,3 +621,9 @@ input[id="dropdown"] {
    height: 75px;
    width: 75px;
 }
+.before_doc {
+   font-weight: bold;
+   border-bottom: 1px solid;
+   display: inline-block;
+   margin-bottom: 10px;
+}
