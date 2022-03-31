@@ -28,10 +28,10 @@ documents_visibility_list = [
 
 all_docs_visib = documents_visibility_list.copy()
 all_docs_visib.append(
-    (543, b'543', prev_action))
-all_docs_visib.append((543, b'544', '543'))
-all_docs_visib.append((543, b'545', next_action))
-all_docs_visib.append((3800, b'There are no more documents', next_action))
+    (2, b'2', prev_action))
+all_docs_visib.append((2, b'3', '2'))
+all_docs_visib.append((2, b'4', next_action))
+all_docs_visib.append((3, b'4', next_action))
 
 
 @pytest.mark.parametrize(('document_num', 'message', 'button_action'), all_docs_visib)
@@ -52,11 +52,15 @@ def test_single_documents_visibility(client, app, auth, document_num, message, b
     assert message in response.data
 
 
+documents_visibility_list = [
+    (1, b'0', prev_action),
+]
+
 sens_docs_visib = documents_visibility_list.copy()
-sens_docs_visib.append((71, b'71', prev_action))
-sens_docs_visib.append((71, b'72', '71'))
-sens_docs_visib.append((71, b'73', next_action))
-sens_docs_visib.append((501, b'There are no more documents', next_action))
+sens_docs_visib.append((1, b'1', prev_action))
+sens_docs_visib.append((1, b'2', '1'))
+sens_docs_visib.append((1, b'3', next_action))
+sens_docs_visib.append((3, b'3', next_action))
 
 
 @pytest.mark.parametrize(('document_num', 'message', 'button_action'), sens_docs_visib)
@@ -79,12 +83,12 @@ def test_sensitive_documents_visibility(client, app, auth, document_num, message
 
 non_sens_docs_visib = documents_visibility_list.copy()
 non_sens_docs_visib.append(
-    (471, b'471', prev_action))
-non_sens_docs_visib.append((471, b'472', '471'))
+    (1, b'1', prev_action))
+non_sens_docs_visib.append((1, b'2', '1'))
 non_sens_docs_visib.append(
-    (471, b'473', next_action))
+    (1, b'3', next_action))
 non_sens_docs_visib.append(
-    (3298, b'There are no more documents', next_action))
+    (3, b'3', next_action))
 
 
 @pytest.mark.parametrize(('document_num', 'message', 'button_action'), non_sens_docs_visib)
