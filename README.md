@@ -18,4 +18,4 @@ pytest
 
 lime file needs to be modified to work.
 
-`explanation.py` is a file modified from the lime library's codebase. For the flask project to show the lime explanations in a good format, you must replace lime's explanation.py file with the `explanations.py` file in this directory. You can do this after installing all packages using the `requirements.txt`.
+`explanation.py` is a file modified from the lime library's codebase. For the flask project to show the lime explanations in a good format, you must replace lime's explanation.py file with the `explanations.py` file in this directory. You can do this after installing all packages using the `requirements.txt` file.
