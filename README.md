@@ -1,34 +1,21 @@
+# Installed required packages
+
+pip install -r requirements.txt
+
+# Initialise database
+
+flask init-db
+
 # Use this command to start project:
 
 export FLASK_APP=flaskr && export FLASK_ENV=development && flask run
 
-# test commands
+# test command
 
-## ensure you are in sens_class_webs dir
-
-_test coverage:_ coverage run -m pytest
-_html report:_ coverage html && open htmlcov/index.html
-
-# Command to print in terminal:
-
-import sys
-print('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>', file=sys.stderr)
-print(document_index, file=sys.stderr)
-print('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>', file=sys.stderr)
-
-# Commands for pickle:
-
-pickle.dump(one_hot_vectorizer, open(directory_path+filename, 'wb'))
-temp = pickle.load(open(directory_path+filename, 'rb'))
-
-# Hide input
-
-%%model
-
-# Change database
-
-flask init-db
+pytest
 
 # Note
 
 lime file needs to be modified to work.
+
+`explanation.py` is a file modified from the lime library's codebase. For the flask project to show the lime explanations in a good format, you must replace lime's explanation.py file with the `explanations.py` file in this directory. You can do this after installing all packages using the `requirements.txt`.
