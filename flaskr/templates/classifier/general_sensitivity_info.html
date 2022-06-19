@@ -14,7 +14,6 @@
 {% endblock %}
 
 {% block content %}
-
   <form method="post">
     <div class="dropdown center">
       <button class="btn btn-secondary dropdown-toggle white_button" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
@@ -94,7 +93,7 @@
               </div>
               <div class="rotate_text sens_text">Sensitive</div>
             </div>
-            <img src="{{conf_mat_png}}" width='100%' height='100%' alt="Confusion Matrix"/>
+            <img src="{{url_for('static', filename=conf_mat_png)}}" width='100%' height='100%' alt="Confusion Matrix"/>
           </div>
           <div class="flex matrix_subtext x_axis">
             <div>
@@ -159,7 +158,7 @@
       {% endif %}
     </div>
     {% for i in shap_images %}
-      <img src="{{i}}" width='30%' height='30%' alt="Shap image"/>
+      <img src="{{url_for('static', filename=i)}}" width='30%' height='30%' alt="Shap image"/>
     {% endfor %}
   </div>
   {% if eli5_general%}

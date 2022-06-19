@@ -900,8 +900,9 @@ def general_sensitivity_info():
     def get_shap_images():
         for i in range(1, 6):
             url = f"{clf}/shap{i}.png"
+            # we take the values from index 7 onwards to not duplicate the word 'static'
             shap_images.append(os.path.join(
-                app.config['IMAGES_FOLDER'], url))
+                app.config['IMAGES_FOLDER'], url)[7:])
 
     clf = ""
     if request.method == 'POST':
@@ -911,7 +912,15 @@ def general_sensitivity_info():
         clf = get_clf()
 
     conf_mat_png = os.path.join(
-        app.config['IMAGES_FOLDER'], clf+'/conf_mat.png')
+        app.config['IMAGES_FOLDER'], clf+'/conf_mat.png')[7:]
+
+    # conf_mat_png = ""
+    import sys
+
+    print('HEREE', file=sys.stderr)
+
+    print((conf_mat_png), file=sys.stderr)
+    print(type(conf_mat_png), file=sys.stderr)
 
     predictions = {}
     eli5_general = None
