@@ -12,13 +12,16 @@ import shap as shap
 from lime.lime_text import LimeTextExplainer
 import pandas as pd
 import os
-from flaskr.db import get_db
+# from flaskr.db import get_db
 from flaskr.auth import login_required
 from flask import (
     Blueprint, flash, g, render_template, request, Flask, session, redirect, url_for
 )
 import uuid
 from werkzeug.security import generate_password_hash
+
+from . user import User
+from .extensions import db
 
 
 bp = Blueprint('classifier', __name__)
@@ -118,79 +121,84 @@ def process_text(text):
 
 
 def get_doc_num(database="") -> int:
-    user_id = g.user['id']
-    db = get_db()
+    user_id = g.user.id
+    # db =()
     document_number = 0
+    user = User.query.filter_by(id=user_id).first()
 
     if database == 0:
-        document_number = db.execute(
-            'SELECT non_sens_document_number FROM user WHERE id = ?', (
-                user_id,)
-        ).fetchone()[0]
+        document_number = user.non_sens_document_number
+        # document_number = db.execute(
+        #     'SELECT non_sens_document_number FROM user WHERE id = ?', (
+        #         user_id,)
+        # ).fetchone()[0]
     elif database == 1:
-        document_number = db.execute(
-            'SELECT sens_document_number FROM user WHERE id = ?', (user_id,)
-        ).fetchone()[0]
+        document_number = user.sens_document_number
     else:
-        document_number = db.execute(
-            'SELECT document_number FROM user WHERE id = ?', (user_id,)
-        ).fetchone()[0]
+        document_number = user.document_number
 
     return document_number
 
 
 def get_visualisation() -> str:
-    user_id = g.user['id']
-    db = get_db()
+    user_id = g.user.id
+    # db = get_db()
 
-    visual = db.execute(
-        'SELECT visualisation_method FROM user WHERE id = ?', (user_id,)
-    ).fetchone()[0]
+    user = User.query.filter_by(id=user_id).first()
+    visual = user.visualisation_method
 
     return visual
 
 
 def get_clf() -> str:
-    user_id = g.user['id']
-    db = get_db()
+    user_id = g.user.id
+    # db = get_db()
 
-    clf = db.execute(
-        'SELECT clf_method FROM user WHERE id = ?', (user_id,)
-    ).fetchone()[0]
+    user = User.query.filter_by(id=user_id).first()
+    clf = user.clf_method
+    # clf = db.execute(
+    #     'SELECT clf_method FROM user WHERE id = ?', (user_id,)
+    # ).fetchone()[0]
 
     return clf
 
 
 def change_visual(visual: str):
-    user_id = g.user['id']
-    db = get_db()
+    user_id = g.user.id
+    # db = get_db()
 
-    db.execute(
-        'UPDATE user SET visualisation_method = ?'
-        ' WHERE id = ?',
-        (visual, user_id)
-    )
+    user = User.query.filter_by(id=user_id).first()
+    user.visualisation_method = visual
+    db.session.commit()
 
-    db.commit()
+    # db.execute(
+    #     'UPDATE user SET visualisation_method = ?'
+    #     ' WHERE id = ?',
+    #     (visual, user_id)
+    # )
 
 
 def change_clf(clf: str):
-    user_id = g.user['id']
-    db = get_db()
+    user_id = g.user.id
+    # db = get_db()
 
-    db.execute(
-        'UPDATE user SET clf_method = ?'
-        ' WHERE id = ?',
-        (clf, user_id)
-    )
+    user = User.query.filter_by(id=user_id).first()
+    user.clf_method = clf
+    db.session.commit()
 
-    db.commit()
+    # db.execute(
+    #     'UPDATE user SET clf_method = ?'
+    #     ' WHERE id = ?',
+    #     (clf, user_id)
+    # )
+
+    # db.commit()
 
 
 def change_doc(document_number: int, max_documents: int, database="") -> int:
-    user_id = g.user['id']
+    user_id = g.user.id
     # db = get_db()
-    db = get_db()
+    user = User.query.filter_by(id=user_id).first()
 
     if request.form['submit_button'] == "Prev":
         if (document_number == 0):
@@ -211,26 +219,16 @@ def change_doc(document_number: int, max_documents: int, database="") -> int:
             document_number = int(request.form['submit_button'])-1
 
     if database == 0:
-        db.execute(
-            'UPDATE user SET non_sens_document_number = ?'
-            ' WHERE id = ?',
-            (document_number, user_id)
-        )
-    elif database == 1:
-        db.execute(
-            'UPDATE user SET sens_document_number = ?'
-            ' WHERE id = ?',
-            (document_number, user_id)
-        )
-    else:
-        db.execute(
-            'UPDATE user SET document_number = ?'
-            ' WHERE id = ?',
-            (document_number, user_id)
-        )
+        user.non_sens_document_number = document_number
 
-    db.commit()
-    # db.session.commit()
+    elif database == 1:
+        user.sens_document_number = document_number
+
+    else:
+        user.document_number = document_number
+
+    # db.commit()
+    db.session.commit()
 
     return document_number
 
@@ -628,22 +626,17 @@ def get_visual_html(sensitivity: int, document_number: int, visual: str, clf: st
 def index():
     if request.method == 'POST':
 
-        db = get_db()
-
         username = str(uuid.uuid1())
 
-        db.execute(
-            "INSERT INTO user (username, password, document_number, sens_document_number, non_sens_document_number, visualisation_method, clf_method) VALUES (?, ?, 0, 0, 0, ?, ?)",
-            (username, generate_password_hash(username), 'None', 'LR'),
-        )
-        db.commit()
+        user = User(username=username, password=generate_password_hash(
+            username), document_number=0, sens_document_number=0, non_sens_document_number=0, visualisation_method='None', clf_method='LR')
+        db.session.add(user)
+        db.session.commit()
 
-        user = db.execute(
-            'SELECT * FROM user WHERE username = ?', (username,)
-        ).fetchone()
+        user = User.query.filter_by(username=username).first()
 
         session.clear()
-        session['user_id'] = user['id']
+        session['user_id'] = user.id
 
         return redirect(url_for("classifier.classifier_main_page"))
 
