@@ -41,10 +41,10 @@
       <li class="one_row">
         {% if g.user %}
           <div class="username">
-            {{ g.user['username'] }}
+            <!-- {{ g.user['username'] }} -->
           </div>
           <i class="fas fa-sign-out-alt">
-            <a href="{{ url_for('auth.logout') }}" class="btn btn-primary btn-mid">Log Out</a>
+            <a href="{{ url_for('auth.logout') }}" class="btn btn-primary btn-mid">Back</a>
           </i>
         {% endif %}
       </li>

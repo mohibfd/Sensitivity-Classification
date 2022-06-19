@@ -15,14 +15,11 @@ import os
 from flaskr.db import get_db
 from flaskr.auth import login_required
 from flask import (
-    Blueprint, flash, g, render_template, request, Flask
+    Blueprint, flash, g, render_template, request, Flask, session, redirect, url_for
 )
-# from . user import User
-# from .extensions import db
+import uuid
+from werkzeug.security import generate_password_hash
 
-# import tensorflow as tf
-# from tensorflow.keras.preprocessing import sequence
-# tf.compat.v1.disable_v2_behavior()
 
 bp = Blueprint('classifier', __name__)
 
@@ -627,12 +624,38 @@ def get_visual_html(sensitivity: int, document_number: int, visual: str, clf: st
     return shap_html, lime_probas_html, visual_html, prediction, highlighting, eli5_html, outlier, lime_probas, common_classifiers
 
 
-@bp.route('/')
-def classifier_main_page():
+@bp.route('/', methods=('GET', 'POST'))
+def index():
+    if request.method == 'POST':
+
+        db = get_db()
+
+        username = str(uuid.uuid1())
+
+        db.execute(
+            "INSERT INTO user (username, password, document_number, sens_document_number, non_sens_document_number, visualisation_method, clf_method) VALUES (?, ?, 0, 0, 0, ?, ?)",
+            (username, generate_password_hash(username), 'None', 'LR'),
+        )
+        db.commit()
+
+        user = db.execute(
+            'SELECT * FROM user WHERE username = ?', (username,)
+        ).fetchone()
+
+        session.clear()
+        session['user_id'] = user['id']
+
+        return redirect(url_for("classifier.classifier_main_page"))
+
     return render_template('classifier/index.html')
 
 
-@bp.route('/sensitive-info', methods=('GET', 'POST'))
+@bp.route('/home')
+def classifier_main_page():
+    return render_template('classifier/classifiers_index.html')
+
+
+@bp.route('/home/sensitive-info', methods=('GET', 'POST'))
 @login_required
 def sensitive_info():
     sensitivity = 1
@@ -695,7 +718,7 @@ def sensitive_info():
                            eli5_html=eli5_html, outlier=outlier, lime_probas=lime_probas, common_classifiers=common_classifiers)
 
 
-@bp.route('/non-sensitive-info', methods=('GET', 'POST'))
+@bp.route('/home/non-sensitive-info', methods=('GET', 'POST'))
 @login_required
 def non_sensitive_info():
     sensitivity = 0
@@ -759,7 +782,7 @@ def non_sensitive_info():
                            eli5_html=eli5_html, outlier=outlier, lime_probas=lime_probas, common_classifiers=common_classifiers)
 
 
-@bp.route('/single-document-sensitivity-info', methods=('GET', 'POST'))
+@bp.route('/home/single-document-sensitivity-info', methods=('GET', 'POST'))
 @login_required
 def single_document_sensitivity_info():
 
@@ -875,7 +898,7 @@ def single_document_sensitivity_info():
                            outlier=outlier, lime_probas=lime_probas, common_classifiers=common_classifiers)
 
 
-@bp.route('/general-sensitivity-info', methods=('GET', 'POST'))
+@bp.route('/home/general-sensitivity-info', methods=('GET', 'POST'))
 @login_required
 def general_sensitivity_info():
 
