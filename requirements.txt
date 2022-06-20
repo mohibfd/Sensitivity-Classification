@@ -22,3 +22,5 @@ gunicorn==20.1.0
 ipython==7.31.1
 ipython-genutils==0.2.0
 shap==0.40.0
+matplotlib==3.4.3
+matplotlib-inline==0.1.3
