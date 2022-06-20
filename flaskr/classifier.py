@@ -1,15 +1,15 @@
-from nltk.stem import WordNetLemmatizer
-import string
-from nltk.tokenize import TweetTokenizer
-import re
-from nltk.corpus import stopwords
-from nltk.stem import PorterStemmer
+# from nltk.stem import WordNetLemmatizer
+# import string
+# from nltk.tokenize import TweetTokenizer
+# import re
+# from nltk.corpus import stopwords
+# from nltk.stem import PorterStemmer
 # import unpack
-import numpy as np
+# import numpy as np
 # import eli5 as eli5
 import pickle
-import shap as shap
-from lime.lime_text import LimeTextExplainer
+# import shap as shap
+# from lime.lime_text import LimeTextExplainer
 import pandas as pd
 import os
 # from flaskr.db import get_db
@@ -71,53 +71,53 @@ if not survey:
 #     [len(LR_cross_val_stats["test_features_list"][i]) for i in range(folds)])
 
 
-def decontract(text):
-    text = re.sub(r"won\'t", "will not", text)
-    text = re.sub(r"can\'t", "can not", text)
-    text = re.sub(r"n\'t", " not", text)
-    text = re.sub(r"\'re", " are", text)
-    text = re.sub(r"\'s", " is", text)
-    text = re.sub(r"\'d", " would", text)
-    text = re.sub(r"\'ll", " will", text)
-    text = re.sub(r"\'t", " not", text)
-    text = re.sub(r"\'ve", " have", text)
-    text = re.sub(r"\'m", " am", text)
-    return text
+# def decontract(text):
+#     text = re.sub(r"won\'t", "will not", text)
+#     text = re.sub(r"can\'t", "can not", text)
+#     text = re.sub(r"n\'t", " not", text)
+#     text = re.sub(r"\'re", " are", text)
+#     text = re.sub(r"\'s", " is", text)
+#     text = re.sub(r"\'d", " would", text)
+#     text = re.sub(r"\'ll", " will", text)
+#     text = re.sub(r"\'t", " not", text)
+#     text = re.sub(r"\'ve", " have", text)
+#     text = re.sub(r"\'m", " am", text)
+#     return text
 
 
-lemmatizer = WordNetLemmatizer()
+# lemmatizer = WordNetLemmatizer()
 
 
-def process_text(text):
+# def process_text(text):
 
-    stemmer = PorterStemmer()
-    stopwords_english = stopwords.words('english')
-    # remove stock market tickers like $GE
-    text = re.sub(r'\$\w*', '', text)
-    # remove old style retweet text "RT"
-    text = re.sub(r'^RT[\s]+', '', text)
-    # remove hyperlinks
-    text = re.sub(r'https?:\/\/.*[\r\n]*', '', text)
-    # remove hashtags
-    # only removing the hash # sign from the word
-    text = re.sub(r'#', '', text)
-    text = str(re.sub("\S*\d\S*", "", text).strip())
-    text = decontract(text)
-    # tokenize texts
-    tokenizer = TweetTokenizer(preserve_case=False, strip_handles=True,
-                               reduce_len=True)
-    tokens = tokenizer.tokenize(text)
+#     stemmer = PorterStemmer()
+#     stopwords_english = stopwords.words('english')
+#     # remove stock market tickers like $GE
+#     text = re.sub(r'\$\w*', '', text)
+#     # remove old style retweet text "RT"
+#     text = re.sub(r'^RT[\s]+', '', text)
+#     # remove hyperlinks
+#     text = re.sub(r'https?:\/\/.*[\r\n]*', '', text)
+#     # remove hashtags
+#     # only removing the hash # sign from the word
+#     text = re.sub(r'#', '', text)
+#     text = str(re.sub("\S*\d\S*", "", text).strip())
+#     text = decontract(text)
+#     # tokenize texts
+#     tokenizer = TweetTokenizer(preserve_case=False, strip_handles=True,
+#                                reduce_len=True)
+#     tokens = tokenizer.tokenize(text)
 
-    texts_clean = []
-    for word in tokens:
-        if (word not in stopwords_english and  # remove stopwords
-                word not in string.punctuation+'...'):  # remove punctuation
-            #
-            stem_word = lemmatizer.lemmatize(
-                word, "v")  # Lemmatizing word
-            texts_clean.append(stem_word)
+#     texts_clean = []
+#     for word in tokens:
+#         if (word not in stopwords_english and  # remove stopwords
+#                 word not in string.punctuation+'...'):  # remove punctuation
+#             #
+#             stem_word = lemmatizer.lemmatize(
+#                 word, "v")  # Lemmatizing word
+#             texts_clean.append(stem_word)
 
-    return " ".join(texts_clean)
+#     return " ".join(texts_clean)
 
 
 def get_doc_num(database="") -> int:
@@ -274,7 +274,9 @@ def get_clf_stats(clf: str) -> dict:
         return LSTM_cross_val_stats
 
 
-def explainers(document_index: int, test_data: pd, test_labels: pd, extra_indexs: list, visual: str, cross_val_stats: dict) -> LimeTextExplainer:
+# def explainers(document_index: int, test_data: pd, test_labels: pd, extra_indexs: list, visual: str, cross_val_stats: dict) -> LimeTextExplainer:
+def explainers(document_index: int, test_data: pd, test_labels: pd, extra_indexs: list, visual: str, cross_val_stats: dict):
+
     index = 0
     # fold_length = len(test_data[0])
 
@@ -302,110 +304,110 @@ def explainers(document_index: int, test_data: pd, test_labels: pd, extra_indexs
     max_len = 150
 
     def lime_explain(text_only=False, probas_only=False, lime_values=None):
+        temp = None
+        # # lime_data = specific_test
+        # lime_data = specific_test[0:2000]
 
-        # lime_data = specific_test
-        lime_data = specific_test[0:2000]
+        # lime_explainer = LimeTextExplainer(
+        #     class_names=target_names)
 
-        lime_explainer = LimeTextExplainer(
-            class_names=target_names)
+        # proba_predictor_func = None
 
-        proba_predictor_func = None
+        # if clf_name == 'LSTM':
+        #     def proba_predictor(arr):
+        #         processed = []
+        #         for i in arr:
+        #             processed.append(process_text(i))
+        #         sequences = vectorizer.texts_to_sequences(processed)
+        #         Ex = sequence.pad_sequences(sequences, maxlen=max_len)
+        #         pred = model.predict(Ex)
+        #         returnable = []
+        #         for i in pred:
+        #             temp = i[0]
+        #             returnable.append(np.array([1-temp, temp]))
+        #         return np.array(returnable)
 
-        if clf_name == 'LSTM':
-            def proba_predictor(arr):
-                processed = []
-                for i in arr:
-                    processed.append(process_text(i))
-                sequences = vectorizer.texts_to_sequences(processed)
-                Ex = sequence.pad_sequences(sequences, maxlen=max_len)
-                pred = model.predict(Ex)
-                returnable = []
-                for i in pred:
-                    temp = i[0]
-                    returnable.append(np.array([1-temp, temp]))
-                return np.array(returnable)
+        #     proba_predictor_func = proba_predictor
 
-            proba_predictor_func = proba_predictor
+        # else:
+        #     def proba_predictor(texts):
+        #         feature = vectorizer.transform(texts)
+        #         pred = model.predict_proba(feature)
+        #         return pred
 
-        else:
-            def proba_predictor(texts):
-                feature = vectorizer.transform(texts)
-                pred = model.predict_proba(feature)
-                return pred
+        #     proba_predictor_func = proba_predictor
 
-            proba_predictor_func = proba_predictor
+        # if not lime_values:
+        #     lime_values = lime_explainer.explain_instance(
+        #         lime_data,
+        #         classifier_fn=proba_predictor_func,
+        #     )
 
-        if not lime_values:
-            lime_values = lime_explainer.explain_instance(
-                lime_data,
-                classifier_fn=proba_predictor_func,
-            )
-
-        if text_only:
-            return lime_values.as_html(predict_proba=False, specific_predict_proba=False)
-        elif probas_only:
-            return lime_values.as_html(text=False,  specific_predict_proba=False), lime_values
-        else:
-            return lime_values.as_html(text=False, predict_proba=False)
+        # if text_only:
+        #     return lime_values.as_html(predict_proba=False, specific_predict_proba=False)
+        # elif probas_only:
+        #     return lime_values.as_html(text=False,  specific_predict_proba=False), lime_values
+        # else:
+        #     return lime_values.as_html(text=False, predict_proba=False)
 
     def shap_explain():
         shap_values = None
-        if not survey:
-            shap_values = cross_val_stats["shap_values"][index]
+        # if not survey:
+        #     shap_values = cross_val_stats["shap_values"][index]
 
-        force_plot = None
-        if clf_name == 'LR':
-            if survey:
-                force_plot = pickle.load(
-                    open(MODEL_PATH + "LR_shap_surveys.pkl", 'rb'))[index]
-            else:
-                force_plot = shap.plots.force(
-                    shap_values[document_index], matplotlib=False)
+        # force_plot = None
+        # if clf_name == 'LR':
+        #     if survey:
+        #         force_plot = pickle.load(
+        #             open(MODEL_PATH + "LR_shap_surveys.pkl", 'rb'))[index]
+        #     else:
+        #         force_plot = shap.plots.force(
+        #             shap_values[document_index], matplotlib=False)
 
-        elif clf_name == 'XGB':
-            if survey:
-                force_plot = pickle.load(
-                    open(MODEL_PATH + "XGB_shap_surveys.pkl", 'rb'))[index]
-            else:
-                explainer = shap.TreeExplainer(model)
-                force_plot = shap.plots.force(
-                    explainer.expected_value, shap_values[document_index], feature_names=vectorizer.get_feature_names(), matplotlib=False)
+        # elif clf_name == 'XGB':
+        #     if survey:
+        #         force_plot = pickle.load(
+        #             open(MODEL_PATH + "XGB_shap_surveys.pkl", 'rb'))[index]
+        #     else:
+        #         explainer = shap.TreeExplainer(model)
+        #         force_plot = shap.plots.force(
+        #             explainer.expected_value, shap_values[document_index], feature_names=vectorizer.get_feature_names(), matplotlib=False)
 
-        else:
-            if survey:
-                force_plot = pickle.load(
-                    open(MODEL_PATH + "LSTM_shap_surveys.pkl", 'rb'))[index]
-            else:
-                X_train = cross_val_stats["train_features_list"][index]
-                X_test = cross_val_stats["test_features_list"][index]
+        # else:
+        #     if survey:
+        #         force_plot = pickle.load(
+        #             open(MODEL_PATH + "LSTM_shap_surveys.pkl", 'rb'))[index]
+        #     else:
+        #         X_train = cross_val_stats["train_features_list"][index]
+        #         X_test = cross_val_stats["test_features_list"][index]
 
-                sequences = vectorizer.texts_to_sequences(X_train)
-                sequences_matrix = sequence.pad_sequences(
-                    sequences, maxlen=max_len)
+        #         sequences = vectorizer.texts_to_sequences(X_train)
+        #         sequences_matrix = sequence.pad_sequences(
+        #             sequences, maxlen=max_len)
 
-                processed = []
-                for i in X_test:
-                    processed.append(process_text(i))
+        #         processed = []
+        #         for i in X_test:
+        #             processed.append(process_text(i))
 
-                test_sequences = vectorizer.texts_to_sequences(processed)
-                test_sequences_matrix = sequence.pad_sequences(
-                    test_sequences, maxlen=max_len)
+        #         test_sequences = vectorizer.texts_to_sequences(processed)
+        #         test_sequences_matrix = sequence.pad_sequences(
+        #             test_sequences, maxlen=max_len)
 
-                explainer = shap.DeepExplainer(model, sequences_matrix)
+        #         explainer = shap.DeepExplainer(model, sequences_matrix)
 
-                words = vectorizer.word_index
-                num2word = {}
-                for w in words.keys():
-                    num2word[words[w]] = w
-                x_test_words = np.stack([np.array(list(map(lambda x: num2word.get(
-                    x, "NONE"), test_sequences_matrix[i]))) for i in range(len(shap_values[0]))])
+        #         words = vectorizer.word_index
+        #         num2word = {}
+        #         for w in words.keys():
+        #             num2word[words[w]] = w
+        #         x_test_words = np.stack([np.array(list(map(lambda x: num2word.get(
+        #             x, "NONE"), test_sequences_matrix[i]))) for i in range(len(shap_values[0]))])
 
-                force_plot = shap.plots.force(
-                    explainer.expected_value[0], shap_values[0][document_index], x_test_words[document_index])
+        #         force_plot = shap.plots.force(
+        #             explainer.expected_value[0], shap_values[0][document_index], x_test_words[document_index])
 
-        shap_html = f"<head>{shap.getjs()}</head><body>{force_plot.html()}</body>"
+        # shap_html = f"<head>{shap.getjs()}</head><body>{force_plot.html()}</body>"
 
-        return shap_html
+        # return shap_html
 
     def get_eli5_weights():
         eli5_weights = []
@@ -594,7 +596,8 @@ def explainers(document_index: int, test_data: pd, test_labels: pd, extra_indexs
     return shap_html, lime_html, vis_html, isSensitive, prediction, highlighting, eli5_html, outlier, lime_probas, common_classifiers
 
 
-def get_visual_html(sensitivity: int, document_number: int, visual: str, clf: str) -> LimeTextExplainer:
+# def get_visual_html(sensitivity: int, document_number: int, visual: str, clf: str) -> LimeTextExplainer:
+def get_visual_html(sensitivity: int, document_number: int, visual: str, clf: str):
 
     cross_val_stats = get_clf_stats(clf)
 
