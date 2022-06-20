@@ -835,10 +835,6 @@ def single_document_sensitivity_info():
         change_docs = request.form.get('submit_button')
 
         if change_docs:
-            if survey:
-                visual = None
-                change_visual('None')
-
             document_number = change_doc(
                 document_number, max_documents)
         elif chosen_vis:
