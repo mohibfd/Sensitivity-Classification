@@ -8,7 +8,7 @@
 # import numpy as np
 # import eli5 as eli5
 import pickle
-# import shap as shap
+import shap as shap
 # from lime.lime_text import LimeTextExplainer
 import pandas as pd
 import os
@@ -352,31 +352,31 @@ def explainers(document_index: int, test_data: pd, test_labels: pd, extra_indexs
 
     def shap_explain():
         shap_values = None
-        # if not survey:
-        #     shap_values = cross_val_stats["shap_values"][index]
+        if not survey:
+            shap_values = cross_val_stats["shap_values"][index]
 
-        # force_plot = None
-        # if clf_name == 'LR':
-        #     if survey:
-        #         force_plot = pickle.load(
-        #             open(MODEL_PATH + "LR_shap_surveys.pkl", 'rb'))[index]
-        #     else:
-        #         force_plot = shap.plots.force(
-        #             shap_values[document_index], matplotlib=False)
+        force_plot = None
+        if clf_name == 'LR':
+            if survey:
+                force_plot = pickle.load(
+                    open(MODEL_PATH + "LR_shap_surveys.pkl", 'rb'))[index]
+            # else:
+            #     force_plot = shap.plots.force(
+            #         shap_values[document_index], matplotlib=False)
 
-        # elif clf_name == 'XGB':
-        #     if survey:
-        #         force_plot = pickle.load(
-        #             open(MODEL_PATH + "XGB_shap_surveys.pkl", 'rb'))[index]
-        #     else:
-        #         explainer = shap.TreeExplainer(model)
-        #         force_plot = shap.plots.force(
-        #             explainer.expected_value, shap_values[document_index], feature_names=vectorizer.get_feature_names(), matplotlib=False)
+        elif clf_name == 'XGB':
+            if survey:
+                force_plot = pickle.load(
+                    open(MODEL_PATH + "XGB_shap_surveys.pkl", 'rb'))[index]
+            # else:
+            #     explainer = shap.TreeExplainer(model)
+            #     force_plot = shap.plots.force(
+            #         explainer.expected_value, shap_values[document_index], feature_names=vectorizer.get_feature_names(), matplotlib=False)
 
-        # else:
-        #     if survey:
-        #         force_plot = pickle.load(
-        #             open(MODEL_PATH + "LSTM_shap_surveys.pkl", 'rb'))[index]
+        else:
+            if survey:
+                force_plot = pickle.load(
+                    open(MODEL_PATH + "LSTM_shap_surveys.pkl", 'rb'))[index]
         #     else:
         #         X_train = cross_val_stats["train_features_list"][index]
         #         X_test = cross_val_stats["test_features_list"][index]
@@ -405,9 +405,9 @@ def explainers(document_index: int, test_data: pd, test_labels: pd, extra_indexs
         #         force_plot = shap.plots.force(
         #             explainer.expected_value[0], shap_values[0][document_index], x_test_words[document_index])
 
-        # shap_html = f"<head>{shap.getjs()}</head><body>{force_plot.html()}</body>"
+        shap_html = f"<head>{shap.getjs()}</head><body>{force_plot.html()}</body>"
 
-        # return shap_html
+        return shap_html
 
     def get_eli5_weights():
         eli5_weights = []
