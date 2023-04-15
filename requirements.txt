@@ -19,7 +19,7 @@ SQLAlchemy==1.4.37
 Werkzeug==2.2.3
 zipp==3.8.0
 gunicorn==20.1.0
-ipython==7.31.1
+ipython==8.10.0
 ipython-genutils==0.2.0
 shap==0.40.0
 matplotlib==3.4.3
