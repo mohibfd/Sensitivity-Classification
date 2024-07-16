@@ -17,7 +17,7 @@ pytz==2022.1
 six==1.16.0
 SQLAlchemy==1.4.37
 Werkzeug==3.0.3
-zipp==3.8.0
+zipp==3.19.1
 gunicorn==22.0.0
 ipython==8.10.0
 ipython-genutils==0.2.0
