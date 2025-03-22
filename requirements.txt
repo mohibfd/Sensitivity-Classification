@@ -18,7 +18,7 @@ six==1.16.0
 SQLAlchemy==1.4.37
 Werkzeug==3.0.6
 zipp==3.19.1
-gunicorn==22.0.0
+gunicorn==23.0.0
 ipython==8.10.0
 ipython-genutils==0.2.0
 shap==0.40.0
